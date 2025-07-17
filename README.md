@@ -48,7 +48,8 @@ Create a `.env` file in the project root:
 ```env
 DISCORD_TOKEN=your_bot_token_here
 COMMAND_PREFIX=!
-RA_API_KEY=your_retroachievements_api_key
+RA_WEB_API_KEY=your_retroachievements_web_api_key
+RA_CONNECT_API_KEY=your_retroachievements_connect_api_key
 ```
 
 ## Database Setup
