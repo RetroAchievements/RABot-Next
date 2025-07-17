@@ -20,16 +20,16 @@
 
 RABot utilizes:
 
-- The **Bun** runtime
-- **TypeScript**
-- **Discord.js**
-- **Drizzle ORM** with SQLite for data persistence
-- **@retroachievements/api**
-- **Pino** for structured logging with command analytics
+- The **[Bun](https://bun.sh)** runtime for high speed, low memory footprint, and native TS execution
+- **[TypeScript](https://www.typescriptlang.org/)** for static type safety
+- **[Discord.js](https://discord.js.org/)** for tight integration with Discord
+- **[Drizzle ORM](https://orm.drizzle.team/)** with SQLite for data persistence
+- **[@retroachievements/api](https://github.com/RetroAchievements/api-js)** for web API calls
+- **[Pino](https://getpino.io/#/)** for structured logging with command analytics
 
 ## Requirements
 
-- [Bun](https://bun.sh) 1.0+
+- [Bun](https://bun.sh) 1.2.18+
 - A Discord bot token
 
 ## Installation
@@ -51,13 +51,12 @@ cp .env.example .env
 ```
 
 Then edit `.env` with your configuration:
+
 - `DISCORD_TOKEN` - Your bot's token from Discord Developer Portal
 - `DISCORD_APPLICATION_ID` - Your bot's application ID from Discord Developer Portal
 - `LEGACY_COMMAND_PREFIX` - Command prefix for legacy commands (default: `!`)
-- `RA_WEB_API_KEY` - RetroAchievements Web API key
-- `RA_CONNECT_API_KEY` - RetroAchievements Connect API key
-- `YOUTUBE_API_KEY` - YouTube Data API v3 key (optional, for longplay searches)
-- `CHEAT_INVESTIGATION_CATEGORY_ID` - Discord category ID for cheat investigations (optional)
+- `RA_WEB_API_KEY` - Your RetroAchievements Web API key
+- `YOUTUBE_API_KEY` - Your YouTube Data API v3 key (optional, for `/gan` longplay searches)
 - `NODE_ENV` - Environment mode: `development` or `production` (default: `development`)
 - `LOG_LEVEL` - Logging level: `trace`, `debug`, `info`, `warn`, `error`, `fatal` (default: `debug` in dev, `info` in prod)
 
@@ -66,10 +65,9 @@ Then edit `.env` with your configuration:
 Initialize the database:
 
 ```bash
-bun run db:generate  # Generate migration files
-bun run db:migrate   # Apply migrations
-bun run db:seed      # Seed default teams (optional)
-bun run db:studio    # Open Drizzle Studio (optional)
+bun db:generate  # Generate migration files
+bun db:migrate   # Apply migrations
+bun db:seed      # Seed default teams (optional)
 ```
 
 ## Deploying Slash Commands
@@ -77,10 +75,11 @@ bun run db:studio    # Open Drizzle Studio (optional)
 After adding your bot to a server, deploy the slash commands:
 
 ```bash
-bun run deploy-commands
+bun deploy-commands
 ```
 
 This needs to be run:
+
 - When you first set up the bot
 - Whenever you add or modify slash commands
 - After major Discord.js updates
@@ -90,35 +89,36 @@ This needs to be run:
 ### Development
 
 ```bash
-bun run dev  # Runs with auto-restart on file changes
+bun dev  # Runs with auto-restart on file changes
 ```
 
 ### Production
 
 ```bash
-bun run start  # Standard run
+bun start  # Standard run
 # or with PM2:
 pm2 start src/index.ts --name rabot-next --interpreter bun
 ```
 
 ## Available Scripts
 
-- `bun run dev` - Run in development mode with hot reload
-- `bun run start` - Run in production mode
-- `bun run deploy-commands` - Deploy slash commands to Discord
-- `bun run db:generate` - Generate database migrations
-- `bun run db:migrate` - Apply database migrations
-- `bun run db:studio` - Open Drizzle Studio for database management
-- `bun run lint` - Run ESLint
-- `bun run lint:fix` - Run ESLint with auto-fix
-- `bun run tsc` - Run TypeScript type checking
+- `bun dev` - Run in development mode with hot reload
+- `bun start` - Run in production mode
+- `bun deploy-commands` - Deploy slash commands to Discord
+- `bun db:generate` - Generate database migrations
+- `bun db:migrate` - Apply database migrations
+- `bun lint` - Run ESLint
+- `bun lint:fix` - Run ESLint with auto-fix
+- `bun tsc` - Run TypeScript type checking
 
 ## Commands
 
 ### 🆕 Migration Notice
+
 RABot is transitioning to slash commands! When you use a legacy prefix command (e.g., `!gan`), you'll see a migration notice encouraging you to use the modern slash command version (e.g., `/gan`). The legacy command will still work during the transition period.
 
 ### Slash Commands (Recommended)
+
 - `/topic` - Display the current channel topic
 - `/contact` - Show contact information for various RA teams
 - `/status` - Display bot status and statistics
@@ -134,6 +134,7 @@ RABot is transitioning to slash commands! When you use a legacy prefix command (
   - `/pingteam create <name>` - Create a new team (admin only)
 
 ### Legacy Prefix Commands (Being Migrated)
+
 The bot still supports the following legacy prefix commands (all prefixed with `!` by default):
 
 - `!topic` - Display the current channel topic
@@ -142,12 +143,6 @@ The bot still supports the following legacy prefix commands (all prefixed with `
 - `!poll` - Create a simple poll
 - `!tpoll` - Create a timed poll
 - `!gan <game_id>` - Generate achievement news template
-- `!gan2 <game_id>` - Generate pretty achievement news template with colors
-- `!pingteam <team>` - Team ping system (privileged users only)
-  - `!pingteam racheats` - Ping the RACheats team
-  - `!pingteam racheats add @user` - Add user to team (admin only)
-  - `!pingteam racheats remove @user` - Remove user from team (admin only)
-  - `!pingteam racheats list` - List team members
 
 ## Project Structure
 

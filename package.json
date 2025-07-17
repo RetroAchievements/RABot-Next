@@ -12,7 +12,9 @@
     "db:seed": "bun run src/database/seed-teams.ts",
     "tsc": "tsc --noEmit",
     "lint": "eslint src --cache",
-    "lint:fix": "eslint src --fix"
+    "lint:fix": "eslint src --fix",
+    "test": "bun test",
+    "test:watch": "bun test --watch"
   },
   "dependencies": {
     "@retroachievements/api": "^2.6.0",

@@ -17,8 +17,6 @@ const gan2SlashCommand: SlashCommand = {
         .setRequired(true),
     ),
 
-  legacyName: "gan2", // For migration mapping
-
   async execute(interaction, _client) {
     await interaction.deferReply();
 

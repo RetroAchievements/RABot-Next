@@ -72,7 +72,6 @@ const pingteamSlashCommand: SlashCommand = {
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles),
 
-  legacyName: "pingteam", // For migration mapping
   cooldown: 30, // 30 seconds cooldown for team pings.
 
   async execute(interaction, _client) {
