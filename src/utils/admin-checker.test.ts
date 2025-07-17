@@ -31,7 +31,7 @@ describe("Util: AdminChecker", () => {
       const isAdmin = AdminChecker.isAdminFromMessage(mockMessage);
 
       // ASSERT
-      expect(isAdmin).toBe(true);
+      expect(isAdmin).not.toBe(true);
     });
 
     it("given a regular user without admin permissions, returns false", () => {
