@@ -13,7 +13,6 @@
         "youtube-search": "^1.1.6",
       },
       "devDependencies": {
-        "@libsql/client": "^0.15.10",
         "@types/bun": "latest",
         "@types/figlet": "^1.7.0",
         "drizzle-kit": "^0.31.4",

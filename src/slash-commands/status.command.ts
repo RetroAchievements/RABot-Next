@@ -1,17 +1,17 @@
-import { EmbedBuilder } from "discord.js";
+import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 
 import { COLORS } from "../config/constants";
-import type { Command } from "../models";
+import type { BotClient, SlashCommand } from "../models";
 
-const statusCommand: Command = {
-  name: "status",
-  aliases: ["info", "stats"],
-  description: "Display bot status and statistics",
-  usage: "!status",
-  category: "utility",
-  cooldown: 5, // 5 seconds cooldown.
+const statusCommand: SlashCommand = {
+  data: new SlashCommandBuilder()
+    .setName("status")
+    .setDescription("Display bot status and statistics"),
 
-  async execute(message, args, client) {
+  legacyName: "status",
+
+  async execute(interaction) {
+    const client = interaction.client as BotClient;
     const uptime = process.uptime();
     const memUsage = process.memoryUsage();
 
@@ -87,7 +87,7 @@ const statusCommand: Command = {
       .setFooter({ text: "RetroAchievements Discord Bot" })
       .setTimestamp();
 
-    await message.reply({ embeds: [embed] });
+    await interaction.reply({ embeds: [embed] });
   },
 };
 

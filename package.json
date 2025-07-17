@@ -1,17 +1,16 @@
 {
-  "name": "rabot-next",
+  "name": "rabot",
   "module": "index.ts",
   "type": "module",
   "private": true,
   "scripts": {
     "dev": "bun --watch src/index.ts",
     "start": "bun run src/index.ts",
-    "tsc": "tsc --noEmit",
     "deploy-commands": "bun run src/deploy-commands.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "bun run src/database/migrate.ts",
     "db:seed": "bun run src/database/seed-teams.ts",
-    "db:studio": "drizzle-kit studio",
+    "tsc": "tsc --noEmit",
     "lint": "eslint src --cache",
     "lint:fix": "eslint src --fix"
   },
@@ -25,7 +24,6 @@
     "youtube-search": "^1.1.6"
   },
   "devDependencies": {
-    "@libsql/client": "^0.15.10",
     "@types/bun": "latest",
     "@types/figlet": "^1.7.0",
     "drizzle-kit": "^0.31.4",

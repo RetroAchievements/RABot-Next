@@ -121,6 +121,7 @@ RABot is transitioning to slash commands! When you use a legacy prefix command (
 ### Slash Commands (Recommended)
 - `/topic` - Display the current channel topic
 - `/contact` - Show contact information for various RA teams
+- `/status` - Display bot status and statistics
 - `/poll` - Create a simple poll (up to 10 options)
 - `/tpoll` - Create a timed poll that automatically closes
 - `/gan <game-id>` - Generate achievement news template
@@ -138,7 +139,6 @@ The bot still supports the following legacy prefix commands (all prefixed with `
 - `!topic` - Display the current channel topic
 - `!rule [number]` - Display server rules
 - `!contact` - Show contact information for various RA teams
-- `!status` - Display bot status and statistics (aliases: `!info`, `!stats`)
 - `!poll` - Create a simple poll
 - `!tpoll` - Create a timed poll
 - `!gan <game_id>` - Generate achievement news template
