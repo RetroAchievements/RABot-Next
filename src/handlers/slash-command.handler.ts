@@ -3,6 +3,7 @@ import { readdirSync } from "fs";
 import { join } from "path";
 
 import type { SlashCommand } from "../models";
+import { logError, logger } from "../utils/logger";
 
 export async function loadSlashCommands(): Promise<Collection<string, SlashCommand>> {
   const commands = new Collection<string, SlashCommand>();
@@ -20,17 +21,19 @@ export async function loadSlashCommands(): Promise<Collection<string, SlashComma
 
       if ("data" in slashCommand && "execute" in slashCommand) {
         commands.set(slashCommand.data.name, slashCommand);
-        console.log(
-          `[SlashCommands] Loaded /${slashCommand.data.name}${slashCommand.legacyName ? ` (legacy: ${slashCommand.legacyName})` : ""}`,
+        logger.debug(
+          `Loaded slash command: /${slashCommand.data.name}${slashCommand.legacyName ? ` (legacy: ${slashCommand.legacyName})` : ""}`,
         );
       } else {
-        console.warn(
-          `[WARNING] The slash command at ${filePath} is missing required "data" or "execute" property.`,
+        logger.warn(
+          `The slash command at ${filePath} is missing required "data" or "execute" property.`,
         );
       }
     }
   } catch (error) {
-    console.error("Error loading slash commands:", error);
+    logError(error, {
+      event: "slash_command_load_error",
+    });
   }
 
   return commands;

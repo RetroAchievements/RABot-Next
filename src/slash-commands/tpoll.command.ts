@@ -3,6 +3,7 @@ import { Collection, SlashCommandBuilder } from "discord.js";
 
 import type { SlashCommand } from "../models";
 import { PollService } from "../services/poll.service";
+import { logError } from "../utils/logger";
 
 const EMOJI_ALPHABET: Record<string, string> = {
   a: "🇦",
@@ -232,7 +233,7 @@ const tpollSlashCommand: SlashCommand = {
           content: `**Your poll has ended.**\n**Click this link to see the results:**\n<${sentMsg.url}>`,
         });
       } catch (error) {
-        console.error("Error ending timed poll:", error);
+        logError("Error ending timed poll:", { error });
       }
     });
   },

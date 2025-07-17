@@ -1,8 +1,9 @@
+import { logError, logger } from "../utils/logger";
 import { db } from "./db";
 import { teams } from "./schema";
 
 async function seedTeams() {
-  console.log("🌱 Seeding default teams...");
+  logger.info("🌱 Seeding default teams...");
 
   try {
     // Insert default teams
@@ -17,9 +18,9 @@ async function seedTeams() {
       ])
       .onConflictDoNothing();
 
-    console.log("✅ Default teams seeded successfully");
+    logger.info("✅ Default teams seeded successfully");
   } catch (error) {
-    console.error("❌ Error seeding teams:", error);
+    logError("❌ Error seeding teams:", { error });
   }
 }
 

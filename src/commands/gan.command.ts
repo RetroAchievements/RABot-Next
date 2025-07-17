@@ -3,6 +3,7 @@ import ytSearch from "youtube-search";
 
 import { RA_WEB_API_KEY, YOUTUBE_API_KEY } from "../config/constants";
 import type { Command } from "../models";
+import { logError } from "../utils/logger";
 
 const ganCommand: Command = {
   name: "genachnews",
@@ -101,7 +102,7 @@ const ganCommand: Command = {
             youtubeLink = results[0].link;
           }
         } catch (error) {
-          console.error("Error searching YouTube:", error);
+          logError("Error searching YouTube:", { error });
           // Keep default placeholder if search fails.
         }
       }
@@ -122,7 +123,7 @@ ${youtubeLink}
         `${message.author}, here's your achievement-news post template:\n${template}`,
       );
     } catch (error) {
-      console.error("Error in gan command:", error);
+      logError("Error in gan command:", { error });
       await sentMsg.edit(`Unable to get info from the game ID \`${gameId}\`... :frowning:`);
     }
   },

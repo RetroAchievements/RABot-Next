@@ -2,6 +2,7 @@ import type { Message } from "discord.js";
 
 import type { BotClient } from "../models";
 import { CooldownManager } from "../utils/cooldown-manager";
+import { logCommandExecution, logError, logMigrationNotice } from "../utils/logger";
 import { sendMigrationNotice } from "../utils/migration-helper";
 
 export async function handleMessage(message: Message, client: BotClient): Promise<void> {
@@ -49,8 +50,11 @@ export async function handleMessage(message: Message, client: BotClient): Promis
   });
 
   if (slashCommand) {
-    console.log(
-      `[Migration] Detected legacy command "${commandName}" has slash equivalent "/${slashCommand.data.name}"`,
+    logMigrationNotice(
+      commandName,
+      slashCommand.data.name,
+      message.author.id,
+      message.guildId || undefined,
     );
     // Send migration notice.
     try {
@@ -60,11 +64,25 @@ export async function handleMessage(message: Message, client: BotClient): Promis
         useEphemeralButton: false, // Use simple temporary message
       });
     } catch (error) {
-      console.error("[Migration] Failed to send migration notice:", error);
+      logError(error, {
+        event: "migration_notice_error",
+        legacyCommand: commandName,
+        slashCommand: slashCommand.data.name,
+        userId: message.author.id,
+        guildId: message.guildId || undefined,
+      });
     }
   }
 
   try {
+    // Log command execution
+    logCommandExecution(
+      command.name,
+      message.author.id,
+      message.guildId || undefined,
+      message.channelId,
+    );
+
     // Check permissions if specified.
     if (command.permissions) {
       // Check user permissions.
@@ -101,7 +119,13 @@ export async function handleMessage(message: Message, client: BotClient): Promis
     // Set cooldown after successful execution.
     CooldownManager.setCooldown(client.cooldowns, message.author.id, command.name);
   } catch (error) {
-    console.error(`Error executing command ${commandName}:`, error);
+    logError(error, {
+      commandName,
+      userId: message.author.id,
+      guildId: message.guildId || undefined,
+      channelId: message.channelId,
+      messageId: message.id,
+    });
     await message.reply("There was an error executing that command.");
   }
 }

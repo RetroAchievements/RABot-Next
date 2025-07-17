@@ -4,6 +4,7 @@ import ytSearch from "youtube-search";
 
 import { RA_WEB_API_KEY, YOUTUBE_API_KEY } from "../config/constants";
 import type { SlashCommand } from "../models";
+import { logError } from "../utils/logger";
 
 const gan2SlashCommand: SlashCommand = {
   data: new SlashCommandBuilder()
@@ -106,7 +107,7 @@ const gan2SlashCommand: SlashCommand = {
             youtubeLink = results[0].link;
           }
         } catch (error) {
-          console.error("Error searching YouTube:", error);
+          logError("Error searching YouTube:", { error });
         }
       }
 
@@ -168,7 +169,7 @@ const gan2SlashCommand: SlashCommand = {
 
       await interaction.editReply(output);
     } catch (error) {
-      console.error("Error in gan2 slash command:", error);
+      logError("Error in gan2 slash command:", { error });
       await interaction.editReply(
         `Unable to get info from the game ID \`${gameId}\`... :frowning:`,
       );

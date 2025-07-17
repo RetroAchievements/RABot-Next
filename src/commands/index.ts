@@ -2,6 +2,7 @@ import { Glob } from "bun";
 import { Collection } from "discord.js";
 
 import type { Command } from "../models";
+import { logError, logger } from "../utils/logger";
 
 export async function loadCommands(): Promise<Collection<string, Command>> {
   const commands = new Collection<string, Command>();
@@ -16,14 +17,17 @@ export async function loadCommands(): Promise<Collection<string, Command>> {
       const command: Command = commandModule.default || commandModule;
 
       if (!command.name || !command.execute) {
-        console.warn(`Invalid command file: ${file}`);
+        logger.warn(`Invalid command file: ${file}`);
         continue;
       }
 
       commands.set(command.name, command);
-      console.log(`✅ Loaded command: ${command.name}`);
+      logger.debug(`✅ Loaded command: ${command.name}`);
     } catch (error) {
-      console.error(`Failed to load command ${file}:`, error);
+      logError(error, {
+        event: "command_load_error",
+        file,
+      });
     }
   }
 

@@ -20,6 +20,8 @@
     "discord.js": "^14.21.0",
     "drizzle-orm": "^0.44.3",
     "figlet": "^1.8.2",
+    "pino": "^9.7.0",
+    "pino-pretty": "^13.0.0",
     "youtube-search": "^1.1.6"
   },
   "devDependencies": {

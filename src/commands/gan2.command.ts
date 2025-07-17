@@ -3,6 +3,7 @@ import ytSearch from "youtube-search";
 
 import { RA_WEB_API_KEY, YOUTUBE_API_KEY } from "../config/constants";
 import type { Command } from "../models";
+import { logError } from "../utils/logger";
 
 const gan2Command: Command = {
   name: "gan2",
@@ -102,7 +103,7 @@ const gan2Command: Command = {
             youtubeLink = results[0].link;
           }
         } catch (error) {
-          console.error("Error searching YouTube:", error);
+          logError("Error searching YouTube:", { error });
         }
       }
 
@@ -172,7 +173,7 @@ const gan2Command: Command = {
         await message.channel.send(output);
       }
     } catch (error) {
-      console.error("Error in gan2 command:", error);
+      logError("Error in gan2 command:", { error });
       await sentMsg.edit(`Unable to get info from the game ID \`${gameId}\`... :frowning:`);
     }
   },

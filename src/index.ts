@@ -7,6 +7,7 @@ import { handleMessage } from "./handlers/message.handler";
 import { loadSlashCommands } from "./handlers/slash-command.handler";
 import type { BotClient, Command, SlashCommand } from "./models";
 import { CooldownManager } from "./utils/cooldown-manager";
+import { logError, logger } from "./utils/logger";
 
 const client = new Client({
   intents: [
@@ -32,33 +33,33 @@ client.once(Events.ClientReady, async (readyClient) => {
   client.commands = await loadCommands();
   client.slashCommands = await loadSlashCommands();
 
-  console.log(`📦 Loaded ${client.commands.size} prefix commands`);
-  console.log(`🗲 Loaded ${client.slashCommands.size} slash commands`);
+  logger.info(`📦 Loaded ${client.commands.size} prefix commands`);
+  logger.info(`🗲 Loaded ${client.slashCommands.size} slash commands`);
 
   // Debug: List loaded slash commands
   if (client.slashCommands.size > 0) {
-    console.log("   Slash commands:");
+    logger.debug("Slash commands loaded:");
     for (const [_name, cmd] of client.slashCommands) {
-      console.log(`   - /${cmd.data.name}${cmd.legacyName ? ` (legacy: !${cmd.legacyName})` : ""}`);
+      logger.debug(`- /${cmd.data.name}${cmd.legacyName ? ` (legacy: !${cmd.legacyName})` : ""}`);
     }
   }
-  console.log("");
 
-  console.log(`✅ Ready! Logged in as ${readyClient.user.tag}`);
-  console.log(`🎮 Legacy command prefix: ${client.commandPrefix}`);
-  console.log(
-    `📊 Serving ${readyClient.guilds.cache.size} guild${readyClient.guilds.cache.size !== 1 ? "s" : ""}:`,
+  logger.info(`✅ Ready! Logged in as ${readyClient.user.tag}`);
+  logger.info(`🎮 Legacy command prefix: ${client.commandPrefix}`);
+  logger.info(
+    `📊 Serving ${readyClient.guilds.cache.size} guild${readyClient.guilds.cache.size !== 1 ? "s" : ""}`,
   );
 
   for (const [_id, guild] of readyClient.guilds.cache) {
-    console.log(`   • ${guild.name} (${guild.memberCount} members)`);
+    logger.info(`• ${guild.name} (${guild.memberCount} members)`);
   }
-
-  console.log("");
 
   // Set up periodic cooldown cleanup (every 10 minutes).
   setInterval(() => {
-    CooldownManager.cleanupExpiredCooldowns(client.cooldowns);
+    const cleaned = CooldownManager.cleanupExpiredCooldowns(client.cooldowns);
+    if (cleaned > 0) {
+      logger.debug(`Cleaned up ${cleaned} expired cooldowns`);
+    }
   }, 600000); // 10 minutes.
 });
 
@@ -74,7 +75,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     const command = client.slashCommands.get(interaction.commandName);
 
     if (!command) {
-      console.error(`No slash command matching ${interaction.commandName} was found.`);
+      logger.error(`No slash command matching ${interaction.commandName} was found.`);
 
       return;
     }
@@ -100,7 +101,12 @@ client.on(Events.InteractionCreate, async (interaction) => {
             })),
           );
         } catch (error) {
-          console.error("Error fetching teams for autocomplete:", error);
+          logError(error, {
+            event: "autocomplete_error",
+            commandName: "pingteam",
+            userId: interaction.user.id,
+            guildId: interaction.guildId || undefined,
+          });
           await interaction.respond([]);
         }
       }
@@ -114,7 +120,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
   const command = client.slashCommands.get(interaction.commandName);
 
   if (!command) {
-    console.error(`No slash command matching ${interaction.commandName} was found.`);
+    logger.error(`No slash command matching ${interaction.commandName} was found.`);
 
     return;
   }
@@ -140,7 +146,13 @@ client.on(Events.InteractionCreate, async (interaction) => {
     // Set cooldown after successful execution.
     CooldownManager.setCooldown(client.cooldowns, interaction.user.id, interaction.commandName);
   } catch (error) {
-    console.error(error);
+    logError(error, {
+      commandName: interaction.commandName,
+      userId: interaction.user.id,
+      guildId: interaction.guildId || undefined,
+      channelId: interaction.channelId,
+      interactionId: interaction.id,
+    });
     const errorMessage = "There was an error while executing this command!";
 
     if (interaction.replied || interaction.deferred) {

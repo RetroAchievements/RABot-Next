@@ -3,6 +3,7 @@ import { Collection } from "discord.js";
 
 import type { Command } from "../models";
 import { PollService } from "../services/poll.service";
+import { logError } from "../utils/logger";
 
 const EMOJI_ALPHABET: Record<string, string> = {
   a: "🇦",
@@ -237,7 +238,7 @@ const tpollCommand: Command = {
 
         await message.reply(pollEndedMsg.join("\n"));
       } catch (error) {
-        console.error("Error ending timed poll:", error);
+        logError("Error ending timed poll:", { error });
         await message.reply("**`poll` error**: Something went wrong with your poll.");
       }
     });

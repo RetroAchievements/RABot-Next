@@ -69,18 +69,21 @@ export class CooldownManager {
    * Clean up expired cooldowns to prevent memory leaks.
    * @param cooldowns - The cooldowns collection from the bot client.
    * @param cooldownTime - The default cooldown time in seconds.
+   * @returns The number of cooldowns that were cleaned up.
    */
   static cleanupExpiredCooldowns(
     cooldowns: Collection<string, Collection<string, number>>,
     cooldownTime: number = COMMAND_COOLDOWN_MS / 1000,
-  ): void {
+  ): number {
     const now = Date.now();
     const cooldownAmount = cooldownTime * 1000;
+    let cleanedCount = 0;
 
     for (const [commandName, timestamps] of cooldowns.entries()) {
       for (const [userId, timestamp] of timestamps.entries()) {
         if (now > timestamp + cooldownAmount) {
           timestamps.delete(userId);
+          cleanedCount++;
         }
       }
 
@@ -89,5 +92,7 @@ export class CooldownManager {
         cooldowns.delete(commandName);
       }
     }
+
+    return cleanedCount;
   }
 }
