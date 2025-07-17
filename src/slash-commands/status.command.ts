@@ -58,9 +58,14 @@ const statusCommand: SlashCommand = {
         },
         {
           name: "👥 Total Users",
-          value: client.guilds.cache
-            .reduce((acc, guild) => acc + guild.memberCount, 0)
-            .toLocaleString(),
+          value: (() => {
+            let totalUsers = 0;
+            for (const guild of client.guilds.cache.values()) {
+              totalUsers += guild.memberCount;
+            }
+
+            return totalUsers.toLocaleString();
+          })(),
           inline: true,
         },
         {

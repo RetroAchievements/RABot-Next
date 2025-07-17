@@ -2,6 +2,7 @@ import { EmbedBuilder } from "discord.js";
 
 import { COLORS } from "../config/constants";
 import type { Command } from "../models";
+import { logError } from "../utils/logger";
 
 const contactCommand: Command = {
   name: "contact",
@@ -86,7 +87,13 @@ const contactCommand: Command = {
     try {
       await message.react("📧");
       await message.reply({ embeds: [embed] });
-    } catch {
+    } catch (error) {
+      logError(error, {
+        event: "contact_command_react_error",
+        userId: message.author.id,
+        guildId: message.guildId || undefined,
+        channelId: message.channelId,
+      });
       await message.reply({ embeds: [embed] });
     }
   },

@@ -7,6 +7,8 @@ import {
   MessageFlags,
 } from "discord.js";
 
+import { logError } from "./logger";
+
 export interface MigrationConfig {
   // Whether to execute the legacy command after showing the migration message.
   executeAfterNotice?: boolean;
@@ -71,8 +73,14 @@ export async function sendMigrationNotice(
     });
 
     collector.on("end", () => {
-      sentMessage.delete().catch(() => {
-        // Ignore errors if message is already deleted
+      sentMessage.delete().catch((error) => {
+        logError(error, {
+          event: "migration_message_delete_error",
+          userId: message.author.id,
+          guildId: message.guildId || undefined,
+          channelId: message.channelId,
+          messageId: sentMessage.id,
+        });
       });
     });
 
@@ -90,8 +98,14 @@ export async function sendMigrationNotice(
 
   if (deleteAfter > 0) {
     setTimeout(() => {
-      sentMessage.delete().catch(() => {
-        // Ignore errors if message is already deleted.
+      sentMessage.delete().catch((error) => {
+        logError(error, {
+          event: "migration_message_auto_delete_error",
+          userId: message.author.id,
+          guildId: message.guildId || undefined,
+          channelId: message.channelId,
+          messageId: sentMessage.id,
+        });
       });
     }, deleteAfter);
   }

@@ -39,7 +39,18 @@ export async function handleMessage(message: Message, client: BotClient): Promis
     const cooldownMessage = CooldownManager.formatCooldownMessage(remainingCooldown);
     const reply = await message.reply(cooldownMessage);
     // Delete cooldown message after 5 seconds.
-    setTimeout(() => reply.delete().catch(() => {}), 5000);
+    setTimeout(
+      () =>
+        reply.delete().catch((error) => {
+          logError(error, {
+            event: "cooldown_message_delete_error",
+            userId: message.author.id,
+            guildId: message.guildId || undefined,
+            channelId: message.channelId,
+          });
+        }),
+      5000,
+    );
 
     return;
   }
