@@ -43,14 +43,20 @@ bun install
 
 ## Configuration
 
-Create a `.env` file in the project root:
+Copy the example environment file and fill in your values:
 
-```env
-DISCORD_TOKEN=your_bot_token_here
-COMMAND_PREFIX=!
-RA_WEB_API_KEY=your_retroachievements_web_api_key
-RA_CONNECT_API_KEY=your_retroachievements_connect_api_key
+```bash
+cp .env.example .env
 ```
+
+Then edit `.env` with your configuration:
+- `DISCORD_TOKEN` - Your bot's token from Discord Developer Portal
+- `DISCORD_APPLICATION_ID` - Your bot's application ID from Discord Developer Portal
+- `LEGACY_COMMAND_PREFIX` - Command prefix for legacy commands (default: `!`)
+- `RA_WEB_API_KEY` - RetroAchievements Web API key
+- `RA_CONNECT_API_KEY` - RetroAchievements Connect API key
+- `YOUTUBE_API_KEY` - YouTube Data API v3 key (optional, for longplay searches)
+- `CHEAT_INVESTIGATION_CATEGORY_ID` - Discord category ID for cheat investigations (optional)
 
 ## Database Setup
 
@@ -59,8 +65,22 @@ Initialize the database:
 ```bash
 bun run db:generate  # Generate migration files
 bun run db:migrate   # Apply migrations
+bun run db:seed      # Seed default teams (optional)
 bun run db:studio    # Open Drizzle Studio (optional)
 ```
+
+## Deploying Slash Commands
+
+After adding your bot to a server, deploy the slash commands:
+
+```bash
+bun run deploy-commands
+```
+
+This needs to be run:
+- When you first set up the bot
+- Whenever you add or modify slash commands
+- After major Discord.js updates
 
 ## Running the Bot
 
@@ -82,15 +102,35 @@ pm2 start src/index.ts --name rabot-next --interpreter bun
 
 - `bun run dev` - Run in development mode with hot reload
 - `bun run start` - Run in production mode
+- `bun run deploy-commands` - Deploy slash commands to Discord
 - `bun run db:generate` - Generate database migrations
 - `bun run db:migrate` - Apply database migrations
 - `bun run db:studio` - Open Drizzle Studio for database management
 - `bun run lint` - Run ESLint
 - `bun run lint:fix` - Run ESLint with auto-fix
+- `bun run tsc` - Run TypeScript type checking
 
 ## Commands
 
-The bot supports the following commands (all prefixed with `!` by default):
+### 🆕 Migration Notice
+RABot is transitioning to slash commands! When you use a legacy prefix command (e.g., `!gan`), you'll see a migration notice encouraging you to use the modern slash command version (e.g., `/gan`). The legacy command will still work during the transition period.
+
+### Slash Commands (Recommended)
+- `/topic` - Display the current channel topic
+- `/contact` - Show contact information for various RA teams
+- `/poll` - Create a simple poll (up to 10 options)
+- `/tpoll` - Create a timed poll that automatically closes
+- `/gan <game-id>` - Generate achievement news template
+- `/gan2 <game-id>` - Generate pretty achievement news template with colors
+- `/pingteam` - Team management system
+  - `/pingteam ping <team>` - Ping all members of a team
+  - `/pingteam add <team> <user>` - Add user to team (admin only)
+  - `/pingteam remove <team> <user>` - Remove user from team (admin only)
+  - `/pingteam list <team>` - List team members
+  - `/pingteam create <name>` - Create a new team (admin only)
+
+### Legacy Prefix Commands (Being Migrated)
+The bot still supports the following legacy prefix commands (all prefixed with `!` by default):
 
 - `!topic` - Display the current channel topic
 - `!rule [number]` - Display server rules

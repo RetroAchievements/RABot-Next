@@ -1,111 +1,119 @@
----
-description: Use Bun instead of Node.js, npm, pnpm, or vite.
-globs: "*.ts, *.tsx, *.html, *.css, *.js, *.jsx, package.json"
-alwaysApply: false
----
+# Project Overview
 
-Default to using Bun instead of Node.js.
+RABot-Next is the official RetroAchievements Discord bot, built with Bun runtime, TypeScript, Discord.js v14, and Drizzle ORM with SQLite. The bot is transitioning from legacy prefix commands (!) to modern slash commands (/) while maintaining backward compatibility.
 
-- Use `bun <file>` instead of `node <file>` or `ts-node <file>`
-- Use `bun test` instead of `jest` or `vitest`
-- Use `bun build <file.html|file.ts|file.css>` instead of `webpack` or `esbuild`
-- Use `bun install` instead of `npm install` or `yarn install` or `pnpm install`
-- Use `bun run <script>` instead of `npm run <script>` or `yarn run <script>` or `pnpm run <script>`
-- Bun automatically loads .env, so don't use dotenv.
+## Development Commands
 
-## APIs
+```bash
+# Initial setup
+bun install
+cp .env.example .env    # Configure environment variables
+bun run db:generate     # Generate database migrations
+bun run db:migrate      # Apply migrations
+bun run db:seed         # Seed default teams (RACheats)
 
-- `Bun.serve()` supports WebSockets, HTTPS, and routes. Don't use `express`.
-- `bun:sqlite` for SQLite. Don't use `better-sqlite3`.
-- `Bun.redis` for Redis. Don't use `ioredis`.
-- `Bun.sql` for Postgres. Don't use `pg` or `postgres.js`.
-- `WebSocket` is built-in. Don't use `ws`.
-- Prefer `Bun.file` over `node:fs`'s readFile/writeFile
-- Bun.$`ls` instead of execa.
+# Development
+bun run dev             # Run with hot reload (--watch)
+bun run tsc             # TypeScript type checking
+bun run lint            # Run ESLint
+bun run lint:fix        # Auto-fix linting issues
 
-## Testing
+# Deployment
+bun run deploy-commands # Deploy slash commands to Discord (required after adding/modifying slash commands)
+bun run start           # Production mode
 
-Use `bun test` to run tests.
-
-```ts#index.test.ts
-import { test, expect } from "bun:test";
-
-test("hello world", () => {
-  expect(1).toBe(1);
-});
+# Database management
+bun run db:studio       # Open Drizzle Studio GUI
 ```
 
-## Frontend
+## Architecture & Key Patterns
 
-Use HTML imports with `Bun.serve()`. Don't use `vite`. HTML imports fully support React, CSS, Tailwind.
+### Dual Command System
 
-Server:
+The bot supports both legacy prefix commands and modern slash commands during the migration period:
 
-```ts#index.ts
-import index from "./index.html"
+1. **Legacy Commands** (`src/commands/*.command.ts`)
+   - Use the `Command` interface
+   - Accessed via prefix (default: `!`)
+   - Show migration notices encouraging slash command use
+   - Example: `!gan 14402`
 
-Bun.serve({
-  routes: {
-    "/": index,
-    "/api/users/:id": {
-      GET: (req) => {
-        return new Response(JSON.stringify({ id: req.params.id }));
-      },
-    },
-  },
-  // optional websocket support
-  websocket: {
-    open: (ws) => {
-      ws.send("Hello, world!");
-    },
-    message: (ws, message) => {
-      ws.send(message);
-    },
-    close: (ws) => {
-      // handle close
-    }
-  },
-  development: {
-    hmr: true,
-    console: true,
-  }
-})
-```
+2. **Slash Commands** (`src/slash-commands/*.command.ts`)
+   - Use the `SlashCommand` interface
+   - Built with Discord.js SlashCommandBuilder
+   - Support autocomplete, better validation, ephemeral responses
+   - Example: `/gan game-id:14402`
 
-HTML files can import .tsx, .jsx or .js files directly and Bun's bundler will transpile & bundle automatically. `<link>` tags can point to stylesheets and Bun's CSS bundler will bundle.
+### Migration System
 
-```html#index.html
-<html>
-  <body>
-    <h1>Hello, world!</h1>
-    <script type="module" src="./frontend.tsx"></script>
-  </body>
-</html>
-```
+When users use legacy commands that have slash equivalents:
 
-With the following `frontend.tsx`:
+- A temporary migration notice appears (15 seconds)
+- The legacy command still executes
+- Configured via `legacyName` property in slash commands
 
-```tsx#frontend.tsx
-import React from "react";
+### Database Architecture
 
-// import .css files directly and it works
-import './index.css';
+- **Drizzle ORM** with SQLite (`bun:sqlite`)
+- Schema defined in `src/database/schema.ts`
+- Services pattern for database operations (`src/services/*.service.ts`)
+- Tables: `teams`, `team_members`, `polls`, `poll_votes`
 
-import { createRoot } from "react-dom/client";
+### Command Registration
 
-const root = createRoot(document.body);
+- Legacy commands auto-loaded from `src/commands/`
+- Slash commands auto-loaded from `src/slash-commands/`
+- Slash commands must be deployed via `bun run deploy-commands`
 
-export default function Frontend() {
-  return <h1>Hello, world!</h1>;
-}
+### Key Services
 
-root.render(<Frontend />);
-```
+- **TeamService**: Manages teams and members, supports both ID and name lookups
+- **PollService**: Handles poll creation and voting
 
-Then, run index.ts
+### Environment Variables
 
-```sh
-bun --hot ./index.ts
-```
+Required in `.env`:
 
-For more information, read the Bun API docs in `node_modules/bun-types/docs/**.md`.
+- `DISCORD_TOKEN`: Bot token
+- `DISCORD_APPLICATION_ID`: Bot application ID
+- `LEGACY_COMMAND_PREFIX`: Prefix for legacy commands (default: `!`)
+- `RA_WEB_API_KEY`: RetroAchievements Web API key
+- `RA_CONNECT_API_KEY`: RetroAchievements Connect API key (future use)
+- `YOUTUBE_API_KEY`: For longplay searches in gan commands
+- `CHEAT_INVESTIGATION_CATEGORY_ID`: Category ID for RACheats team restrictions
+
+### Discord.js v14 Patterns
+
+- Use `MessageFlags.Ephemeral` instead of `ephemeral: true`
+- Autocomplete handlers in main interaction event
+- Proper intent configuration for message content access
+
+## Command Implementation Notes
+
+### Adding New Commands
+
+1. **Slash commands preferred** for new features
+2. Create in `src/slash-commands/[name].command.ts`
+3. Export default with `SlashCommand` interface
+4. Set `legacyName` if replacing a prefix command
+5. Run `bun run deploy-commands` after adding
+
+### Team System
+
+- Teams stored by ID, accessed by name in commands
+- Autocomplete support for team selection
+- Special restrictions for certain teams (e.g., RACheats)
+
+### RetroAchievements API
+
+- Use `@retroachievements/api` package
+- Build authorization with `buildAuthorization()`
+- Handle game IDs and URLs in gan commands
+
+## Common Gotchas
+
+- Always use Bun commands (`bun run`, `bun install`) not npm/yarn/pnpm
+- Deploy slash commands after changes (`bun deploy-commands`)
+- Check channel type before accessing properties like `topic` or `parentId`
+- Use proper null checks for Discord.js properties
+- Remember to handle both team IDs and names in TeamService methods

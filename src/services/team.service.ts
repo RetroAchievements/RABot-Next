@@ -63,4 +63,38 @@ export class TeamService {
     
     return !!member;
   }
+
+  static async getAllTeams(): Promise<Team[]> {
+    return await db.select().from(teams);
+  }
+
+  // Helper methods that work with team names
+  static async getTeamByName(name: string): Promise<Team | null> {
+    const [team] = await db.select().from(teams).where(eq(teams.name, name));
+    return team || null;
+  }
+
+  static async addMemberByTeamName(teamName: string, userId: string, addedBy: string): Promise<void> {
+    const team = await this.getTeamByName(teamName);
+    if (!team) {
+      throw new Error(`Team "${teamName}" not found`);
+    }
+    await this.addMember(team.id, userId, addedBy);
+  }
+
+  static async removeMemberByTeamName(teamName: string, userId: string): Promise<boolean> {
+    const team = await this.getTeamByName(teamName);
+    if (!team) {
+      return false;
+    }
+    return await this.removeMember(team.id, userId);
+  }
+
+  static async getTeamMembersByName(teamName: string): Promise<string[]> {
+    const team = await this.getTeamByName(teamName);
+    if (!team) {
+      return [];
+    }
+    return await this.getTeamMembers(team.id);
+  }
 }

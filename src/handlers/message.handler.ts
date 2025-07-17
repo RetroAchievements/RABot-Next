@@ -1,5 +1,6 @@
 import { Message } from "discord.js";
 import type { BotClient } from "../models";
+import { sendMigrationNotice } from "../utils/migration-helper";
 
 export async function handleMessage(message: Message, client: BotClient): Promise<void> {
   // Ignore messages from bots.
@@ -20,6 +21,26 @@ export async function handleMessage(message: Message, client: BotClient): Promis
     client.commands.find(cmd => cmd.aliases?.includes(commandName));
 
   if (!command) return;
+
+  // Check if there's a corresponding slash command for migration notice.
+  const slashCommand = client.slashCommands.find((cmd) => {
+    // Check if the legacy command name matches what the user typed
+    return cmd.legacyName === commandName;
+  });
+
+  if (slashCommand) {
+    console.log(`[Migration] Detected legacy command "${commandName}" has slash equivalent "/${slashCommand.data.name}"`);
+    // Send migration notice.
+    try {
+      await sendMigrationNotice(message, slashCommand.data.name, {
+        executeAfterNotice: true,
+        deleteAfter: 15000, // 15 seconds
+        useEphemeralButton: false, // Use simple temporary message
+      });
+    } catch (error) {
+      console.error("[Migration] Failed to send migration notice:", error);
+    }
+  }
 
   try {
     // Check permissions if specified.
