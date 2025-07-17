@@ -157,6 +157,32 @@ const pingteamSlashCommand: SlashCommand = {
 
       case "list": {
         const teamName = interaction.options.getString("team", true);
+
+        // Check permissions for restricted teams
+        if (teamName.toLowerCase() === "racheats") {
+          if (!interaction.channel || interaction.channel.type === ChannelType.DM) {
+            await interaction.reply({
+              content: "The RACheats team member list can only be viewed in server channels.",
+              flags: MessageFlags.Ephemeral,
+            });
+
+            return;
+          }
+
+          if (
+            "parentId" in interaction.channel &&
+            interaction.channel.parentId !== CHEAT_INVESTIGATION_CATEGORY_ID
+          ) {
+            await interaction.reply({
+              content:
+                "The RACheats team member list can only be viewed in the Cheat Investigation category.",
+              flags: MessageFlags.Ephemeral,
+            });
+
+            return;
+          }
+        }
+
         const members = await TeamService.getTeamMembersByName(teamName);
 
         if (members.length === 0) {
