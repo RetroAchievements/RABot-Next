@@ -1,13 +1,16 @@
-import { MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import {
+  type GuildMember,
+  MessageFlags,
+  PermissionFlagsBits,
+  SlashCommandBuilder,
+} from "discord.js";
 
 import type { SlashCommand } from "../models";
 
 const UWC_ROLE_ID = "1002687198757388299";
 
 const uwcSlashCommand: SlashCommand = {
-  data: new SlashCommandBuilder()
-    .setName("uwc")
-    .setDescription("Create an Unwelcome Concept poll"),
+  data: new SlashCommandBuilder().setName("uwc").setDescription("Create an Unwelcome Concept poll"),
 
   async execute(interaction, _client) {
     // Check if user has permission (specific role or administrator).
@@ -21,7 +24,7 @@ const uwcSlashCommand: SlashCommand = {
       return;
     }
 
-    const hasRequiredRole = "roles" in member && member.roles.cache.has(UWC_ROLE_ID);
+    const hasRequiredRole = (member as GuildMember)?.roles?.cache?.has(UWC_ROLE_ID) ?? false;
     const isAdmin = interaction.memberPermissions?.has(PermissionFlagsBits.Administrator);
 
     if (!hasRequiredRole && !isAdmin) {
