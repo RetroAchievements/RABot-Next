@@ -1,35 +1,7 @@
 import { SlashCommandBuilder } from "discord.js";
 
 import type { SlashCommand } from "../models";
-
-const EMOJI_ALPHABET: Record<string, string> = {
-  a: "🇦",
-  b: "🇧",
-  c: "🇨",
-  d: "🇩",
-  e: "🇪",
-  f: "🇫",
-  g: "🇬",
-  h: "🇭",
-  i: "🇮",
-  j: "🇯",
-  k: "🇰",
-  l: "🇱",
-  m: "🇲",
-  n: "🇳",
-  o: "🇴",
-  p: "🇵",
-  q: "🇶",
-  r: "🇷",
-  s: "🇸",
-  t: "🇹",
-  u: "🇺",
-  v: "🇻",
-  w: "🇼",
-  x: "🇽",
-  y: "🇾",
-  z: "🇿",
-};
+import { EMOJI_ALPHABET } from "../utils/poll-constants";
 
 const pollSlashCommand: SlashCommand = {
   data: new SlashCommandBuilder()

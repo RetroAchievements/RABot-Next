@@ -4,35 +4,7 @@ import { Collection } from "discord.js";
 import type { Command } from "../models";
 import { PollService } from "../services/poll.service";
 import { logError } from "../utils/logger";
-
-const EMOJI_ALPHABET: Record<string, string> = {
-  a: "🇦",
-  b: "🇧",
-  c: "🇨",
-  d: "🇩",
-  e: "🇪",
-  f: "🇫",
-  g: "🇬",
-  h: "🇭",
-  i: "🇮",
-  j: "🇯",
-  k: "🇰",
-  l: "🇱",
-  m: "🇲",
-  n: "🇳",
-  o: "🇴",
-  p: "🇵",
-  q: "🇶",
-  r: "🇷",
-  s: "🇸",
-  t: "🇹",
-  u: "🇺",
-  v: "🇻",
-  w: "🇼",
-  x: "🇽",
-  y: "🇾",
-  z: "🇿",
-};
+import { EMOJI_ALPHABET } from "../utils/poll-constants";
 
 const tpollCommand: Command = {
   name: "tpoll",
