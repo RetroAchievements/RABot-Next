@@ -28,7 +28,20 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 *.tsbuildinfo
 
 # IDEs
+.claude/settings.local.json
 .idea
 
 # Finder (MacOS) folder config
 .DS_Store
+
+# Database files
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Drizzle
+drizzle
+
+# Downloaded game cache
+data/games.json
