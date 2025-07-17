@@ -1,0 +1,26 @@
+{
+  "name": "rabot-next",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "lint": "eslint src --cache",
+    "lint:fix": "eslint src --fix"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "eslint": "^9.31.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.1",
+    "eslint-plugin-sort-keys-shorthand": "^3.0.0",
+    "eslint-plugin-unicorn": "^59.0.1",
+    "typescript-eslint": "^8.37.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "discord.js": "^14.21.0"
+  }
+}
