@@ -1,6 +1,7 @@
 import type { Message } from "discord.js";
 
 import type { BotClient } from "../models";
+import { AdminChecker } from "../utils/admin-checker";
 import { CommandAnalytics } from "../utils/command-analytics";
 import { CooldownManager } from "../utils/cooldown-manager";
 import { logCommandExecution, logError, logMigrationNotice } from "../utils/logger";
@@ -27,11 +28,15 @@ export async function handleMessage(message: Message, client: BotClient): Promis
 
   if (!command) return;
 
-  // Check cooldowns.
-  const remainingCooldown = CooldownManager.checkCooldown(
+  // Check if user is an administrator.
+  const isAdmin = AdminChecker.isAdminFromMessage(message);
+
+  // Check cooldowns with admin bypass.
+  const remainingCooldown = CooldownManager.checkCooldownWithBypass(
     client.cooldowns,
     message.author.id,
     command.name,
+    isAdmin,
     command.cooldown,
   );
 

@@ -1,6 +1,7 @@
 import { Collection } from "discord.js";
 
 import { COMMAND_COOLDOWN_MS } from "../config/constants";
+import { logger } from "./logger";
 
 export class CooldownManager {
   /**
@@ -33,6 +34,33 @@ export class CooldownManager {
     }
 
     return 0;
+  }
+
+  /**
+   * Check if a user is on cooldown for a specific command with admin bypass support.
+   * @param cooldowns - The cooldowns collection from the bot client.
+   * @param userId - The user's ID.
+   * @param commandName - The command name.
+   * @param isAdmin - Whether the user is an administrator.
+   * @param cooldownTime - The cooldown time in seconds (optional).
+   * @returns The remaining cooldown time in milliseconds, or 0 if no cooldown or admin bypass.
+   */
+  static checkCooldownWithBypass(
+    cooldowns: Collection<string, Collection<string, number>>,
+    userId: string,
+    commandName: string,
+    isAdmin: boolean,
+    cooldownTime?: number,
+  ): number {
+    // Administrators bypass all cooldowns.
+    if (isAdmin) {
+      logger.debug("Administrator bypassing cooldown", { userId, commandName });
+
+      return 0;
+    }
+
+    // Use standard cooldown check for non-administrators.
+    return this.checkCooldown(cooldowns, userId, commandName, cooldownTime);
   }
 
   /**

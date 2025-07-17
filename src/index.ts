@@ -6,6 +6,7 @@ import { LEGACY_COMMAND_PREFIX } from "./config/constants";
 import { handleMessage } from "./handlers/message.handler";
 import { loadSlashCommands } from "./handlers/slash-command.handler";
 import type { BotClient, Command, SlashCommand } from "./models";
+import { AdminChecker } from "./utils/admin-checker";
 import { CommandAnalytics } from "./utils/command-analytics";
 import { CooldownManager } from "./utils/cooldown-manager";
 import { logError, logger } from "./utils/logger";
@@ -126,11 +127,15 @@ client.on(Events.InteractionCreate, async (interaction) => {
     return;
   }
 
-  // Check cooldowns.
-  const remainingCooldown = CooldownManager.checkCooldown(
+  // Check if user is an administrator.
+  const isAdmin = AdminChecker.isAdminFromInteraction(interaction);
+
+  // Check cooldowns with admin bypass.
+  const remainingCooldown = CooldownManager.checkCooldownWithBypass(
     client.cooldowns,
     interaction.user.id,
     interaction.commandName,
+    isAdmin,
     command.cooldown,
   );
 

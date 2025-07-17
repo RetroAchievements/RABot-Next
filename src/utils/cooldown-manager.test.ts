@@ -147,6 +147,91 @@ describe("Util: CooldownManager", () => {
     });
   });
 
+  describe("checkCooldownWithBypass", () => {
+    it("is defined", () => {
+      // ASSERT
+      expect(CooldownManager.checkCooldownWithBypass).toBeDefined();
+    });
+
+    it("given the user is an admin, returns 0 even if cooldown exists", () => {
+      // ARRANGE
+      const now = Date.now();
+      const timestamps = new Collection<string, number>();
+      timestamps.set("user123", now);
+      cooldowns.set("ping", timestamps);
+
+      // ACT
+      const remainingTime = CooldownManager.checkCooldownWithBypass(
+        cooldowns,
+        "user123",
+        "ping",
+        true, // ... is admin ...
+        5, // ... 5 second cooldown ...
+      );
+
+      // ASSERT
+      expect(remainingTime).toEqual(0);
+    });
+
+    it("given the user is not an admin and has no cooldown, returns 0", () => {
+      // ARRANGE
+      cooldowns.set("ping", new Collection());
+
+      // ACT
+      const remainingTime = CooldownManager.checkCooldownWithBypass(
+        cooldowns,
+        "user123",
+        "ping",
+        false, // ... is not admin ...
+        5,
+      );
+
+      // ASSERT
+      expect(remainingTime).toEqual(0);
+    });
+
+    it("given the user is not an admin and has an active cooldown, returns remaining time", () => {
+      // ARRANGE
+      const now = Date.now();
+      const timestamps = new Collection<string, number>();
+      timestamps.set("user123", now);
+      cooldowns.set("ping", timestamps);
+
+      // ACT
+      const remainingTime = CooldownManager.checkCooldownWithBypass(
+        cooldowns,
+        "user123",
+        "ping",
+        false, // ... is not admin ...
+        5, // ... 5 second cooldown ...
+      );
+
+      // ASSERT
+      expect(remainingTime).toBeGreaterThan(4900);
+      expect(remainingTime).toBeLessThanOrEqual(5000);
+    });
+
+    it("given the user is not an admin and cooldown has expired, returns 0", () => {
+      // ARRANGE
+      const pastTimestamp = Date.now() - 10000; // ... 10 seconds ago ...
+      const timestamps = new Collection<string, number>();
+      timestamps.set("user123", pastTimestamp);
+      cooldowns.set("ping", timestamps);
+
+      // ACT
+      const remainingTime = CooldownManager.checkCooldownWithBypass(
+        cooldowns,
+        "user123",
+        "ping",
+        false, // ... is not admin ...
+        5, // ... 5 second cooldown ...
+      );
+
+      // ASSERT
+      expect(remainingTime).toEqual(0);
+    });
+  });
+
   describe("cleanupExpiredCooldowns", () => {
     it("is defined", () => {
       // ASSERT
