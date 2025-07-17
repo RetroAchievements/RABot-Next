@@ -1,0 +1,8 @@
+#!/bin/sh
+# exit on error
+set -e
+
+printf "\n⏳ bun run verify\n"
+bun run verify
+
+printf "\n✅ pre-push OK\n\n"
