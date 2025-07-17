@@ -85,7 +85,7 @@ const pingteamSlashCommand: SlashCommand = {
         if (teamName.toLowerCase() === "racheats") {
           if (!interaction.channel || interaction.channel.type === ChannelType.DM) {
             await interaction.reply({
-              content: "The RACheats team can only be pinged in server channels.",
+              content: "The RACheats team can't be pinged here.",
               flags: MessageFlags.Ephemeral,
             });
 
@@ -97,7 +97,7 @@ const pingteamSlashCommand: SlashCommand = {
             interaction.channel.parentId !== CHEAT_INVESTIGATION_CATEGORY_ID
           ) {
             await interaction.reply({
-              content: "The RACheats team can only be pinged in the Cheat Investigation category.",
+              content: "The RACheats team can't be pinged here.",
               flags: MessageFlags.Ephemeral,
             });
 
@@ -162,7 +162,7 @@ const pingteamSlashCommand: SlashCommand = {
         if (teamName.toLowerCase() === "racheats") {
           if (!interaction.channel || interaction.channel.type === ChannelType.DM) {
             await interaction.reply({
-              content: "The RACheats team member list can only be viewed in server channels.",
+              content: "The RACheats team member list can't be viewed here.",
               flags: MessageFlags.Ephemeral,
             });
 
@@ -174,8 +174,7 @@ const pingteamSlashCommand: SlashCommand = {
             interaction.channel.parentId !== CHEAT_INVESTIGATION_CATEGORY_ID
           ) {
             await interaction.reply({
-              content:
-                "The RACheats team member list can only be viewed in the Cheat Investigation category.",
+              content: "The RACheats team member list can't be viewed here.",
               flags: MessageFlags.Ephemeral,
             });
 

@@ -38,7 +38,7 @@ describe("SlashCommand: pingteam", () => {
 
         // ASSERT
         expect(interaction.reply).toHaveBeenCalledWith({
-          content: "The RACheats team can only be pinged in server channels.",
+          content: "The RACheats team can't be pinged here.",
           flags: MessageFlags.Ephemeral,
         });
         expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
@@ -60,7 +60,7 @@ describe("SlashCommand: pingteam", () => {
 
         // ASSERT
         expect(interaction.reply).toHaveBeenCalledWith({
-          content: "The RACheats team can only be pinged in server channels.",
+          content: "The RACheats team can't be pinged here.",
           flags: MessageFlags.Ephemeral,
         });
         expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
@@ -87,7 +87,7 @@ describe("SlashCommand: pingteam", () => {
 
         // ASSERT
         expect(interaction.reply).toHaveBeenCalledWith({
-          content: "The RACheats team can only be pinged in the Cheat Investigation category.",
+          content: "The RACheats team can't be pinged here.",
           flags: MessageFlags.Ephemeral,
         });
         expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
@@ -140,7 +140,7 @@ describe("SlashCommand: pingteam", () => {
 
         // ASSERT
         expect(interaction.reply).toHaveBeenCalledWith({
-          content: "The RACheats team can only be pinged in the Cheat Investigation category.",
+          content: "The RACheats team can't be pinged here.",
           flags: MessageFlags.Ephemeral,
         });
       });
@@ -194,7 +194,7 @@ describe("SlashCommand: pingteam", () => {
 
         // ASSERT
         expect(interaction.reply).toHaveBeenCalledWith({
-          content: "The RACheats team member list can only be viewed in server channels.",
+          content: "The RACheats team member list can't be viewed here.",
           flags: MessageFlags.Ephemeral,
         });
         expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
@@ -216,7 +216,7 @@ describe("SlashCommand: pingteam", () => {
 
         // ASSERT
         expect(interaction.reply).toHaveBeenCalledWith({
-          content: "The RACheats team member list can only be viewed in server channels.",
+          content: "The RACheats team member list can't be viewed here.",
           flags: MessageFlags.Ephemeral,
         });
         expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
@@ -243,8 +243,7 @@ describe("SlashCommand: pingteam", () => {
 
         // ASSERT
         expect(interaction.reply).toHaveBeenCalledWith({
-          content:
-            "The RACheats team member list can only be viewed in the Cheat Investigation category.",
+          content: "The RACheats team member list can't be viewed here.",
           flags: MessageFlags.Ephemeral,
         });
         expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
@@ -298,8 +297,7 @@ describe("SlashCommand: pingteam", () => {
 
         // ASSERT
         expect(interaction.reply).toHaveBeenCalledWith({
-          content:
-            "The RACheats team member list can only be viewed in the Cheat Investigation category.",
+          content: "The RACheats team member list can't be viewed here.",
           flags: MessageFlags.Ephemeral,
         });
       });
