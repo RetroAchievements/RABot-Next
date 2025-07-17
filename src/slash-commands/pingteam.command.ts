@@ -70,7 +70,7 @@ const pingteamSlashCommand: SlashCommand = {
           option.setName("name").setDescription("Team name").setRequired(true),
         ),
     )
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles),
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   cooldown: 30, // 30 seconds cooldown for team pings.
 
