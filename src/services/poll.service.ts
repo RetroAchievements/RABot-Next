@@ -13,7 +13,7 @@ export class PollService {
     creatorId: string,
     question: string,
     options: string[],
-    endTime: Date | null
+    endTime?: Date | null
   ): Promise<Poll> {
     const pollOptions: PollOption[] = options.map((text) => ({ text, votes: [] }));
     

@@ -25,7 +25,11 @@ const ganCommand: Command = {
       gameId = parseInt(arg, 10);
     } else if (/^https?:\/\/retroachievements\.org\/game\/(\d+)/i.test(arg)) {
       const match = arg.match(/\/game\/(\d+)/);
-      gameId = parseInt(match![1], 10);
+      if (!match) {
+        await message.reply("Invalid game URL format.");
+        return;
+      }
+      gameId = parseInt(match[1]!, 10);
     } else {
       await message.reply("Invalid game ID or URL format.");
       return;
@@ -57,7 +61,9 @@ const ganCommand: Command = {
           if (achievement.dateModified) {
             // Extract just the date part (YYYY-MM-DD).
             const dateOnly = achievement.dateModified.split(" ")[0];
-            dates.add(dateOnly);
+            if (dateOnly) {
+              dates.add(dateOnly);
+            }
           }
         });
 
@@ -79,7 +85,7 @@ const ganCommand: Command = {
           
           const { results } = await ytSearch(searchTerms, opts);
           
-          if (results && results.length > 0) {
+          if (results && results.length > 0 && results[0]?.link) {
             youtubeLink = results[0].link;
           }
         } catch (error) {

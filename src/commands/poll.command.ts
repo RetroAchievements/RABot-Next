@@ -28,7 +28,7 @@ const pollCommand: Command = {
     const question = cleanArgs[0];
     const opts = cleanArgs.slice(1);
 
-    if (question.length === 0 || question.length >= 400) {
+    if (!question || question.length === 0 || question.length >= 400) {
       await message.reply("Invalid question");
       return;
     }
@@ -60,11 +60,19 @@ const pollCommand: Command = {
     ];
 
     // Send the poll message.
+    if (!("send" in message.channel)) {
+      await message.reply("This command can only be used in text channels.");
+      return;
+    }
+    
     const sentMsg = await message.channel.send(pollMsg.join("\n"));
 
     // Add reactions.
     for (let i = 0; i < opts.length; i++) {
-      await sentMsg.react(reactions[i]);
+      const emoji = reactions[i];
+      if (emoji) {
+        await sentMsg.react(emoji);
+      }
     }
   },
 };

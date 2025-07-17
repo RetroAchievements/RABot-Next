@@ -34,7 +34,7 @@ const ruleCommand: Command = {
   
   async execute(message, args) {
     // Check if command was invoked with a numbered alias (e.g., !rule2).
-    const commandUsed = message.content.split(" ")[0].slice(1); // Remove prefix.
+    const commandUsed = message.content.split(" ")[0]?.slice(1) || ""; // Remove prefix.
     let ruleNumber: string;
     
     if (commandUsed.startsWith("rule") && commandUsed.length > 4) {

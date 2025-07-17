@@ -97,8 +97,8 @@ The bot supports the following commands (all prefixed with `!` by default):
 - `!contact` - Show contact information for various RA teams
 - `!poll` - Create a simple poll
 - `!tpoll` - Create a timed poll
-- `!whatgame [console]` - Get a random game suggestion
 - `!gan <game_id>` - Generate achievement news template
+- `!gan2 <game_id>` - Generate pretty achievement news template with colors
 - `!pingteam <team>` - Team ping system (privileged users only)
   - `!pingteam racheats` - Ping the RACheats team
   - `!pingteam racheats add @user` - Add user to team (admin only)
