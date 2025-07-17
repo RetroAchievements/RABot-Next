@@ -6,6 +6,7 @@ import { LEGACY_COMMAND_PREFIX } from "./config/constants";
 import { handleMessage } from "./handlers/message.handler";
 import { loadSlashCommands } from "./handlers/slash-command.handler";
 import type { BotClient, Command, SlashCommand } from "./models";
+import { CommandAnalytics } from "./utils/command-analytics";
 import { CooldownManager } from "./utils/cooldown-manager";
 import { logError, logger } from "./utils/logger";
 
@@ -140,11 +141,17 @@ client.on(Events.InteractionCreate, async (interaction) => {
     return;
   }
 
+  // Start tracking command execution
+  const startTime = CommandAnalytics.startTracking();
+
   try {
     await command.execute(interaction, client);
 
     // Set cooldown after successful execution.
     CooldownManager.setCooldown(client.cooldowns, interaction.user.id, interaction.commandName);
+
+    // Track successful command execution
+    CommandAnalytics.trackSlashCommand(interaction, startTime, true);
   } catch (error) {
     logError(error, {
       commandName: interaction.commandName,
@@ -153,6 +160,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
       channelId: interaction.channelId,
       interactionId: interaction.id,
     });
+
+    // Track failed command execution
+    CommandAnalytics.trackSlashCommand(interaction, startTime, false, error as Error);
+
     const errorMessage = "There was an error while executing this command!";
 
     if (interaction.replied || interaction.deferred) {

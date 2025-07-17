@@ -81,6 +81,8 @@ Required in `.env`:
 - `RA_CONNECT_API_KEY`: RetroAchievements Connect API key (future use)
 - `YOUTUBE_API_KEY`: For longplay searches in gan commands
 - `CHEAT_INVESTIGATION_CATEGORY_ID`: Category ID for RACheats team restrictions
+- `NODE_ENV`: Set to "production" in production (default: "development")
+- `LOG_LEVEL`: Logging level - trace, debug, info, warn, error, fatal (default: "debug" in dev, "info" in prod)
 
 ### Discord.js v14 Patterns
 
@@ -109,6 +111,46 @@ Required in `.env`:
 - Use `@retroachievements/api` package
 - Build authorization with `buildAuthorization()`
 - Handle game IDs and URLs in gan commands
+
+## Logging System
+
+The bot uses Pino for structured logging with the following features:
+
+### Log Levels
+- `trace`: Most detailed logging
+- `debug`: Detailed information for debugging
+- `info`: General informational messages
+- `warn`: Warning messages
+- `error`: Error messages
+- `fatal`: Fatal errors that cause the bot to exit
+
+### Logging Utilities
+
+1. **Basic Logger** (`src/utils/logger.ts`)
+   - `logger.info()`, `logger.error()`, etc. for standard logging
+   - `logError()` - Log errors with context
+   - `logCommandExecution()` - Log command executions
+   - `logMigrationNotice()` - Log migration notices
+   - `logDatabaseQuery()` - Log database operations
+   - `logApiCall()` - Log external API calls
+
+2. **Error Tracking** (`src/utils/error-tracker.ts`)
+   - `ErrorTracker.trackMessageError()` - Track errors from message commands
+   - `ErrorTracker.trackInteractionError()` - Track errors from slash commands
+   - `ErrorTracker.formatUserError()` - Format errors for user display with error IDs
+
+3. **Command Analytics** (`src/utils/command-analytics.ts`)
+   - Automatic tracking of all command executions
+   - Execution time measurement
+   - Success/failure tracking
+   - Per-user and per-guild statistics
+   - Access statistics via `CommandAnalytics.getStatistics()`
+
+### Best Practices
+- Always use structured logging with context objects
+- Include user ID, guild ID, and command name in error logs
+- Use appropriate log levels (don't use `info` for debugging)
+- Error IDs help users report issues
 
 ## Common Gotchas
 

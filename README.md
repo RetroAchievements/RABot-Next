@@ -25,6 +25,7 @@ RABot utilizes:
 - **Discord.js**
 - **Drizzle ORM** with SQLite for data persistence
 - **@retroachievements/api**
+- **Pino** for structured logging with command analytics
 
 ## Requirements
 
@@ -57,6 +58,8 @@ Then edit `.env` with your configuration:
 - `RA_CONNECT_API_KEY` - RetroAchievements Connect API key
 - `YOUTUBE_API_KEY` - YouTube Data API v3 key (optional, for longplay searches)
 - `CHEAT_INVESTIGATION_CATEGORY_ID` - Discord category ID for cheat investigations (optional)
+- `NODE_ENV` - Environment mode: `development` or `production` (default: `development`)
+- `LOG_LEVEL` - Logging level: `trace`, `debug`, `info`, `warn`, `error`, `fatal` (default: `debug` in dev, `info` in prod)
 
 ## Database Setup
 
@@ -135,6 +138,7 @@ The bot still supports the following legacy prefix commands (all prefixed with `
 - `!topic` - Display the current channel topic
 - `!rule [number]` - Display server rules
 - `!contact` - Show contact information for various RA teams
+- `!status` - Display bot status and statistics (aliases: `!info`, `!stats`)
 - `!poll` - Create a simple poll
 - `!tpoll` - Create a timed poll
 - `!gan <game_id>` - Generate achievement news template
@@ -149,13 +153,14 @@ The bot still supports the following legacy prefix commands (all prefixed with `
 
 ```
 src/
-├── commands/        # Bot commands (*.command.ts files)
+├── commands/        # Legacy prefix commands (*.command.ts files)
+├── slash-commands/  # Modern slash commands (*.command.ts files)
 ├── config/          # Configuration and constants
 ├── database/        # Database setup and schemas
 ├── handlers/        # Message and event handlers
 ├── models/          # TypeScript interfaces and types
 ├── services/        # Business logic services
-└── utils/           # Utility functions
+└── utils/           # Utility functions and logging
 ```
 
 ## Contributing

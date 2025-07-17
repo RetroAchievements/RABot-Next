@@ -1,6 +1,7 @@
 import type { Message } from "discord.js";
 
 import type { BotClient } from "../models";
+import { CommandAnalytics } from "../utils/command-analytics";
 import { CooldownManager } from "../utils/cooldown-manager";
 import { logCommandExecution, logError, logMigrationNotice } from "../utils/logger";
 import { sendMigrationNotice } from "../utils/migration-helper";
@@ -74,6 +75,9 @@ export async function handleMessage(message: Message, client: BotClient): Promis
     }
   }
 
+  // Start tracking command execution
+  const startTime = CommandAnalytics.startTracking();
+
   try {
     // Log command execution
     logCommandExecution(
@@ -118,6 +122,9 @@ export async function handleMessage(message: Message, client: BotClient): Promis
 
     // Set cooldown after successful execution.
     CooldownManager.setCooldown(client.cooldowns, message.author.id, command.name);
+
+    // Track successful command execution
+    CommandAnalytics.trackLegacyCommand(message, command.name, startTime, true);
   } catch (error) {
     logError(error, {
       commandName,
@@ -126,6 +133,10 @@ export async function handleMessage(message: Message, client: BotClient): Promis
       channelId: message.channelId,
       messageId: message.id,
     });
+
+    // Track failed command execution
+    CommandAnalytics.trackLegacyCommand(message, command.name, startTime, false, error as Error);
+
     await message.reply("There was an error executing that command.");
   }
 }
