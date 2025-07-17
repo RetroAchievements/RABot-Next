@@ -118,5 +118,13 @@ export default tseslint.config(
         },
       ],
     },
+  },
+
+  // Override for test files
+  {
+    files: ["**/*.test.ts", "**/test/**/*.ts", "**/*.mock.ts"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off", // Allow any in test files
+    },
   }
 );

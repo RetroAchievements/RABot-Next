@@ -110,6 +110,9 @@ pm2 start src/index.ts --name rabot-next --interpreter bun
 - `bun lint` - Run ESLint
 - `bun lint:fix` - Run ESLint with auto-fix
 - `bun tsc` - Run TypeScript type checking
+- `bun test` - Run all tests
+- `bun test:watch` - Run tests in watch mode
+- `bun verify` - Run lint, type checking, and tests (comprehensive check)
 
 ## Commands
 

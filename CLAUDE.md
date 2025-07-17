@@ -17,6 +17,9 @@ bun run dev             # Run with hot reload (--watch)
 bun run tsc             # TypeScript type checking
 bun run lint            # Run ESLint
 bun run lint:fix        # Auto-fix linting issues
+bun test                # Run all tests
+bun test:watch          # Run tests in watch mode
+bun run verify          # Run lint, type checking, and tests (comprehensive check)
 
 # Deployment
 bun run deploy-commands # Deploy slash commands to Discord (required after adding/modifying slash commands)
