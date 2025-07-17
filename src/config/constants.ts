@@ -6,7 +6,7 @@ export const RA_CONNECT_API_KEY = process.env.RA_CONNECT_API_KEY || "";
 export const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || "";
 
 // RetroAchievements Workshop server config.
-export const CHEAT_INVESTIGATION_CATEGORY_ID = "1002686858435764346";
+export const CHEAT_INVESTIGATION_CATEGORY_ID = process.env.CHEAT_INVESTIGATION_CATEGORY_ID || "";
 
 // Poll configuration.
 export const MAX_POLL_OPTIONS = 10;

@@ -1,3 +1,5 @@
+import { CHEAT_INVESTIGATION_CATEGORY_ID } from "./constants";
+
 // Team-specific restrictions and settings.
 export const TEAM_RESTRICTIONS: Record<
   string,
@@ -8,7 +10,7 @@ export const TEAM_RESTRICTIONS: Record<
   }
 > = {
   racheats: {
-    categoryId: "1002686858435764346",
+    categoryId: CHEAT_INVESTIGATION_CATEGORY_ID,
     requireCategory: true,
   },
 };
