@@ -2,6 +2,7 @@ export const COMMAND_PREFIX = process.env.COMMAND_PREFIX || "!";
 export const DISCORD_TOKEN = process.env.DISCORD_TOKEN!;
 export const RA_WEB_API_KEY = process.env.RA_WEB_API_KEY || "";
 export const RA_CONNECT_API_KEY = process.env.RA_CONNECT_API_KEY || "";
+export const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || "";
 
 // RetroAchievements Workshop server config.
 export const CHEAT_INVESTIGATION_CATEGORY_ID = "1002686858435764346";
