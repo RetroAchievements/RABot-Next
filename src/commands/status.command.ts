@@ -1,6 +1,7 @@
 import { EmbedBuilder } from "discord.js";
-import type { Command } from "../models";
+
 import { COLORS } from "../config/constants";
+import type { Command } from "../models";
 
 const statusCommand: Command = {
   name: "status",
@@ -8,24 +9,27 @@ const statusCommand: Command = {
   description: "Display bot status and statistics",
   usage: "!status",
   category: "utility",
-  
+  cooldown: 5, // 5 seconds cooldown.
+
   async execute(message, args, client) {
     const uptime = process.uptime();
     const memUsage = process.memoryUsage();
-    
+
     // Format uptime.
     const days = Math.floor(uptime / 86400);
     const hours = Math.floor((uptime % 86400) / 3600);
     const minutes = Math.floor((uptime % 3600) / 60);
     const seconds = Math.floor(uptime % 60);
-    
+
     const uptimeString = [
       days > 0 ? `${days}d` : null,
       hours > 0 ? `${hours}h` : null,
       minutes > 0 ? `${minutes}m` : null,
-      `${seconds}s`
-    ].filter(Boolean).join(" ");
-    
+      `${seconds}s`,
+    ]
+      .filter(Boolean)
+      .join(" ");
+
     // Create embed.
     const embed = new EmbedBuilder()
       .setTitle("📊 RABot Status")
@@ -54,7 +58,9 @@ const statusCommand: Command = {
         },
         {
           name: "👥 Total Users",
-          value: client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0).toLocaleString(),
+          value: client.guilds.cache
+            .reduce((acc, guild) => acc + guild.memberCount, 0)
+            .toLocaleString(),
           inline: true,
         },
         {
@@ -80,7 +86,7 @@ const statusCommand: Command = {
       ])
       .setFooter({ text: "RetroAchievements Discord Bot" })
       .setTimestamp();
-    
+
     await message.reply({ embeds: [embed] });
   },
 };

@@ -1,10 +1,11 @@
-import { Collection } from "discord.js";
-import type { Command } from "../models";
 import { Glob } from "bun";
+import { Collection } from "discord.js";
+
+import type { Command } from "../models";
 
 export async function loadCommands(): Promise<Collection<string, Command>> {
   const commands = new Collection<string, Command>();
-  
+
   // Use Bun's glob to find all command files.
   const glob = new Glob("**/*.command.ts");
   const commandFiles = Array.from(glob.scanSync({ cwd: import.meta.dir }));

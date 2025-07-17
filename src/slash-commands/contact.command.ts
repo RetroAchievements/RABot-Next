@@ -1,14 +1,15 @@
-import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
+import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
+
 import type { SlashCommand } from "../models";
 
 const contactSlashCommand: SlashCommand = {
   data: new SlashCommandBuilder()
     .setName("contact")
     .setDescription("Show contact information for various RetroAchievements teams"),
-  
+
   legacyName: "contact", // For migration mapping
-  
-  async execute(interaction, client) {
+
+  async execute(interaction, _client) {
     const embed = new EmbedBuilder()
       .setTitle("RetroAchievements Team Contact Information")
       .setColor(0x0099ff)
@@ -43,9 +44,9 @@ const contactSlashCommand: SlashCommand = {
           name: "💬 General Support",
           value: "Use the appropriate support channels or contact a moderator",
           inline: false,
-        }
+        },
       )
-      .setFooter({ 
+      .setFooter({
         text: "Please use the appropriate team for your issue",
       })
       .setTimestamp();

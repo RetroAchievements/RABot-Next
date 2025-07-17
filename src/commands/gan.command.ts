@@ -1,7 +1,8 @@
 import { buildAuthorization, getGameExtended } from "@retroachievements/api";
 import ytSearch from "youtube-search";
-import type { Command } from "../models";
+
 import { RA_WEB_API_KEY, YOUTUBE_API_KEY } from "../config/constants";
+import type { Command } from "../models";
 
 const ganCommand: Command = {
   name: "genachnews",
@@ -10,32 +11,38 @@ const ganCommand: Command = {
   usage: "!gan <gameId|gameUrl>",
   examples: ["!gan 4650", "!gan https://retroachievements.org/game/4650"],
   category: "retroachievements",
-  
+  cooldown: 3, // 3 seconds default cooldown.
+
   async execute(message, args) {
     if (!args[0]) {
       await message.reply("Please provide a game ID or URL. Example: `!gan 4650`");
+
       return;
     }
 
     // Extract game ID from argument (could be number or URL).
     let gameId: number;
     const arg = args[0];
-    
+
     if (/^\d+$/.test(arg)) {
       gameId = parseInt(arg, 10);
     } else if (/^https?:\/\/retroachievements\.org\/game\/(\d+)/i.test(arg)) {
       const match = arg.match(/\/game\/(\d+)/);
       if (!match) {
         await message.reply("Invalid game URL format.");
+
         return;
       }
       gameId = parseInt(match[1]!, 10);
     } else {
       await message.reply("Invalid game ID or URL format.");
+
       return;
     }
 
-    const sentMsg = await message.reply(`:hourglass: Getting info for game ID \`${gameId}\`, please wait...`);
+    const sentMsg = await message.reply(
+      `:hourglass: Getting info for game ID \`${gameId}\`, please wait...`,
+    );
 
     try {
       // Build authorization for API call.
@@ -49,6 +56,7 @@ const ganCommand: Command = {
 
       if (!gameInfo) {
         await sentMsg.edit(`Unable to get info from the game ID \`${gameId}\`... :frowning:`);
+
         return;
       }
 
@@ -56,8 +64,8 @@ const ganCommand: Command = {
       let achievementSetDate = "";
       if (gameInfo.achievements && Object.keys(gameInfo.achievements).length > 0) {
         const dates = new Set<string>();
-        
-        Object.values(gameInfo.achievements).forEach((achievement) => {
+
+        for (const achievement of Object.values(gameInfo.achievements)) {
           if (achievement.dateModified) {
             // Extract just the date part (YYYY-MM-DD).
             const dateOnly = achievement.dateModified.split(" ")[0];
@@ -65,26 +73,30 @@ const ganCommand: Command = {
               dates.add(dateOnly);
             }
           }
-        });
+        }
 
         // Find the most recent date.
-        achievementSetDate = [...dates].reduce((d1, d2) => {
-          return new Date(d1) >= new Date(d2) ? d1 : d2;
-        });
+        let mostRecentDate = "";
+        for (const date of dates) {
+          if (!mostRecentDate || new Date(date) > new Date(mostRecentDate)) {
+            mostRecentDate = date;
+          }
+        }
+        achievementSetDate = mostRecentDate;
       }
 
       // Try to find a YouTube longplay link.
       let youtubeLink = "{LONGPLAY-LINK}";
       if (YOUTUBE_API_KEY) {
         try {
-          const searchTerms = `longplay ${gameInfo.title.replace(/~/g, '')} ${gameInfo.consoleName}`;
+          const searchTerms = `longplay ${gameInfo.title.replace(/~/g, "")} ${gameInfo.consoleName}`;
           const opts = {
             maxResults: 1,
             key: YOUTUBE_API_KEY,
           };
-          
+
           const { results } = await ytSearch(searchTerms, opts);
-          
+
           if (results && results.length > 0 && results[0]?.link) {
             youtubeLink = results[0].link;
           }
@@ -106,7 +118,9 @@ ${youtubeLink}
 <https://retroachievements.org/game/${gameId}>
 `;
 
-      await sentMsg.edit(`${message.author}, here's your achievement-news post template:\n${template}`);
+      await sentMsg.edit(
+        `${message.author}, here's your achievement-news post template:\n${template}`,
+      );
     } catch (error) {
       console.error("Error in gan command:", error);
       await sentMsg.edit(`Unable to get info from the game ID \`${gameId}\`... :frowning:`);

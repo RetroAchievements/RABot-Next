@@ -1,6 +1,7 @@
+import { and, eq, isNull } from "drizzle-orm";
+
 import { db } from "../database/db";
 import { polls, pollVotes } from "../database/schema";
-import { eq, and, isNull } from "drizzle-orm";
 import type { PollOption } from "../models";
 
 type Poll = typeof polls.$inferSelect;
@@ -13,24 +14,28 @@ export class PollService {
     creatorId: string,
     question: string,
     options: string[],
-    endTime?: Date | null
+    endTime?: Date | null,
   ): Promise<Poll> {
     const pollOptions: PollOption[] = options.map((text) => ({ text, votes: [] }));
-    
-    const result = await db.insert(polls).values({
-      messageId,
-      channelId,
-      creatorId,
-      question,
-      options: JSON.stringify(pollOptions),
-      endTime,
-    }).returning();
-    
+
+    const result = await db
+      .insert(polls)
+      .values({
+        messageId,
+        channelId,
+        creatorId,
+        question,
+        options: JSON.stringify(pollOptions),
+        endTime,
+      })
+      .returning();
+
     return result[0]!;
   }
 
   static async getPoll(messageId: string): Promise<Poll | null> {
     const [poll] = await db.select().from(polls).where(eq(polls.messageId, messageId));
+
     return poll || null;
   }
 
@@ -46,39 +51,34 @@ export class PollService {
       userId,
       optionIndex,
     });
-    
+
     return true;
   }
 
   static async getUserVote(pollId: number, userId: string): Promise<PollVote | null> {
-    const [vote] = await db.select()
+    const [vote] = await db
+      .select()
       .from(pollVotes)
-      .where(and(
-        eq(pollVotes.pollId, pollId),
-        eq(pollVotes.userId, userId)
-      ));
-    
+      .where(and(eq(pollVotes.pollId, pollId), eq(pollVotes.userId, userId)));
+
     return vote || null;
   }
 
   static async getPollResults(pollId: number): Promise<Map<number, number>> {
-    const votes = await db.select()
-      .from(pollVotes)
-      .where(eq(pollVotes.pollId, pollId));
-    
+    const votes = await db.select().from(pollVotes).where(eq(pollVotes.pollId, pollId));
+
     const results = new Map<number, number>();
-    votes.forEach((vote) => {
+    for (const vote of votes) {
       const count = results.get(vote.optionIndex) || 0;
       results.set(vote.optionIndex, count + 1);
-    });
-    
+    }
+
     return results;
   }
 
   static async getActivePolls(): Promise<Poll[]> {
-    const now = new Date();
-    return await db.select()
-      .from(polls)
-      .where(isNull(polls.endTime)); // For now, just get polls without end times.
+    // const now = new Date();
+
+    return db.select().from(polls).where(isNull(polls.endTime)); // For now, just get polls without end times.
   }
 }

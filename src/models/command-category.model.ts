@@ -1,6 +1,1 @@
-export type CommandCategory =
-  | "general"
-  | "utility"
-  | "moderation"
-  | "games"
-  | "retroachievements";
+export type CommandCategory = "general" | "utility" | "moderation" | "games" | "retroachievements";

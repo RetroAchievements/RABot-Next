@@ -1,4 +1,4 @@
-import { sqliteTable as table, primaryKey } from "drizzle-orm/sqlite-core";
+import { primaryKey, sqliteTable as table } from "drizzle-orm/sqlite-core";
 import * as t from "drizzle-orm/sqlite-core";
 
 // Teams table.
@@ -29,7 +29,7 @@ export const teamMembers = table(
   },
   (table) => ({
     pk: primaryKey({ columns: [table.userId, table.teamId] }),
-  })
+  }),
 );
 
 // Polls table.
@@ -64,5 +64,5 @@ export const pollVotes = table(
   },
   (table) => ({
     pk: primaryKey({ columns: [table.pollId, table.userId] }),
-  })
+  }),
 );

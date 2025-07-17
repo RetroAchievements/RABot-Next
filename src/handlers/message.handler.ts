@@ -1,5 +1,7 @@
-import { Message } from "discord.js";
+import type { Message } from "discord.js";
+
 import type { BotClient } from "../models";
+import { CooldownManager } from "../utils/cooldown-manager";
 import { sendMigrationNotice } from "../utils/migration-helper";
 
 export async function handleMessage(message: Message, client: BotClient): Promise<void> {
@@ -17,10 +19,28 @@ export async function handleMessage(message: Message, client: BotClient): Promis
   if (!commandName) return;
 
   // Find command by name or alias.
-  const command = client.commands.get(commandName) ||
-    client.commands.find(cmd => cmd.aliases?.includes(commandName));
+  const command =
+    client.commands.get(commandName) ||
+    client.commands.find((cmd) => cmd.aliases?.includes(commandName));
 
   if (!command) return;
+
+  // Check cooldowns.
+  const remainingCooldown = CooldownManager.checkCooldown(
+    client.cooldowns,
+    message.author.id,
+    command.name,
+    command.cooldown,
+  );
+
+  if (remainingCooldown > 0) {
+    const cooldownMessage = CooldownManager.formatCooldownMessage(remainingCooldown);
+    const reply = await message.reply(cooldownMessage);
+    // Delete cooldown message after 5 seconds.
+    setTimeout(() => reply.delete().catch(() => {}), 5000);
+
+    return;
+  }
 
   // Check if there's a corresponding slash command for migration notice.
   const slashCommand = client.slashCommands.find((cmd) => {
@@ -29,7 +49,9 @@ export async function handleMessage(message: Message, client: BotClient): Promis
   });
 
   if (slashCommand) {
-    console.log(`[Migration] Detected legacy command "${commandName}" has slash equivalent "/${slashCommand.data.name}"`);
+    console.log(
+      `[Migration] Detected legacy command "${commandName}" has slash equivalent "/${slashCommand.data.name}"`,
+    );
     // Send migration notice.
     try {
       await sendMigrationNotice(message, slashCommand.data.name, {
@@ -50,6 +72,7 @@ export async function handleMessage(message: Message, client: BotClient): Promis
         const member = message.guild.members.cache.get(message.author.id);
         if (!member || !member.permissions.has(command.permissions.user)) {
           await message.reply("You don't have permission to use this command.");
+
           return;
         }
       }
@@ -59,6 +82,7 @@ export async function handleMessage(message: Message, client: BotClient): Promis
         const botMember = message.guild.members.cache.get(client.user!.id);
         if (!botMember || !botMember.permissions.has(command.permissions.bot)) {
           await message.reply("I don't have the required permissions to execute this command.");
+
           return;
         }
       }
@@ -66,12 +90,16 @@ export async function handleMessage(message: Message, client: BotClient): Promis
       // Check custom permissions.
       if (command.permissions.custom && !command.permissions.custom(message)) {
         await message.reply("You don't have permission to use this command.");
+
         return;
       }
     }
 
     // Execute the command.
     await command.execute(message, args, client);
+
+    // Set cooldown after successful execution.
+    CooldownManager.setCooldown(client.cooldowns, message.author.id, command.name);
   } catch (error) {
     console.error(`Error executing command ${commandName}:`, error);
     await message.reply("There was an error executing that command.");

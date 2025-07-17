@@ -1,3 +1,4 @@
+import type { Message } from "discord.js";
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -5,7 +6,6 @@ import {
   ComponentType,
   MessageFlags,
 } from "discord.js";
-import type { Message } from "discord.js";
 
 export interface MigrationConfig {
   // Whether to execute the legacy command after showing the migration message.
@@ -21,7 +21,7 @@ export interface MigrationConfig {
 export async function sendMigrationNotice(
   message: Message,
   slashCommandName: string,
-  config: MigrationConfig = {}
+  config: MigrationConfig = {},
 ): Promise<Message | null> {
   const {
     executeAfterNotice = true,
@@ -36,7 +36,7 @@ export async function sendMigrationNotice(
       new ButtonBuilder()
         .setCustomId(`migration_${slashCommandName}_${message.author.id}`)
         .setLabel("ℹ️ Command Migration Info")
-        .setStyle(ButtonStyle.Primary)
+        .setStyle(ButtonStyle.Primary),
     );
 
     const sentMessage = await message.reply({
@@ -58,6 +58,7 @@ export async function sendMigrationNotice(
           content: "This button is only for the person who used the command.",
           flags: MessageFlags.Ephemeral,
         });
+
         return;
       }
 
@@ -76,25 +77,24 @@ export async function sendMigrationNotice(
     });
 
     return sentMessage;
-  } else {
-    // Original behavior - visible message that auto-deletes
-    const defaultMessage = `📢 **Command Migration Notice**\nThe \`${message.content.split(" ")[0]}\` command is being migrated to a slash command!\n\nPlease use \`/${slashCommandName}\` instead for a better experience with autocomplete and built-in help.\n\n${executeAfterNotice ? "_Running the legacy command for you this time..._" : ""}`;
-
-    const migrationMessage = customMessage || defaultMessage;
-
-    const sentMessage = await message.reply({
-      content: migrationMessage,
-      allowedMentions: { repliedUser: false },
-    });
-
-    if (deleteAfter > 0) {
-      setTimeout(() => {
-        sentMessage.delete().catch(() => {
-          // Ignore errors if message is already deleted.
-        });
-      }, deleteAfter);
-    }
-
-    return sentMessage;
   }
+  // Original behavior - visible message that auto-deletes
+  const defaultMessage = `📢 **Command Migration Notice**\nThe \`${message.content.split(" ")[0]}\` command is being migrated to a slash command!\n\nPlease use \`/${slashCommandName}\` instead for a better experience with autocomplete and built-in help.\n\n${executeAfterNotice ? "_Running the legacy command for you this time..._" : ""}`;
+
+  const migrationMessage = customMessage || defaultMessage;
+
+  const sentMessage = await message.reply({
+    content: migrationMessage,
+    allowedMentions: { repliedUser: false },
+  });
+
+  if (deleteAfter > 0) {
+    setTimeout(() => {
+      sentMessage.delete().catch(() => {
+        // Ignore errors if message is already deleted.
+      });
+    }, deleteAfter);
+  }
+
+  return sentMessage;
 }

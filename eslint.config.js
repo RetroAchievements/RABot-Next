@@ -94,7 +94,7 @@ export default tseslint.config(
       "import/no-unresolved": [
         "error",
         {
-          ignore: ["^.*/vendor/.*"], // CI can't see these files.
+          ignore: ["^.*/vendor/.*", "^bun:.*"], // CI can't see these files, and bun: modules are built-in.
         },
       ],
       "simple-import-sort/exports": "error",

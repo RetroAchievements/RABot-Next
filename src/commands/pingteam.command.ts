@@ -1,7 +1,8 @@
 import { PermissionFlagsBits } from "discord.js";
+
+import { TEAM_RESTRICTIONS } from "../config/team-restrictions";
 import type { Command } from "../models";
 import { TeamService } from "../services/team.service";
-import { TEAM_RESTRICTIONS } from "../config/team-restrictions";
 
 const pingteamCommand: Command = {
   name: "pingteam",
@@ -14,12 +15,12 @@ const pingteamCommand: Command = {
     "!pingteam racheats list - List team members",
   ],
   category: "moderation",
+  cooldown: 30, // 30 seconds cooldown for team pings.
 
   async execute(message, args) {
     if (args.length === 0) {
-      await message.reply(
-        "Please specify a team name. Example: `!pingteam racheats`"
-      );
+      await message.reply("Please specify a team name. Example: `!pingteam racheats`");
+
       return;
     }
 
@@ -31,26 +32,22 @@ const pingteamCommand: Command = {
     if (!team) {
       // Auto-create teams on first use.
       const teamName = teamId.charAt(0).toUpperCase() + teamId.slice(1);
-      team = await TeamService.createTeam(
-        teamId,
-        `${teamName} Team`,
-        message.author.id
-      );
+      team = await TeamService.createTeam(teamId, `${teamName} Team`, message.author.id);
     }
 
     // Handle subcommands.
     if (subcommand === "add" || subcommand === "remove") {
       // Check admin permissions.
       if (!message.member?.permissions.has(PermissionFlagsBits.Administrator)) {
-        await message.reply(
-          "You need administrator permissions to manage teams."
-        );
+        await message.reply("You need administrator permissions to manage teams.");
+
         return;
       }
 
       const user = message.mentions.users.first();
       if (!user) {
         await message.reply("Please mention a user to add/remove.");
+
         return;
       }
 
@@ -62,11 +59,10 @@ const pingteamCommand: Command = {
         if (removed) {
           await message.reply(`✅ Removed ${user} from the ${team.name} team.`);
         } else {
-          await message.reply(
-            `${user} is not a member of the ${team.name} team.`
-          );
+          await message.reply(`${user} is not a member of the ${team.name} team.`);
         }
       }
+
       return;
     }
 
@@ -79,8 +75,9 @@ const pingteamCommand: Command = {
           message.channel.parentId !== restrictions.categoryId
         ) {
           await message.reply(
-            `The ${team.name} team members can only be viewed from specific channels.`
+            `The ${team.name} team members can only be viewed from specific channels.`,
           );
+
           return;
         }
       }
@@ -88,6 +85,7 @@ const pingteamCommand: Command = {
       const memberIds = await TeamService.getTeamMembers(teamId);
       if (memberIds.length === 0) {
         await message.reply(`The ${team.name} team has no members.`);
+
         return;
       }
 
@@ -96,14 +94,18 @@ const pingteamCommand: Command = {
         memberIds.map(async (id) => {
           try {
             const user = await message.client.users.fetch(id);
+
             return `${user.username} (${user.id})`;
           } catch {
             return `Unknown User (${id})`;
           }
-        })
+        }),
       );
-      
-      await message.reply(`**${team.name} team members:**\n\`\`\`\n${memberDetails.join("\n")}\n\`\`\``);
+
+      await message.reply(
+        `**${team.name} team members:**\n\`\`\`\n${memberDetails.join("\n")}\n\`\`\``,
+      );
+
       return;
     }
 
@@ -116,9 +118,8 @@ const pingteamCommand: Command = {
         !("parentId" in message.channel) ||
         message.channel.parentId !== restrictions.categoryId
       ) {
-        await message.reply(
-          `The ${team.name} can only be pinged from specific channels.`
-        );
+        await message.reply(`The ${team.name} can only be pinged from specific channels.`);
+
         return;
       }
     }
@@ -126,8 +127,9 @@ const pingteamCommand: Command = {
     const memberIds = await TeamService.getTeamMembers(teamId);
     if (memberIds.length === 0) {
       await message.reply(
-        `The ${team.name} team has no members. An administrator needs to add members first.`
+        `The ${team.name} team has no members. An administrator needs to add members first.`,
       );
+
       return;
     }
 
@@ -136,7 +138,7 @@ const pingteamCommand: Command = {
 
     // Use reply to ensure it works in all channel types.
     await message.reply(
-      `📡 **${team.name} team ping!**\n${memberPings}\n\nRequested by ${message.author}`
+      `📡 **${team.name} team ping!**\n${memberPings}\n\nRequested by ${message.author}`,
     );
   },
 };
