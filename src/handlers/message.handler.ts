@@ -122,7 +122,8 @@ export async function handleMessage(message: Message, client: BotClient): Promis
     return cmd.legacyName === commandName;
   });
 
-  if (slashCommand) {
+  // Exclude certain commands from migration notices.
+  if (slashCommand && commandName !== "poll") {
     logMigrationNotice(
       commandName,
       slashCommand.data.name,
