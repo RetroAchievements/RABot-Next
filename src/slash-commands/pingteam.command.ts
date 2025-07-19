@@ -4,6 +4,18 @@ import { CHEAT_INVESTIGATION_CATEGORY_ID, PINGTEAM_ALLOWED_GUILD_ID } from "../c
 import type { SlashCommand } from "../models";
 import { TeamService } from "../services/team.service";
 
+/**
+ * Team management and ping system.
+ *
+ * This command handles team organization, allowing administrators to create teams,
+ * manage membership, and enable users to ping entire teams. Special security
+ * measures are implemented for sensitive teams like RACheats (cheat investigation)
+ * to prevent misuse and maintain confidentiality.
+ *
+ * The guild restriction ensures this sensitive functionality is only available
+ * in the official RetroAchievements Discord server where proper moderation
+ * and oversight can be maintained.
+ */
 const pingteamSlashCommand: SlashCommand = {
   data: new SlashCommandBuilder()
     .setName("pingteam")
@@ -72,10 +84,20 @@ const pingteamSlashCommand: SlashCommand = {
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
-  cooldown: 30, // 30 seconds cooldown for team pings.
+  // 30-second cooldown prevents spam and reduces notification fatigue.
+  // Team pings can be disruptive, so we limit frequency to encourage thoughtful usage.
+  cooldown: 30,
 
   async execute(interaction, _client) {
-    // Check if command is used in the allowed guild.
+    /**
+     * Guild restriction for security and moderation.
+     *
+     * Team functionality involves sensitive operations like pinging groups of people
+     * and managing membership. Restricting to the official RA Discord ensures:
+     * - Proper administrator oversight and accountability
+     * - Consistent moderation policies across team usage
+     * - Prevention of bot abuse in unauthorized servers
+     */
     if (interaction.guildId !== PINGTEAM_ALLOWED_GUILD_ID) {
       await interaction.reply({
         content: "You can't use this here.",
@@ -91,7 +113,18 @@ const pingteamSlashCommand: SlashCommand = {
       case "ping": {
         const teamName = interaction.options.getString("team", true);
 
-        // Check permissions for restricted teams
+        /**
+         * Special restrictions for the RACheats team.
+         *
+         * RACheats handles sensitive cheat investigations that require confidentiality.
+         * Restricting pings to the investigation category prevents:
+         * - Accidental disclosure of ongoing investigations
+         * - Inappropriate pings that could compromise confidential work
+         * - Misuse of the team for non-investigation purposes
+         *
+         * The category restriction ensures discussions stay within proper channels
+         * where appropriate context and confidentiality can be maintained.
+         */
         if (teamName.toLowerCase() === "racheats") {
           if (!interaction.channel || interaction.channel.type === ChannelType.DM) {
             await interaction.reply({
@@ -126,6 +159,7 @@ const pingteamSlashCommand: SlashCommand = {
           return;
         }
 
+        // Convert user IDs to Discord mentions for the ping.
         const mentions = members.map((m) => `<@${m}>`).join(" ");
         await interaction.reply(`🔔 **${teamName} team ping:**\n${mentions}`);
         break;
@@ -168,7 +202,14 @@ const pingteamSlashCommand: SlashCommand = {
       case "list": {
         const teamName = interaction.options.getString("team", true);
 
-        // Check permissions for restricted teams
+        /**
+         * Same security restrictions as ping command for RACheats team.
+         *
+         * Even viewing team membership can be sensitive for investigation teams.
+         * Knowing who is involved in cheat investigations could compromise
+         * ongoing cases or create bias. The category restriction ensures
+         * membership information is only visible in appropriate contexts.
+         */
         if (teamName.toLowerCase() === "racheats") {
           if (!interaction.channel || interaction.channel.type === ChannelType.DM) {
             await interaction.reply({
@@ -206,7 +247,9 @@ const pingteamSlashCommand: SlashCommand = {
         const memberList = members.map((m) => `• <@${m}>`).join("\n");
         await interaction.reply({
           content: `**Members of ${teamName}:**\n${memberList}`,
-          allowedMentions: { parse: [] }, // Don't actually ping when listing
+          // Disable mentions when listing - we want to show usernames but not ping everyone.
+          // This prevents accidental notification spam when viewing team membership.
+          allowedMentions: { parse: [] },
         });
         break;
       }
@@ -214,7 +257,16 @@ const pingteamSlashCommand: SlashCommand = {
       case "create": {
         const teamName = interaction.options.getString("name", true);
 
-        // Generate team ID from name (lowercase, no spaces)
+        /**
+         * Generate team ID from display name for database consistency.
+         *
+         * We convert the human-readable name to a URL-safe, database-friendly ID:
+         * - Lowercase for case-insensitive lookups
+         * - Replace spaces with hyphens for readability
+         * - This ensures consistent internal references while preserving display names
+         *
+         * Example: "RA Cheats" becomes "ra-cheats" as the internal ID
+         */
         const teamId = teamName.toLowerCase().replace(/\s+/g, "-");
 
         const team = await TeamService.createTeam(teamId, teamName, interaction.user.id);
