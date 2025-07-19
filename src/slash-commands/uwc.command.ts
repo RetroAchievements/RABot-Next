@@ -5,7 +5,9 @@ import {
   SlashCommandBuilder,
 } from "discord.js";
 
+import { WORKSHOP_GUILD_ID } from "../config/constants";
 import type { SlashCommand } from "../models";
+import { requireGuild } from "../utils/guild-restrictions";
 
 const UWC_ROLE_ID = "1002687198757388299";
 
@@ -13,6 +15,17 @@ const uwcSlashCommand: SlashCommand = {
   data: new SlashCommandBuilder().setName("uwc").setDescription("Create an Unwelcome Concept poll"),
 
   async execute(interaction, _client) {
+    /**
+     * Guild restriction for security and moderation.
+     *
+     * UWC polls are part of the RetroAchievements Workshop process and should
+     * only be available in the official Workshop Discord server where proper
+     * oversight and context can be maintained.
+     */
+    if (!(await requireGuild(interaction, WORKSHOP_GUILD_ID))) {
+      return;
+    }
+
     // Check if user has permission (specific role or administrator).
     const member = interaction.member;
     if (!member) {

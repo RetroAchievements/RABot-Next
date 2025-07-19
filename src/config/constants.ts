@@ -9,7 +9,8 @@ export const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || "";
 export const CHEAT_INVESTIGATION_CATEGORY_ID = process.env.CHEAT_INVESTIGATION_CATEGORY_ID || "";
 
 // Guild restrictions.
-export const PINGTEAM_ALLOWED_GUILD_ID = "476211979464343552";
+export const MAIN_GUILD_ID = process.env.MAIN_GUILD_ID || "";
+export const WORKSHOP_GUILD_ID = process.env.WORKSHOP_GUILD_ID || "";
 
 // Poll configuration.
 export const MAX_POLL_OPTIONS = 10;
