@@ -168,49 +168,11 @@ src/
 
 ## Contributing
 
-Contributions are welcome!
+Contributions are welcome! Please see our [Contributing Guide](CONTRIBUTING.md) for detailed information on:
 
-### Getting Started
+- Setting up your development environment
+- Development workflow and standards
+- Submitting pull requests
+- Code style and project structure
 
-1. Fork the repository and clone your fork
-2. Follow the installation and setup instructions above
-3. Make sure you can run the bot locally before making changes
-
-### Development Workflow
-
-1. **Create a feature branch** from `main` for your changes
-2. **Use conventional commits** for clear change history
-3. **Run the verification suite** before submitting:
-   ```bash
-   bun run verify  # Runs lint, type checking, and tests
-   ```
-4. **Test your changes thoroughly** in a development environment
-5. **Update documentation** for new features or changed behavior
-
-### Code Standards
-
-- **TypeScript**: All code must be properly typed
-- **ESLint**: Follow the existing linting rules (`bun run lint`)
-- **Comments**: Explain the "why", not the "what"
-- **Testing**: Add tests for new functionality
-- **Modern practices**: Prefer slash commands over legacy prefix commands
-
-### Submitting Changes
-
-1. Ensure all tests pass and code is properly formatted
-2. Provide a clear PR description explaining:
-   - What the change does and why
-   - How to test the change
-   - Any breaking changes or migration notes
-3. Link to relevant issues or discussions
-4. Be responsive to code review feedback
-
-### Project Structure
-
-See the Project Structure section above for an overview of the codebase organization. Key areas:
-
-- **Slash commands** (`src/slash-commands/`) - Preferred for new features
-- **Services** (`src/services/`) - Business logic and data access
-- **Utils** (`src/utils/`) - Shared utilities and helpers
-
-Questions? Feel free to open an issue or ask in our Discord!
+For quick questions, feel free to open an issue or ask in our [Discord server](https://discord.gg/dq2E4hE)!
