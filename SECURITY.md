@@ -12,7 +12,7 @@ Security vulnerabilities should **never** be reported through public GitHub issu
 
 Please report security vulnerabilities through one of these channels:
 
-- **GitHub Security Advisories**: [Create a private security advisory](https://github.com/RetroAchievements/RABot/security/advisories/new)
+- **GitHub Security Advisories**: [Create a private security advisory](https://github.com/RetroAchievements/RABot-Next/security/advisories/new)
 - **Discord**: Direct message a moderator on the [RetroAchievements Discord](https://discord.gg/dq2E4hE)
 
 ### 3. Provide Details

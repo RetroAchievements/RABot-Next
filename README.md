@@ -37,8 +37,8 @@ RABot utilizes:
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/RetroAchievements/RABot.git
-cd RABot
+git clone https://github.com/RetroAchievements/RABot-Next.git
+cd RABot-Next
 bun install
 ```
 
