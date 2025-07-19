@@ -138,6 +138,7 @@ RABot is transitioning to slash commands! When you use a legacy prefix command (
   - `/pingteam list <team>` - List team members
   - `/pingteam create <name>` - Create a new team (admin only)
 - `/uwc` - Create an Unwelcome Concept poll (Workshop server only)
+- `/dadjoke` - Get a random dad joke
 
 ### Legacy Prefix Commands (Being Migrated)
 
@@ -149,6 +150,7 @@ The bot still supports the following legacy prefix commands (all prefixed with `
 - `!poll` - Create a simple poll
 - `!tpoll` - Create a timed poll
 - `!gan <game_id>` - Generate achievement news template
+- `!dadjoke` - Get a random dad joke
 
 ## Project Structure
 

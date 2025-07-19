@@ -107,6 +107,7 @@ Required in `.env`:
 4. Set `legacyName` if replacing a prefix command
 5. Add guild restrictions using `requireGuild()` utility if needed
 6. Run `bun run deploy-commands` after adding
+7. **Update README.md** - Add the new command to both the slash commands and legacy commands lists (if applicable)
 
 ### Guild Restrictions
 
