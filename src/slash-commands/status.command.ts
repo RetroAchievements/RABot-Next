@@ -2,6 +2,7 @@ import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 
 import { COLORS } from "../config/constants";
 import type { BotClient, SlashCommand } from "../models";
+import { GithubReleaseService } from "../services/github-release.service";
 
 const statusCommand: SlashCommand = {
   data: new SlashCommandBuilder()
@@ -14,6 +15,9 @@ const statusCommand: SlashCommand = {
     const client = interaction.client as BotClient;
     const uptime = process.uptime();
     const memUsage = process.memoryUsage();
+
+    // Fetch the latest version from GitHub
+    const version = await GithubReleaseService.fetchLatestVersion();
 
     // Format uptime.
     const days = Math.floor(uptime / 86400);
@@ -36,6 +40,11 @@ const statusCommand: SlashCommand = {
       .setColor(COLORS.PRIMARY)
       .setThumbnail(client.user!.displayAvatarURL())
       .addFields([
+        {
+          name: "📦 Version",
+          value: version || "Unknown",
+          inline: true,
+        },
         {
           name: "⏱️ Uptime",
           value: uptimeString,
