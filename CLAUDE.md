@@ -1,6 +1,6 @@
 # Project Overview
 
-RABot-Next is the official RetroAchievements Discord bot, built with Bun runtime, TypeScript, Discord.js v14, and Drizzle ORM with SQLite. The bot is transitioning from legacy prefix commands (!) to modern slash commands (/) while maintaining backward compatibility.
+RABot is the official RetroAchievements Discord bot, built with Bun runtime, TypeScript, Discord.js v14, and Drizzle ORM with SQLite. The bot is transitioning from legacy prefix commands (!) to modern slash commands (/) while maintaining backward compatibility.
 
 ## Development Commands
 
@@ -77,17 +77,19 @@ When users use legacy commands that have slash equivalents:
 
 Required in `.env`:
 
-- `DISCORD_TOKEN`: Bot token
-- `DISCORD_APPLICATION_ID`: Bot application ID
+- `DISCORD_TOKEN`: Bot token (required)
+- `DISCORD_APPLICATION_ID`: Bot application ID (required)
+- `RA_WEB_API_KEY`: RetroAchievements Web API key (required)
 - `LEGACY_COMMAND_PREFIX`: Prefix for legacy commands (default: `!`)
-- `RA_WEB_API_KEY`: RetroAchievements Web API key
 - `RA_CONNECT_API_KEY`: RetroAchievements Connect API key (future use)
-- `YOUTUBE_API_KEY`: For longplay searches in gan commands
-- `MAIN_GUILD_ID`: Discord guild ID for the main RetroAchievements server
-- `WORKSHOP_GUILD_ID`: Discord guild ID for the RetroAchievements Workshop server
+- `YOUTUBE_API_KEY`: For longplay searches in gan commands (optional, but recommended)
+- `MAIN_GUILD_ID`: Discord guild ID for the main RetroAchievements server (optional, but recommended)
+- `WORKSHOP_GUILD_ID`: Discord guild ID for the RetroAchievements Workshop server (optional, but recommended)
 - `CHEAT_INVESTIGATION_CATEGORY_ID`: Category ID for RACheats team restrictions
 - `NODE_ENV`: Set to "production" in production (default: "development")
 - `LOG_LEVEL`: Logging level - trace, debug, info, warn, error, fatal (default: "debug" in dev, "info" in prod)
+
+**Note**: The bot will validate required environment variables on startup and exit with an error if any are missing.
 
 ### Discord.js v14 Patterns
 
@@ -179,6 +181,25 @@ The bot uses Pino for structured logging with the following features:
 - Use appropriate log levels (don't use `info` for debugging)
 - Error IDs help users report issues
 
+## Production Notes
+
+### Deployment
+
+- The bot automatically deploys via Forge when changes are merged to main
+- Runs under a process supervisor on the production server
+- No manual PM2 configuration needed
+
+### Database Performance
+
+- SQLite WAL mode is enabled by default for better concurrent access
+- WAL mode allows concurrent reads during writes, ideal for Discord bot usage patterns
+
+### Shutdown Handling
+
+- The bot handles SIGTERM and SIGINT signals for graceful shutdown
+- Discord client connections are properly closed before exit
+- Uncaught exceptions and promise rejections trigger graceful shutdown
+
 ## Common Gotchas
 
 - Always use Bun commands (`bun run`, `bun install`) not npm/yarn/pnpm
@@ -188,3 +209,4 @@ The bot uses Pino for structured logging with the following features:
 - Remember to handle both team IDs and names in TeamService methods
 - Use `requireGuild()` for server restrictions instead of manual guild ID checks
 - Always write tests for new utilities and commands (follow existing test patterns)
+- The bot validates required environment variables on startup - check logs if it exits immediately

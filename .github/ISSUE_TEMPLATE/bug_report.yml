@@ -1,0 +1,93 @@
+name: Bug Report
+description: Report a bug or unexpected behavior in RABot
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out the information below to help us understand and fix the issue.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+      placeholder: When I use the /gan command with a game ID that doesn't exist, the bot crashes instead of showing an error message.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. Use the command '/gan game-id:999999'
+        2. Wait for bot response
+        3. Bot becomes unresponsive
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What you expected to happen.
+      placeholder: The bot should respond with an error message saying "Game not found" or similar.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened.
+      placeholder: The bot stopped responding to all commands and had to be restarted.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: command-type
+    attributes:
+      label: Command Type
+      description: Is this related to a slash command or legacy prefix command?
+      options:
+        - Slash command (/)
+        - Legacy command (!)
+        - Both
+        - Not command-related
+    validations:
+      required: true
+
+  - type: input
+    id: discord-server
+    attributes:
+      label: Discord Server
+      description: Which server did this occur in? (if applicable)
+      placeholder: RetroAchievements Main / RetroAchievements Workshop / Private Server
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error Messages or Logs
+      description: If you have access to any error messages or logs, please paste them here.
+      render: shell
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched existing issues to ensure this bug hasn't been reported
+          required: true
+        - label: I have provided clear reproduction steps
+          required: true
+        - label: This is a bug in the bot, not a Discord or API issue
+          required: true

@@ -98,9 +98,9 @@ bun dev  # Runs with auto-restart on file changes
 
 ```bash
 bun start  # Standard run
-# or with PM2:
-pm2 start src/index.ts --name rabot-next --interpreter bun
 ```
+
+For production deployments, the bot is automatically deployed via Forge when changes are merged to the main branch. The bot runs under a process supervisor on the production server.
 
 ## Available Scripts
 
