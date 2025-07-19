@@ -1,8 +1,27 @@
 {
   "name": "rabot",
+  "version": "1.0.0",
+  "description": "The official RetroAchievements Discord bot",
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RetroAchievements/RABot.git"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "rabot",
+    "retroachievements",
+    "achievements"
+  ],
+  "author": "RetroAchievements",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/RetroAchievements/RABot/issues"
+  },
+  "homepage": "https://github.com/RetroAchievements/RABot#readme",
   "scripts": {
     "dev": "bun --watch src/index.ts",
     "start": "bun run src/index.ts",

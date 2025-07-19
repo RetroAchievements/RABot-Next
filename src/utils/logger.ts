@@ -12,7 +12,7 @@ const pinoOptions: pino.LoggerOptions = {
   },
   base: {
     pid: process.pid,
-    hostname: process.env.HOSTNAME || "rabot-next",
+    hostname: process.env.HOSTNAME || "rabot",
   },
 };
 

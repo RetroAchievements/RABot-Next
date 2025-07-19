@@ -11,6 +11,42 @@ import { CommandAnalytics } from "./utils/command-analytics";
 import { CooldownManager } from "./utils/cooldown-manager";
 import { logError, logger } from "./utils/logger";
 
+/**
+ * Validates that all required environment variables are set.
+ * Exits the process if any critical variables are missing.
+ */
+function validateEnvironment(): void {
+  const requiredEnvVars = ["DISCORD_TOKEN", "DISCORD_APPLICATION_ID", "RA_WEB_API_KEY"];
+
+  const missingVars: string[] = [];
+
+  for (const envVar of requiredEnvVars) {
+    if (!process.env[envVar]) {
+      missingVars.push(envVar);
+    }
+  }
+
+  if (missingVars.length > 0) {
+    logger.fatal(`Missing required environment variables: ${missingVars.join(", ")}`);
+    logger.fatal("Please check your .env file and ensure all required variables are set.");
+    process.exit(1);
+  }
+
+  // Warn about optional but recommended variables.
+  const optionalVars = ["MAIN_GUILD_ID", "WORKSHOP_GUILD_ID", "YOUTUBE_API_KEY"];
+
+  for (const envVar of optionalVars) {
+    if (!process.env[envVar]) {
+      logger.warn(
+        `Optional environment variable ${envVar} is not set. Some features may be limited.`,
+      );
+    }
+  }
+}
+
+// Validate environment before starting.
+validateEnvironment();
+
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -178,6 +214,48 @@ client.on(Events.InteractionCreate, async (interaction) => {
       await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
     }
   }
+});
+
+// Graceful shutdown handling.
+let isShuttingDown = false;
+
+async function gracefulShutdown(signal: string): Promise<void> {
+  if (isShuttingDown) {
+    return;
+  }
+
+  isShuttingDown = true;
+  logger.info(`Received ${signal}, shutting down gracefully...`);
+
+  try {
+    // Destroy the Discord client connection.
+    client.destroy();
+    logger.info("Discord client connection closed.");
+
+    // Wait a moment for any pending operations.
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    logger.info("Shutdown complete.");
+    process.exit(0);
+  } catch (error) {
+    logger.error("Error during shutdown:", error);
+    process.exit(1);
+  }
+}
+
+// Handle termination signals.
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+
+// Handle uncaught errors.
+process.on("uncaughtException", (error) => {
+  logger.fatal("Uncaught exception:", error);
+  gracefulShutdown("uncaughtException");
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  logger.fatal("Unhandled rejection at:", promise, "reason:", reason);
+  gracefulShutdown("unhandledRejection");
 });
 
 client.login(process.env.DISCORD_TOKEN);

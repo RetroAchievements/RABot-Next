@@ -1,0 +1,93 @@
+name: Feature Request
+description: Suggest a new feature or enhancement for RABot
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature! Please provide as much detail as possible to help us understand your idea.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or Use Case
+      description: Describe the problem you're trying to solve or the use case for this feature.
+      placeholder: |
+        Currently, when creating polls, users can't see who voted for which option. 
+        This makes it difficult to follow up with specific voters or understand voting patterns.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe your proposed solution or feature.
+      placeholder: |
+        Add a `/poll results` command that shows:
+        - Vote counts for each option
+        - List of users who voted for each option (with privacy settings)
+        - Timestamp of when votes were cast
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Solutions
+      description: Have you considered any alternative solutions or workarounds?
+      placeholder: We could also use Discord's built-in poll feature, but it lacks some customization options we need.
+
+  - type: dropdown
+    id: command-preference
+    attributes:
+      label: Command Type Preference
+      description: Should this be implemented as a slash command or legacy command?
+      options:
+        - Slash command (/) - Preferred
+        - Legacy command (!)
+        - Both
+        - Not applicable
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Feature Scope
+      description: Who would benefit from this feature?
+      options:
+        - All users
+        - Administrators only
+        - Specific server only (Main/Workshop)
+        - Team members only
+    validations:
+      required: true
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Usage Examples
+      description: Provide examples of how this feature would be used.
+      placeholder: |
+        `/poll results poll-id:12345`
+        `/poll results poll-id:12345 show-voters:true`
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other context, mockups, or examples about the feature request here.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched existing issues to ensure this feature hasn't been requested
+          required: true
+        - label: This feature would be useful to multiple users, not just me
+          required: true
+        - label: I have provided clear use cases and examples
+          required: true
