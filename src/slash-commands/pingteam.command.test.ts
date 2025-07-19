@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
 import { ChannelType, MessageFlags } from "discord.js";
 
-import { CHEAT_INVESTIGATION_CATEGORY_ID } from "../config/constants";
+import { CHEAT_INVESTIGATION_CATEGORY_ID, PINGTEAM_ALLOWED_GUILD_ID } from "../config/constants";
 import { TeamService } from "../services/team.service";
 import { createMockInteraction, createMockTextChannel } from "../test/mocks/discord.mock";
 import pingteamSlashCommand from "./pingteam.command";
@@ -22,10 +22,12 @@ describe("SlashCommand: pingteam", () => {
 
   describe("ping subcommand", () => {
     describe("RACheats team restrictions", () => {
+      // Note: These tests now require the command to be in the allowed guild
       it("denies ping in DM channels", async () => {
         // ARRANGE
         const interaction = createMockInteraction({
           commandName: "pingteam",
+          guildId: PINGTEAM_ALLOWED_GUILD_ID,
           channel: null, // DM channel
           options: {
             getSubcommand: mock(() => "ping"),
@@ -48,6 +50,7 @@ describe("SlashCommand: pingteam", () => {
         // ARRANGE
         const interaction = createMockInteraction({
           commandName: "pingteam",
+          guildId: PINGTEAM_ALLOWED_GUILD_ID,
           channel: { type: ChannelType.DM },
           options: {
             getSubcommand: mock(() => "ping"),
@@ -75,6 +78,7 @@ describe("SlashCommand: pingteam", () => {
 
         const interaction = createMockInteraction({
           commandName: "pingteam",
+          guildId: PINGTEAM_ALLOWED_GUILD_ID,
           channel,
           options: {
             getSubcommand: mock(() => "ping"),
@@ -101,6 +105,7 @@ describe("SlashCommand: pingteam", () => {
 
         const interaction = createMockInteraction({
           commandName: "pingteam",
+          guildId: PINGTEAM_ALLOWED_GUILD_ID,
           channel,
           options: {
             getSubcommand: mock(() => "ping"),
@@ -128,6 +133,7 @@ describe("SlashCommand: pingteam", () => {
 
         const interaction = createMockInteraction({
           commandName: "pingteam",
+          guildId: PINGTEAM_ALLOWED_GUILD_ID,
           channel,
           options: {
             getSubcommand: mock(() => "ping"),
@@ -155,6 +161,7 @@ describe("SlashCommand: pingteam", () => {
 
         const interaction = createMockInteraction({
           commandName: "pingteam",
+          guildId: PINGTEAM_ALLOWED_GUILD_ID,
           channel,
           options: {
             getSubcommand: mock(() => "ping"),
@@ -178,10 +185,12 @@ describe("SlashCommand: pingteam", () => {
 
   describe("list subcommand", () => {
     describe("RACheats team restrictions", () => {
+      // Note: These tests now require the command to be in the allowed guild
       it("denies list in DM channels", async () => {
         // ARRANGE
         const interaction = createMockInteraction({
           commandName: "pingteam",
+          guildId: PINGTEAM_ALLOWED_GUILD_ID,
           channel: null, // DM channel
           options: {
             getSubcommand: mock(() => "list"),
@@ -204,6 +213,7 @@ describe("SlashCommand: pingteam", () => {
         // ARRANGE
         const interaction = createMockInteraction({
           commandName: "pingteam",
+          guildId: PINGTEAM_ALLOWED_GUILD_ID,
           channel: { type: ChannelType.DM },
           options: {
             getSubcommand: mock(() => "list"),
@@ -231,6 +241,7 @@ describe("SlashCommand: pingteam", () => {
 
         const interaction = createMockInteraction({
           commandName: "pingteam",
+          guildId: PINGTEAM_ALLOWED_GUILD_ID,
           channel,
           options: {
             getSubcommand: mock(() => "list"),
@@ -257,6 +268,7 @@ describe("SlashCommand: pingteam", () => {
 
         const interaction = createMockInteraction({
           commandName: "pingteam",
+          guildId: PINGTEAM_ALLOWED_GUILD_ID,
           channel,
           options: {
             getSubcommand: mock(() => "list"),
@@ -285,6 +297,7 @@ describe("SlashCommand: pingteam", () => {
 
         const interaction = createMockInteraction({
           commandName: "pingteam",
+          guildId: PINGTEAM_ALLOWED_GUILD_ID,
           channel,
           options: {
             getSubcommand: mock(() => "list"),
@@ -312,6 +325,7 @@ describe("SlashCommand: pingteam", () => {
 
         const interaction = createMockInteraction({
           commandName: "pingteam",
+          guildId: PINGTEAM_ALLOWED_GUILD_ID,
           channel,
           options: {
             getSubcommand: mock(() => "list"),
@@ -344,6 +358,7 @@ describe("SlashCommand: pingteam", () => {
       const mockUser = { id: "user123" };
       const interaction = createMockInteraction({
         commandName: "pingteam",
+        guildId: PINGTEAM_ALLOWED_GUILD_ID,
         channel,
         options: {
           getSubcommand: mock(() => "add"),
@@ -373,6 +388,7 @@ describe("SlashCommand: pingteam", () => {
       const mockUser = { id: "user123" };
       const interaction = createMockInteraction({
         commandName: "pingteam",
+        guildId: PINGTEAM_ALLOWED_GUILD_ID,
         channel,
         options: {
           getSubcommand: mock(() => "remove"),
@@ -397,6 +413,7 @@ describe("SlashCommand: pingteam", () => {
 
       const interaction = createMockInteraction({
         commandName: "pingteam",
+        guildId: PINGTEAM_ALLOWED_GUILD_ID,
         channel,
         options: {
           getSubcommand: mock(() => "create"),
@@ -410,6 +427,114 @@ describe("SlashCommand: pingteam", () => {
       // ASSERT
       expect(TeamService.createTeam).toHaveBeenCalledWith("newteam", "newteam", expect.any(String));
       expect(interaction.reply).toHaveBeenCalledWith('✅ Created team "newteam".');
+    });
+  });
+
+  describe("guild restrictions", () => {
+    it("denies all subcommands in non-allowed guilds", async () => {
+      // ARRANGE
+      const subcommands = ["ping", "add", "remove", "list", "create"];
+
+      for (const subcommand of subcommands) {
+        const interaction = createMockInteraction({
+          commandName: "pingteam",
+          guildId: "999999999999999999", // Different guild
+          options: {
+            getSubcommand: mock(() => subcommand),
+            getString: mock(() => "testteam"),
+            getUser: mock(() => ({ id: "user123" })),
+          },
+        });
+
+        // ACT
+        await pingteamSlashCommand.execute(interaction, null as any);
+
+        // ASSERT
+        expect(interaction.reply).toHaveBeenCalledWith({
+          content: "You can't use this here.",
+          flags: MessageFlags.Ephemeral,
+        });
+
+        // Ensure no service methods were called
+        expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
+        expect(TeamService.addMemberByTeamName).not.toHaveBeenCalled();
+        expect(TeamService.removeMemberByTeamName).not.toHaveBeenCalled();
+        expect(TeamService.createTeam).not.toHaveBeenCalled();
+
+        // Reset mocks for next iteration
+        mock.restore();
+        spyOn(TeamService, "getTeamMembersByName").mockResolvedValue([]);
+        spyOn(TeamService, "addMemberByTeamName").mockResolvedValue();
+        spyOn(TeamService, "removeMemberByTeamName").mockResolvedValue(true);
+        spyOn(TeamService, "createTeam").mockResolvedValue({} as any);
+      }
+    });
+
+    it("denies command in DMs", async () => {
+      // ARRANGE
+      const interaction = createMockInteraction({
+        commandName: "pingteam",
+        guildId: null, // DM - no guild ID
+        options: {
+          getSubcommand: mock(() => "ping"),
+          getString: mock(() => "testteam"),
+        },
+      });
+
+      // ACT
+      await pingteamSlashCommand.execute(interaction, null as any);
+
+      // ASSERT
+      expect(interaction.reply).toHaveBeenCalledWith({
+        content: "You can't use this here.",
+        flags: MessageFlags.Ephemeral,
+      });
+      expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
+    });
+
+    it("allows all subcommands in the allowed guild", async () => {
+      // ARRANGE - Test ping subcommand
+      const pingInteraction = createMockInteraction({
+        commandName: "pingteam",
+        guildId: PINGTEAM_ALLOWED_GUILD_ID,
+        channel: createMockTextChannel({} as any),
+        options: {
+          getSubcommand: mock(() => "ping"),
+          getString: mock(() => "testteam"),
+        },
+      });
+
+      (TeamService.getTeamMembersByName as any).mockResolvedValue(["user1", "user2"]);
+
+      // ACT
+      await pingteamSlashCommand.execute(pingInteraction, null as any);
+
+      // ASSERT
+      expect(TeamService.getTeamMembersByName).toHaveBeenCalledWith("testteam");
+      expect(pingInteraction.reply).toHaveBeenCalledWith(
+        "🔔 **testteam team ping:**\n<@user1> <@user2>",
+      );
+
+      // Reset for next test
+      mock.restore();
+      spyOn(TeamService, "createTeam").mockResolvedValue({} as any);
+
+      // ARRANGE - Test create subcommand
+      const createInteraction = createMockInteraction({
+        commandName: "pingteam",
+        guildId: PINGTEAM_ALLOWED_GUILD_ID,
+        options: {
+          getSubcommand: mock(() => "create"),
+          getString: mock(() => "newteam"),
+        },
+      });
+
+      // ACT
+      await pingteamSlashCommand.execute(createInteraction, null as any);
+
+      // ASSERT
+      expect(TeamService.createTeam).toHaveBeenCalled();
+      expect(createInteraction.reply).toHaveBeenCalledWith('✅ Created team "newteam".');
     });
   });
 });

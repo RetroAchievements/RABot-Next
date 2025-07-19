@@ -1,6 +1,6 @@
 import { ChannelType, MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 
-import { CHEAT_INVESTIGATION_CATEGORY_ID } from "../config/constants";
+import { CHEAT_INVESTIGATION_CATEGORY_ID, PINGTEAM_ALLOWED_GUILD_ID } from "../config/constants";
 import type { SlashCommand } from "../models";
 import { TeamService } from "../services/team.service";
 
@@ -75,6 +75,16 @@ const pingteamSlashCommand: SlashCommand = {
   cooldown: 30, // 30 seconds cooldown for team pings.
 
   async execute(interaction, _client) {
+    // Check if command is used in the allowed guild.
+    if (interaction.guildId !== PINGTEAM_ALLOWED_GUILD_ID) {
+      await interaction.reply({
+        content: "You can't use this here.",
+        flags: MessageFlags.Ephemeral,
+      });
+
+      return;
+    }
+
     const subcommand = interaction.options.getSubcommand();
 
     switch (subcommand) {
