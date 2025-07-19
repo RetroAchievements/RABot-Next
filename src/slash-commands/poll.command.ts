@@ -41,8 +41,6 @@ const pollSlashCommand: SlashCommand = {
       option.setName("option10").setDescription("Tenth option").setRequired(false),
     ),
 
-  legacyName: "poll", // For migration mapping
-
   async execute(interaction, _client) {
     await interaction.deferReply();
 
