@@ -13,7 +13,29 @@ export interface CommandMetrics {
   isSlashCommand: boolean;
 }
 
+/**
+ * In-memory command analytics system for monitoring bot usage patterns.
+ *
+ * This system uses in-memory storage rather than database persistence for several reasons:
+ * 1. Performance - Analytics tracking happens on every command execution and must be fast
+ * 2. Simplicity - No additional database tables or migrations needed
+ * 3. Privacy - Usage data doesn't persist across bot restarts, reducing long-term data retention
+ * 4. Resource efficiency - Avoids database writes on every command
+ *
+ * The trade-off is that analytics reset on bot restart, which is acceptable for
+ * operational monitoring and debugging rather than long-term business analytics.
+ */
 export class CommandAnalytics {
+  /**
+   * In-memory analytics storage using nested Maps for efficient lookups.
+   *
+   * The nested Map structure allows O(1) access to any specific metric:
+   * - commandMetrics: command name -> total count
+   * - userCommandCounts: user ID -> command name -> count
+   * - guildCommandCounts: guild ID -> command name -> count
+   *
+   * This design enables fast real-time analytics without expensive database queries.
+   */
   private static commandMetrics = new Map<string, number>();
   private static userCommandCounts = new Map<string, Map<string, number>>();
   private static guildCommandCounts = new Map<string, Map<string, number>>();
@@ -92,14 +114,22 @@ export class CommandAnalytics {
   }
 
   /**
-   * Update internal counters for analytics.
+   * Update internal counters for analytics across multiple dimensions.
+   *
+   * We track usage from three perspectives for comprehensive monitoring:
+   * 1. Global command popularity (which commands are used most)
+   * 2. Per-user usage patterns (who are the heavy users, potential abuse detection)
+   * 3. Per-guild activity levels (which servers are most active)
+   *
+   * This multi-dimensional tracking helps identify usage trends, performance
+   * bottlenecks, and potential issues without compromising user privacy.
    */
   private static updateCounters(metrics: CommandMetrics): void {
-    // Update total command count
+    // Track global command usage for popularity metrics.
     const currentCount = this.commandMetrics.get(metrics.commandName) || 0;
     this.commandMetrics.set(metrics.commandName, currentCount + 1);
 
-    // Update user command count
+    // Track per-user command usage for behavior analysis and rate limiting insights.
     if (!this.userCommandCounts.has(metrics.userId)) {
       this.userCommandCounts.set(metrics.userId, new Map());
     }
@@ -107,7 +137,7 @@ export class CommandAnalytics {
     const userCommandCount = userCommands.get(metrics.commandName) || 0;
     userCommands.set(metrics.commandName, userCommandCount + 1);
 
-    // Update guild command count
+    // Track per-guild command usage for server activity monitoring.
     if (metrics.guildId) {
       if (!this.guildCommandCounts.has(metrics.guildId)) {
         this.guildCommandCounts.set(metrics.guildId, new Map());
@@ -176,6 +206,10 @@ export class CommandAnalytics {
 
   /**
    * Reset all analytics data.
+   *
+   * This method provides a way to clear analytics data without restarting the bot,
+   * useful for testing, debugging, or periodic cleanup. Since we use in-memory
+   * storage, this is the only way to manually clear accumulated data.
    */
   static reset(): void {
     this.commandMetrics.clear();
