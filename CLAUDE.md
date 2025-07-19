@@ -83,6 +83,8 @@ Required in `.env`:
 - `RA_WEB_API_KEY`: RetroAchievements Web API key
 - `RA_CONNECT_API_KEY`: RetroAchievements Connect API key (future use)
 - `YOUTUBE_API_KEY`: For longplay searches in gan commands
+- `MAIN_GUILD_ID`: Discord guild ID for the main RetroAchievements server
+- `WORKSHOP_GUILD_ID`: Discord guild ID for the RetroAchievements Workshop server
 - `CHEAT_INVESTIGATION_CATEGORY_ID`: Category ID for RACheats team restrictions
 - `NODE_ENV`: Set to "production" in production (default: "development")
 - `LOG_LEVEL`: Logging level - trace, debug, info, warn, error, fatal (default: "debug" in dev, "info" in prod)
@@ -101,13 +103,35 @@ Required in `.env`:
 2. Create in `src/slash-commands/[name].command.ts`
 3. Export default with `SlashCommand` interface
 4. Set `legacyName` if replacing a prefix command
-5. Run `bun run deploy-commands` after adding
+5. Add guild restrictions using `requireGuild()` utility if needed
+6. Run `bun run deploy-commands` after adding
+
+### Guild Restrictions
+
+Use the `requireGuild()` utility for server-restricted commands:
+
+```typescript
+import { requireGuild } from "../utils/guild-restrictions";
+import { WORKSHOP_GUILD_ID } from "../config/constants";
+
+async execute(interaction, _client) {
+  if (!(await requireGuild(interaction, WORKSHOP_GUILD_ID))) {
+    return;
+  }
+  // Command logic here...
+}
+```
+
+- Provides consistent, low-cognitive-load guild restrictions
+- Automatically sends ephemeral error responses
+- Use `MAIN_GUILD_ID` or `WORKSHOP_GUILD_ID` constants
 
 ### Team System
 
 - Teams stored by ID, accessed by name in commands
 - Autocomplete support for team selection
 - Special restrictions for certain teams (e.g., RACheats)
+- Team commands restricted to Workshop server only
 
 ### RetroAchievements API
 
@@ -162,3 +186,5 @@ The bot uses Pino for structured logging with the following features:
 - Check channel type before accessing properties like `topic` or `parentId`
 - Use proper null checks for Discord.js properties
 - Remember to handle both team IDs and names in TeamService methods
+- Use `requireGuild()` for server restrictions instead of manual guild ID checks
+- Always write tests for new utilities and commands (follow existing test patterns)

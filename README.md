@@ -57,6 +57,8 @@ Then edit `.env` with your configuration:
 - `LEGACY_COMMAND_PREFIX` - Command prefix for legacy commands (default: `!`)
 - `RA_WEB_API_KEY` - Your RetroAchievements Web API key
 - `YOUTUBE_API_KEY` - Your YouTube Data API v3 key (optional, for `/gan` longplay searches)
+- `MAIN_GUILD_ID` - Discord guild ID for the main RetroAchievements server
+- `WORKSHOP_GUILD_ID` - Discord guild ID for the RetroAchievements Workshop server
 - `NODE_ENV` - Environment mode: `development` or `production` (default: `development`)
 - `LOG_LEVEL` - Logging level: `trace`, `debug`, `info`, `warn`, `error`, `fatal` (default: `debug` in dev, `info` in prod)
 
@@ -129,12 +131,13 @@ RABot is transitioning to slash commands! When you use a legacy prefix command (
 - `/tpoll` - Create a timed poll that automatically closes
 - `/gan <game-id>` - Generate achievement news template
 - `/gan2 <game-id>` - Generate pretty achievement news template with colors
-- `/pingteam` - Team management system
+- `/pingteam` - Team management system (Workshop server only)
   - `/pingteam ping <team>` - Ping all members of a team
   - `/pingteam add <team> <user>` - Add user to team (admin only)
   - `/pingteam remove <team> <user>` - Remove user from team (admin only)
   - `/pingteam list <team>` - List team members
   - `/pingteam create <name>` - Create a new team (admin only)
+- `/uwc` - Create an Unwelcome Concept poll (Workshop server only)
 
 ### Legacy Prefix Commands (Being Migrated)
 

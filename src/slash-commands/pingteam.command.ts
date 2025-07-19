@@ -1,8 +1,9 @@
 import { ChannelType, MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 
-import { CHEAT_INVESTIGATION_CATEGORY_ID, PINGTEAM_ALLOWED_GUILD_ID } from "../config/constants";
+import { CHEAT_INVESTIGATION_CATEGORY_ID, WORKSHOP_GUILD_ID } from "../config/constants";
 import type { SlashCommand } from "../models";
 import { TeamService } from "../services/team.service";
+import { requireGuild } from "../utils/guild-restrictions";
 
 /**
  * Team management and ping system.
@@ -93,17 +94,12 @@ const pingteamSlashCommand: SlashCommand = {
      * Guild restriction for security and moderation.
      *
      * Team functionality involves sensitive operations like pinging groups of people
-     * and managing membership. Restricting to the official RA Discord ensures:
+     * and managing membership. Restricting to the official RA Workshop Discord ensures:
      * - Proper administrator oversight and accountability
      * - Consistent moderation policies across team usage
      * - Prevention of bot abuse in unauthorized servers
      */
-    if (interaction.guildId !== PINGTEAM_ALLOWED_GUILD_ID) {
-      await interaction.reply({
-        content: "You can't use this here.",
-        flags: MessageFlags.Ephemeral,
-      });
-
+    if (!(await requireGuild(interaction, WORKSHOP_GUILD_ID))) {
       return;
     }
 
