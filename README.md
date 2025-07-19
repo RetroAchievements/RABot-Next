@@ -139,6 +139,7 @@ RABot is transitioning to slash commands! When you use a legacy prefix command (
   - `/pingteam create <name>` - Create a new team (admin only)
 - `/uwc` - Create an Unwelcome Concept poll (Workshop server only)
 - `/dadjoke` - Get a random dad joke
+- `/frames <input>` - Convert between time and frames at different frame rates
 
 ### Legacy Prefix Commands (Being Migrated)
 
@@ -151,6 +152,7 @@ The bot still supports the following legacy prefix commands (all prefixed with `
 - `!tpoll` - Create a timed poll
 - `!gan <game_id>` - Generate achievement news template
 - `!dadjoke` - Get a random dad joke
+- `!frames <time|frames> [fps]` - Convert between time and frames at different frame rates
 
 ## Project Structure
 
