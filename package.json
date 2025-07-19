@@ -7,7 +7,7 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/RetroAchievements/RABot.git"
+    "url": "git+https://github.com/RetroAchievements/RABot-Next.git"
   },
   "keywords": [
     "discord",
@@ -19,9 +19,9 @@
   "author": "RetroAchievements",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/RetroAchievements/RABot/issues"
+    "url": "https://github.com/RetroAchievements/RABot-Next/issues"
   },
-  "homepage": "https://github.com/RetroAchievements/RABot#readme",
+  "homepage": "https://github.com/RetroAchievements/RABot-Next#readme",
   "scripts": {
     "dev": "bun --watch src/index.ts",
     "start": "bun run src/index.ts",
