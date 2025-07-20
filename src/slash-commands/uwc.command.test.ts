@@ -946,4 +946,204 @@ describe("SlashCommand: uwc", () => {
       });
     });
   });
+
+  describe("channel filtering", () => {
+    it("only searches for polls in the UWC forum channel when configured", async () => {
+      // ARRANGE
+      const originalEnv = process.env.UWC_FORUM_CHANNEL_ID;
+      process.env.UWC_FORUM_CHANNEL_ID = "uwc-forum-123";
+
+      const member = createMockGuildMember({
+        roles: {
+          cache: {
+            has: mock(() => true), // Has required role
+          },
+        },
+      });
+
+      const futureDate = new Date(Date.now() + 48 * 60 * 60 * 1000);
+      const mockVoters = new Map();
+
+      const mockAnswer = {
+        fetchVoters: mock(() => Promise.resolve(mockVoters)),
+      };
+
+      const mockAnswers = new Map();
+      mockAnswers.set(1, mockAnswer);
+
+      const uwcPollInCorrectChannel = {
+        author: { id: "bot-id" },
+        poll: {
+          question: { text: "Is this an Unwelcome Concept?" },
+          expiresAt: futureDate,
+          answers: mockAnswers,
+        },
+        url: "https://discord.com/channels/123/456/789",
+      };
+
+      const uwcPollInWrongChannel = {
+        author: { id: "bot-id" },
+        poll: {
+          question: { text: "Is this an Unwelcome Concept?" },
+          expiresAt: futureDate,
+          answers: mockAnswers,
+        },
+        url: "https://discord.com/channels/123/456/790",
+      };
+
+      const mockMessages1 = new Map();
+      mockMessages1.set("1", uwcPollInCorrectChannel);
+
+      const mockMessages2 = new Map();
+      mockMessages2.set("2", uwcPollInWrongChannel);
+
+      const mockUwcChannel = {
+        id: "uwc-forum-123",
+        name: "uwc-forum",
+        messages: {
+          fetch: mock(() => Promise.resolve(mockMessages1)),
+        },
+      };
+
+      const mockOtherChannel = {
+        id: "other-channel-456",
+        name: "rabot",
+        messages: {
+          fetch: mock(() => Promise.resolve(mockMessages2)),
+        },
+      };
+
+      const mockChannels = new Map();
+      mockChannels.set("uwc-forum-123", mockUwcChannel);
+      mockChannels.set("other-channel-456", mockOtherChannel);
+
+      const interaction = createMockInteraction({
+        commandName: "uwc",
+        guildId: WORKSHOP_GUILD_ID,
+        member,
+        options: {
+          getSubcommand: mock(() => "list"),
+        },
+        guild: {
+          channels: {
+            fetch: mock(() => Promise.resolve(mockChannels)),
+            fetchActiveThreads: mock(() => Promise.resolve({ threads: new Map() })),
+          },
+        },
+        client: { user: { id: "bot-id" } },
+        user: { id: "test-user-id" },
+        deferReply: mock(() => Promise.resolve()),
+        editReply: mock(() => Promise.resolve()),
+      });
+
+      try {
+        // ACT
+        await uwcSlashCommand.execute(interaction, null as any);
+
+        // ASSERT
+        // The channel fetch should have been called for the correct channel
+        expect(mockUwcChannel.messages.fetch).toHaveBeenCalled();
+        // The other channel should NOT have its messages fetched
+        expect(mockOtherChannel.messages.fetch).not.toHaveBeenCalled();
+
+        const editReplyCall = (interaction.editReply as any).mock.calls[0][0];
+        expect(editReplyCall.content).toContain("UWC Polls:");
+        // Should only find the poll in the correct channel
+        expect(editReplyCall.content).toContain("[Poll in #uwc-forum]");
+        expect(editReplyCall.content).not.toContain("[Poll in #rabot]");
+      } finally {
+        // Restore original env
+        process.env.UWC_FORUM_CHANNEL_ID = originalEnv;
+      }
+    });
+
+    it("searches all channels when UWC_FORUM_CHANNEL_ID is not configured", async () => {
+      // ARRANGE
+      const originalEnv = process.env.UWC_FORUM_CHANNEL_ID;
+      delete process.env.UWC_FORUM_CHANNEL_ID;
+
+      const member = createMockGuildMember({
+        roles: {
+          cache: {
+            has: mock(() => true), // Has required role
+          },
+        },
+      });
+
+      const futureDate = new Date(Date.now() + 48 * 60 * 60 * 1000);
+      const mockVoters = new Map();
+
+      const mockAnswer = {
+        fetchVoters: mock(() => Promise.resolve(mockVoters)),
+      };
+
+      const mockAnswers = new Map();
+      mockAnswers.set(1, mockAnswer);
+
+      const uwcPoll = {
+        author: { id: "bot-id" },
+        poll: {
+          question: { text: "Is this an Unwelcome Concept?" },
+          expiresAt: futureDate,
+          answers: mockAnswers,
+        },
+        url: "https://discord.com/channels/123/456/789",
+      };
+
+      const mockMessages = new Map();
+      mockMessages.set("1", uwcPoll);
+
+      const mockChannel1 = {
+        id: "channel-123",
+        name: "channel1",
+        messages: {
+          fetch: mock(() => Promise.resolve(mockMessages)),
+        },
+      };
+
+      const mockChannel2 = {
+        id: "channel-456",
+        name: "channel2",
+        messages: {
+          fetch: mock(() => Promise.resolve(new Map())),
+        },
+      };
+
+      const mockChannels = new Map();
+      mockChannels.set("channel-123", mockChannel1);
+      mockChannels.set("channel-456", mockChannel2);
+
+      const interaction = createMockInteraction({
+        commandName: "uwc",
+        guildId: WORKSHOP_GUILD_ID,
+        member,
+        options: {
+          getSubcommand: mock(() => "list"),
+        },
+        guild: {
+          channels: {
+            fetch: mock(() => Promise.resolve(mockChannels)),
+            fetchActiveThreads: mock(() => Promise.resolve({ threads: new Map() })),
+          },
+        },
+        client: { user: { id: "bot-id" } },
+        user: { id: "test-user-id" },
+        deferReply: mock(() => Promise.resolve()),
+        editReply: mock(() => Promise.resolve()),
+      });
+
+      try {
+        // ACT
+        await uwcSlashCommand.execute(interaction, null as any);
+
+        // ASSERT
+        // Both channels should have their messages fetched
+        expect(mockChannel1.messages.fetch).toHaveBeenCalled();
+        expect(mockChannel2.messages.fetch).toHaveBeenCalled();
+      } finally {
+        // Restore original env
+        process.env.UWC_FORUM_CHANNEL_ID = originalEnv;
+      }
+    });
+  });
 });
