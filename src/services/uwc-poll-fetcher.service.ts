@@ -14,14 +14,10 @@ export interface UwcPoll {
 export class UwcPollFetcherService {
   /**
    * Fetches all UWC polls from a guild.
-   * @param guild The guild to fetch polls from
-   * @param botUser The bot user
-   * @param channelId Optional channel ID to filter polls to a specific channel
    */
   static async fetchAllPolls(
     guild: Guild,
     botUser: User,
-    channelId?: string,
   ): Promise<{
     activePolls: UwcPoll[];
     endedPollsAwaitingAction: UwcPoll[];
@@ -29,13 +25,12 @@ export class UwcPollFetcherService {
     const activePolls: UwcPoll[] = [];
     const endedPollsAwaitingAction: UwcPoll[] = [];
 
-    // Fetch channels in the guild
+    // Fetch all channels in the guild
     const channels = await guild.channels.fetch();
 
-    // Search through channels (filtered by channelId if provided)
+    // Search through all channels
     for (const [, channel] of channels) {
       if (!channel || !("messages" in channel)) continue;
-      if (channelId && channel.id !== channelId) continue;
 
       try {
         const messages = await channel.messages.fetch({ limit: 100 });
@@ -49,9 +44,6 @@ export class UwcPollFetcherService {
     // Also check active threads
     const activeThreads = await guild.channels.fetchActiveThreads();
     for (const [, thread] of activeThreads.threads) {
-      // If channelId is provided, only process threads in that channel
-      if (channelId && thread.parentId !== channelId) continue;
-
       try {
         const messages = await thread.messages.fetch({ limit: 100 });
         await this.processThreadMessages(
@@ -71,26 +63,16 @@ export class UwcPollFetcherService {
 
   /**
    * Searches for UWC polls matching a query.
-   * @param guild The guild to search in
-   * @param botUser The bot user
-   * @param query The search query
-   * @param channelId Optional channel ID to filter polls to a specific channel
    */
-  static async searchPolls(
-    guild: Guild,
-    botUser: User,
-    query: string,
-    channelId?: string,
-  ): Promise<UwcPoll[]> {
+  static async searchPolls(guild: Guild, botUser: User, query: string): Promise<UwcPoll[]> {
     const matchingPolls: UwcPoll[] = [];
 
-    // Fetch channels in the guild
+    // Fetch all channels in the guild
     const channels = await guild.channels.fetch();
 
-    // Search through channels (filtered by channelId if provided)
+    // Search through all channels
     for (const [, channel] of channels) {
       if (!channel || !("messages" in channel)) continue;
-      if (channelId && channel.id !== channelId) continue;
       if (!channel.name.includes(query)) continue;
 
       try {
@@ -104,8 +86,6 @@ export class UwcPollFetcherService {
     // Also check active threads
     const activeThreads = await guild.channels.fetchActiveThreads();
     for (const [, thread] of activeThreads.threads) {
-      // If channelId is provided, only process threads in that channel
-      if (channelId && thread.parentId !== channelId) continue;
       if (!thread.name.includes(query)) continue;
 
       try {
