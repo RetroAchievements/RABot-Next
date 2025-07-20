@@ -137,9 +137,7 @@ RABot is transitioning to slash commands! When you use a legacy prefix command (
   - `/pingteam remove <team> <user>` - Remove user from team (admin only)
   - `/pingteam list <team>` - List team members
   - `/pingteam create <name>` - Create a new team (admin only)
-- `/uwc create` - Create an Unwelcome Concept poll (Workshop server only)
-  - `/uwc list` - List all UWC polls: active polls by voting status, and ended polls awaiting action
-  - `/uwc search <query>` - Search for previous UWC results by achievement ID or game ID
+- `/uwc` - Create an Unwelcome Concept poll (Workshop server only)
 - `/dadjoke` - Get a random dad joke
 - `/frames <input>` - Convert between time and frames at different frame rates
 
@@ -163,7 +161,6 @@ src/
 ├── commands/        # Legacy prefix commands (*.command.ts files)
 ├── slash-commands/  # Modern slash commands (*.command.ts files)
 ├── config/          # Configuration and constants
-├── constants/       # Shared constants and enums
 ├── database/        # Database setup and schemas
 ├── handlers/        # Message and event handlers
 ├── models/          # TypeScript interfaces and types
