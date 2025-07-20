@@ -55,8 +55,6 @@ When users use legacy commands that have slash equivalents:
 - The legacy command still executes
 - Configured via `legacyName` property in slash commands
 
-Note: Some slash commands like `/uwc` have no legacy equivalent and are slash-only from the start.
-
 ### Database Architecture
 
 - **Drizzle ORM** with SQLite (`bun:sqlite`)
@@ -74,7 +72,6 @@ Note: Some slash commands like `/uwc` have no legacy equivalent and are slash-on
 
 - **TeamService**: Manages teams and members, supports both ID and name lookups
 - **PollService**: Handles poll creation and voting
-- **UwcResultsService**: Searches and formats previous UWC poll results
 
 ### Environment Variables
 
@@ -89,8 +86,6 @@ Required in `.env`:
 - `MAIN_GUILD_ID`: Discord guild ID for the main RetroAchievements server (optional, but recommended)
 - `WORKSHOP_GUILD_ID`: Discord guild ID for the RetroAchievements Workshop server (optional, but recommended)
 - `CHEAT_INVESTIGATION_CATEGORY_ID`: Category ID for RACheats team restrictions
-- `UWC_AUTO_DETECT_ENABLED`: Set to "false" to disable auto-detection (default: "true")
-- `UWC_FORUM_CHANNEL_ID`: Required for UWC auto-detection - the Discord forum channel ID where UWC threads are created
 - `NODE_ENV`: Set to "production" in production (default: "development")
 - `LOG_LEVEL`: Logging level - trace, debug, info, warn, error, fatal (default: "debug" in dev, "info" in prod)
 
@@ -141,15 +136,6 @@ async execute(interaction, _client) {
 - Special restrictions for certain teams (e.g., RACheats)
 - Team commands restricted to Workshop server only
 
-### UWC (Unwelcome Concepts) System
-
-- `/uwc create` - Creates native Discord polls for voting on unwelcome concepts
-- `/uwc list` - Shows all UWC polls categorized by user's voting status and action status
-- `/uwc search <query>` - Searches previous UWC results by achievement ID
-- Auto-detection: When enabled and configured with `UWC_FORUM_CHANNEL_ID`, automatically posts previous poll results when new UWC report threads are created
-- Workshop server only functionality
-- Uses Discord's native poll API with vote tracking
-
 ### RetroAchievements API
 
 - Use `@retroachievements/api` package
@@ -195,15 +181,6 @@ The bot uses Pino for structured logging with the following features:
 - Include user ID, guild ID, and command name in error logs
 - Use appropriate log levels (don't use `info` for debugging)
 - Error IDs help users report issues
-
-## Event Handlers
-
-### ThreadCreate Event
-- Handles UWC auto-detection when new threads are created
-- Checks thread title pattern for achievement IDs (format: "12345: Achievement Title (Game)")
-- Requires `UWC_FORUM_CHANNEL_ID` to be configured
-- Posts previous UWC poll results automatically if found
-- Can be disabled with `UWC_AUTO_DETECT_ENABLED=false`
 
 ## Production Notes
 

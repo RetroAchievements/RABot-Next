@@ -107,27 +107,6 @@ client.on(Events.MessageCreate, async (message) => {
   await handleMessage(message, client);
 });
 
-// Handle thread creation for UWC auto-detection.
-client.on(Events.ThreadCreate, async (thread) => {
-  // Check if UWC auto-detection is enabled
-  if (process.env.UWC_AUTO_DETECT_ENABLED === "false") {
-    return;
-  }
-
-  try {
-    // Import handler dynamically to avoid circular dependencies
-    const { handleUwcAutoDetect } = await import("./handlers/uwc-auto-detect.handler");
-    await handleUwcAutoDetect(thread, client);
-  } catch (error) {
-    logError(error, {
-      event: "uwc_auto_detect_error",
-      threadId: thread.id,
-      threadName: thread.name,
-      guildId: thread.guildId,
-    });
-  }
-});
-
 // Handle slash command interactions.
 client.on(Events.InteractionCreate, async (interaction) => {
   // Handle autocomplete
