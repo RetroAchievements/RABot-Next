@@ -116,10 +116,12 @@ async function handleListSubcommand(interaction: ChatInputCommandInteraction): P
     return;
   }
 
-  // Fetch all UWC polls
+  // Fetch all UWC polls from the UWC forum channel only
+  const uwcForumChannelId = process.env.UWC_FORUM_CHANNEL_ID;
   const { activePolls, endedPollsAwaitingAction } = await UwcPollFetcherService.fetchAllPolls(
     interaction.guild,
     interaction.client.user!,
+    uwcForumChannelId || undefined,
   );
 
   if (activePolls.length === 0 && endedPollsAwaitingAction.length === 0) {
@@ -185,11 +187,13 @@ async function handleSearchSubcommand(interaction: ChatInputCommandInteraction):
     return;
   }
 
-  // Search for matching polls
+  // Search for matching polls in the UWC forum channel only
+  const uwcForumChannelId = process.env.UWC_FORUM_CHANNEL_ID;
   const matchingPolls = await UwcPollFetcherService.searchPolls(
     interaction.guild,
     interaction.client.user!,
     query,
+    uwcForumChannelId || undefined,
   );
 
   if (matchingPolls.length === 0) {

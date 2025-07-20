@@ -7,6 +7,7 @@ export const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || "";
 
 // RetroAchievements Workshop server config.
 export const CHEAT_INVESTIGATION_CATEGORY_ID = process.env.CHEAT_INVESTIGATION_CATEGORY_ID || "";
+export const UWC_FORUM_CHANNEL_ID = process.env.UWC_FORUM_CHANNEL_ID || "";
 
 // Guild restrictions.
 export const MAIN_GUILD_ID = process.env.MAIN_GUILD_ID || "";
