@@ -131,10 +131,22 @@ const pingteamSlashCommand: SlashCommand = {
             return;
           }
 
+          // Check category ID based on channel type.
+          let categoryId: string | null = null;
+
           if (
-            "parentId" in interaction.channel &&
-            interaction.channel.parentId !== CHEAT_INVESTIGATION_CATEGORY_ID
+            interaction.channel.type === ChannelType.PublicThread ||
+            interaction.channel.type === ChannelType.PrivateThread ||
+            interaction.channel.type === ChannelType.AnnouncementThread
           ) {
+            // For threads, the category is in the parent channel's parentId.
+            categoryId = interaction.channel.parent?.parentId ?? null;
+          } else if ("parentId" in interaction.channel) {
+            // For regular channels, parentId points directly to the category.
+            categoryId = interaction.channel.parentId;
+          }
+
+          if (categoryId !== CHEAT_INVESTIGATION_CATEGORY_ID) {
             await interaction.reply({
               content: "The RACheats team can't be pinged here.",
               flags: MessageFlags.Ephemeral,
@@ -216,10 +228,22 @@ const pingteamSlashCommand: SlashCommand = {
             return;
           }
 
+          // Check category ID based on channel type.
+          let categoryId: string | null = null;
+
           if (
-            "parentId" in interaction.channel &&
-            interaction.channel.parentId !== CHEAT_INVESTIGATION_CATEGORY_ID
+            interaction.channel.type === ChannelType.PublicThread ||
+            interaction.channel.type === ChannelType.PrivateThread ||
+            interaction.channel.type === ChannelType.AnnouncementThread
           ) {
+            // For threads, the category is in the parent channel's parentId.
+            categoryId = interaction.channel.parent?.parentId ?? null;
+          } else if ("parentId" in interaction.channel) {
+            // For regular channels, parentId points directly to the category.
+            categoryId = interaction.channel.parentId;
+          }
+
+          if (categoryId !== CHEAT_INVESTIGATION_CATEGORY_ID) {
             await interaction.reply({
               content: "The RACheats team member list can't be viewed here.",
               flags: MessageFlags.Ephemeral,
