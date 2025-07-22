@@ -3,7 +3,11 @@ import { ChannelType, MessageFlags } from "discord.js";
 
 import { CHEAT_INVESTIGATION_CATEGORY_ID, WORKSHOP_GUILD_ID } from "../config/constants";
 import { TeamService } from "../services/team.service";
-import { createMockInteraction, createMockTextChannel } from "../test/mocks/discord.mock";
+import {
+  createMockInteraction,
+  createMockTextChannel,
+  createMockThreadChannel,
+} from "../test/mocks/discord.mock";
 import pingteamSlashCommand from "./pingteam.command";
 
 describe("SlashCommand: pingteam", () => {
@@ -148,6 +152,179 @@ describe("SlashCommand: pingteam", () => {
         expect(interaction.reply).toHaveBeenCalledWith({
           content: "The RACheats team can't be pinged here.",
           flags: MessageFlags.Ephemeral,
+        });
+      });
+
+      describe("forum thread channels", () => {
+        it("denies ping in PublicThread outside cheat investigation category", async () => {
+          // ARRANGE
+          const threadChannel = createMockThreadChannel({
+            type: ChannelType.PublicThread,
+            parentCategoryId: "9999999999999999999", // Wrong category
+          });
+
+          const interaction = createMockInteraction({
+            commandName: "pingteam",
+            guildId: WORKSHOP_GUILD_ID,
+            channel: threadChannel,
+            options: {
+              getSubcommand: mock(() => "ping"),
+              getString: mock(() => "racheats"),
+            },
+          });
+
+          // ACT
+          await pingteamSlashCommand.execute(interaction, null as any);
+
+          // ASSERT
+          expect(interaction.reply).toHaveBeenCalledWith({
+            content: "The RACheats team can't be pinged here.",
+            flags: MessageFlags.Ephemeral,
+          });
+          expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
+        });
+
+        it("denies ping in PrivateThread outside cheat investigation category", async () => {
+          // ARRANGE
+          const threadChannel = createMockThreadChannel({
+            type: ChannelType.PrivateThread,
+            parentCategoryId: "9999999999999999999", // Wrong category
+          });
+
+          const interaction = createMockInteraction({
+            commandName: "pingteam",
+            guildId: WORKSHOP_GUILD_ID,
+            channel: threadChannel,
+            options: {
+              getSubcommand: mock(() => "ping"),
+              getString: mock(() => "racheats"),
+            },
+          });
+
+          // ACT
+          await pingteamSlashCommand.execute(interaction, null as any);
+
+          // ASSERT
+          expect(interaction.reply).toHaveBeenCalledWith({
+            content: "The RACheats team can't be pinged here.",
+            flags: MessageFlags.Ephemeral,
+          });
+          expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
+        });
+
+        it("denies ping in AnnouncementThread outside cheat investigation category", async () => {
+          // ARRANGE
+          const threadChannel = createMockThreadChannel({
+            type: ChannelType.AnnouncementThread,
+            parentCategoryId: "9999999999999999999", // Wrong category
+          });
+
+          const interaction = createMockInteraction({
+            commandName: "pingteam",
+            guildId: WORKSHOP_GUILD_ID,
+            channel: threadChannel,
+            options: {
+              getSubcommand: mock(() => "ping"),
+              getString: mock(() => "racheats"),
+            },
+          });
+
+          // ACT
+          await pingteamSlashCommand.execute(interaction, null as any);
+
+          // ASSERT
+          expect(interaction.reply).toHaveBeenCalledWith({
+            content: "The RACheats team can't be pinged here.",
+            flags: MessageFlags.Ephemeral,
+          });
+          expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
+        });
+
+        it("allows ping in PublicThread within cheat investigation category", async () => {
+          // ARRANGE
+          const threadChannel = createMockThreadChannel({
+            type: ChannelType.PublicThread,
+            parentCategoryId: CHEAT_INVESTIGATION_CATEGORY_ID,
+          });
+
+          const interaction = createMockInteraction({
+            commandName: "pingteam",
+            guildId: WORKSHOP_GUILD_ID,
+            channel: threadChannel,
+            options: {
+              getSubcommand: mock(() => "ping"),
+              getString: mock(() => "racheats"),
+            },
+          });
+
+          (TeamService.getTeamMembersByName as any).mockResolvedValue(["user1", "user2"]);
+
+          // ACT
+          await pingteamSlashCommand.execute(interaction, null as any);
+
+          // ASSERT
+          expect(TeamService.getTeamMembersByName).toHaveBeenCalledWith("racheats");
+          expect(interaction.reply).toHaveBeenCalledWith(
+            "🔔 **racheats team ping:**\n<@user1> <@user2>",
+          );
+        });
+
+        it("allows ping in PrivateThread within cheat investigation category", async () => {
+          // ARRANGE
+          const threadChannel = createMockThreadChannel({
+            type: ChannelType.PrivateThread,
+            parentCategoryId: CHEAT_INVESTIGATION_CATEGORY_ID,
+          });
+
+          const interaction = createMockInteraction({
+            commandName: "pingteam",
+            guildId: WORKSHOP_GUILD_ID,
+            channel: threadChannel,
+            options: {
+              getSubcommand: mock(() => "ping"),
+              getString: mock(() => "racheats"),
+            },
+          });
+
+          (TeamService.getTeamMembersByName as any).mockResolvedValue(["user1", "user2"]);
+
+          // ACT
+          await pingteamSlashCommand.execute(interaction, null as any);
+
+          // ASSERT
+          expect(TeamService.getTeamMembersByName).toHaveBeenCalledWith("racheats");
+          expect(interaction.reply).toHaveBeenCalledWith(
+            "🔔 **racheats team ping:**\n<@user1> <@user2>",
+          );
+        });
+
+        it("allows ping in AnnouncementThread within cheat investigation category", async () => {
+          // ARRANGE
+          const threadChannel = createMockThreadChannel({
+            type: ChannelType.AnnouncementThread,
+            parentCategoryId: CHEAT_INVESTIGATION_CATEGORY_ID,
+          });
+
+          const interaction = createMockInteraction({
+            commandName: "pingteam",
+            guildId: WORKSHOP_GUILD_ID,
+            channel: threadChannel,
+            options: {
+              getSubcommand: mock(() => "ping"),
+              getString: mock(() => "racheats"),
+            },
+          });
+
+          (TeamService.getTeamMembersByName as any).mockResolvedValue(["user1", "user2"]);
+
+          // ACT
+          await pingteamSlashCommand.execute(interaction, null as any);
+
+          // ASSERT
+          expect(TeamService.getTeamMembersByName).toHaveBeenCalledWith("racheats");
+          expect(interaction.reply).toHaveBeenCalledWith(
+            "🔔 **racheats team ping:**\n<@user1> <@user2>",
+          );
         });
       });
     });
@@ -312,6 +489,182 @@ describe("SlashCommand: pingteam", () => {
         expect(interaction.reply).toHaveBeenCalledWith({
           content: "The RACheats team member list can't be viewed here.",
           flags: MessageFlags.Ephemeral,
+        });
+      });
+
+      describe("forum thread channels", () => {
+        it("denies list in PublicThread outside cheat investigation category", async () => {
+          // ARRANGE
+          const threadChannel = createMockThreadChannel({
+            type: ChannelType.PublicThread,
+            parentCategoryId: "9999999999999999999", // Wrong category
+          });
+
+          const interaction = createMockInteraction({
+            commandName: "pingteam",
+            guildId: WORKSHOP_GUILD_ID,
+            channel: threadChannel,
+            options: {
+              getSubcommand: mock(() => "list"),
+              getString: mock(() => "racheats"),
+            },
+          });
+
+          // ACT
+          await pingteamSlashCommand.execute(interaction, null as any);
+
+          // ASSERT
+          expect(interaction.reply).toHaveBeenCalledWith({
+            content: "The RACheats team member list can't be viewed here.",
+            flags: MessageFlags.Ephemeral,
+          });
+          expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
+        });
+
+        it("denies list in PrivateThread outside cheat investigation category", async () => {
+          // ARRANGE
+          const threadChannel = createMockThreadChannel({
+            type: ChannelType.PrivateThread,
+            parentCategoryId: "9999999999999999999", // Wrong category
+          });
+
+          const interaction = createMockInteraction({
+            commandName: "pingteam",
+            guildId: WORKSHOP_GUILD_ID,
+            channel: threadChannel,
+            options: {
+              getSubcommand: mock(() => "list"),
+              getString: mock(() => "racheats"),
+            },
+          });
+
+          // ACT
+          await pingteamSlashCommand.execute(interaction, null as any);
+
+          // ASSERT
+          expect(interaction.reply).toHaveBeenCalledWith({
+            content: "The RACheats team member list can't be viewed here.",
+            flags: MessageFlags.Ephemeral,
+          });
+          expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
+        });
+
+        it("denies list in AnnouncementThread outside cheat investigation category", async () => {
+          // ARRANGE
+          const threadChannel = createMockThreadChannel({
+            type: ChannelType.AnnouncementThread,
+            parentCategoryId: "9999999999999999999", // Wrong category
+          });
+
+          const interaction = createMockInteraction({
+            commandName: "pingteam",
+            guildId: WORKSHOP_GUILD_ID,
+            channel: threadChannel,
+            options: {
+              getSubcommand: mock(() => "list"),
+              getString: mock(() => "racheats"),
+            },
+          });
+
+          // ACT
+          await pingteamSlashCommand.execute(interaction, null as any);
+
+          // ASSERT
+          expect(interaction.reply).toHaveBeenCalledWith({
+            content: "The RACheats team member list can't be viewed here.",
+            flags: MessageFlags.Ephemeral,
+          });
+          expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
+        });
+
+        it("allows list in PublicThread within cheat investigation category", async () => {
+          // ARRANGE
+          const threadChannel = createMockThreadChannel({
+            type: ChannelType.PublicThread,
+            parentCategoryId: CHEAT_INVESTIGATION_CATEGORY_ID,
+          });
+
+          const interaction = createMockInteraction({
+            commandName: "pingteam",
+            guildId: WORKSHOP_GUILD_ID,
+            channel: threadChannel,
+            options: {
+              getSubcommand: mock(() => "list"),
+              getString: mock(() => "racheats"),
+            },
+          });
+
+          (TeamService.getTeamMembersByName as any).mockResolvedValue(["user1", "user2"]);
+
+          // ACT
+          await pingteamSlashCommand.execute(interaction, null as any);
+
+          // ASSERT
+          expect(TeamService.getTeamMembersByName).toHaveBeenCalledWith("racheats");
+          expect(interaction.reply).toHaveBeenCalledWith({
+            content: "**Members of racheats:**\n• <@user1>\n• <@user2>",
+            allowedMentions: { parse: [] },
+          });
+        });
+
+        it("allows list in PrivateThread within cheat investigation category", async () => {
+          // ARRANGE
+          const threadChannel = createMockThreadChannel({
+            type: ChannelType.PrivateThread,
+            parentCategoryId: CHEAT_INVESTIGATION_CATEGORY_ID,
+          });
+
+          const interaction = createMockInteraction({
+            commandName: "pingteam",
+            guildId: WORKSHOP_GUILD_ID,
+            channel: threadChannel,
+            options: {
+              getSubcommand: mock(() => "list"),
+              getString: mock(() => "racheats"),
+            },
+          });
+
+          (TeamService.getTeamMembersByName as any).mockResolvedValue(["user1", "user2"]);
+
+          // ACT
+          await pingteamSlashCommand.execute(interaction, null as any);
+
+          // ASSERT
+          expect(TeamService.getTeamMembersByName).toHaveBeenCalledWith("racheats");
+          expect(interaction.reply).toHaveBeenCalledWith({
+            content: "**Members of racheats:**\n• <@user1>\n• <@user2>",
+            allowedMentions: { parse: [] },
+          });
+        });
+
+        it("allows list in AnnouncementThread within cheat investigation category", async () => {
+          // ARRANGE
+          const threadChannel = createMockThreadChannel({
+            type: ChannelType.AnnouncementThread,
+            parentCategoryId: CHEAT_INVESTIGATION_CATEGORY_ID,
+          });
+
+          const interaction = createMockInteraction({
+            commandName: "pingteam",
+            guildId: WORKSHOP_GUILD_ID,
+            channel: threadChannel,
+            options: {
+              getSubcommand: mock(() => "list"),
+              getString: mock(() => "racheats"),
+            },
+          });
+
+          (TeamService.getTeamMembersByName as any).mockResolvedValue(["user1", "user2"]);
+
+          // ACT
+          await pingteamSlashCommand.execute(interaction, null as any);
+
+          // ASSERT
+          expect(TeamService.getTeamMembersByName).toHaveBeenCalledWith("racheats");
+          expect(interaction.reply).toHaveBeenCalledWith({
+            content: "**Members of racheats:**\n• <@user1>\n• <@user2>",
+            allowedMentions: { parse: [] },
+          });
         });
       });
     });
