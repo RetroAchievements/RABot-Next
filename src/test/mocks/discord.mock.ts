@@ -1,4 +1,4 @@
-import { mock } from "bun:test";
+import { type Mock, mock } from "bun:test";
 import {
   ChannelType,
   type ChatInputCommandInteraction,
@@ -54,6 +54,25 @@ export function createMockTextChannel(overrides?: Partial<TextChannel>): TextCha
   } as unknown as TextChannel;
 }
 
+export function createMockThreadChannel(overrides?: any): any {
+  const parentChannel =
+    overrides?.parent ||
+    createMockTextChannel({
+      parentId: overrides?.parentCategoryId !== undefined ? overrides.parentCategoryId : null,
+    } as any);
+
+  return {
+    id: "333333333",
+    type: overrides?.type || ChannelType.PublicThread,
+    name: "test-thread",
+    parentId: parentChannel.id,
+    parent: parentChannel,
+    send: mock(() => Promise.resolve({ id: "msg123" })),
+    permissionsFor: mock(() => new PermissionsBitField(["SendMessages", "EmbedLinks"])),
+    ...overrides,
+  };
+}
+
 export function createMockGuild(overrides?: Partial<Guild>): Guild {
   return {
     id: "222222222",
@@ -95,10 +114,10 @@ export function createMockMessage(overrides?: any): Message {
       cache: new Collection(),
     },
     reference: null,
-    reply: mock(() => Promise.resolve({} as Message)),
+    reply: mock(() => Promise.resolve({} as Message)) as Mock<() => Promise<Message>>,
     delete: mock(() => Promise.resolve({} as Message)),
     react: mock(() => Promise.resolve({})),
-    edit: mock(() => Promise.resolve({} as Message)),
+    edit: mock(() => Promise.resolve({} as Message)) as Mock<() => Promise<Message>>,
   };
 
   // Apply overrides
@@ -129,7 +148,7 @@ export function createMockInteraction(overrides?: any): ChatInputCommandInteract
       user: createMockUser({ id: "bot123", bot: true }),
     },
     options: {
-      getString: mock(() => null),
+      getString: mock(() => null) as Mock<(name: string, required?: boolean) => string | null>,
       getInteger: mock(() => null),
       getBoolean: mock(() => null),
       getUser: mock(() => null),
@@ -143,7 +162,7 @@ export function createMockInteraction(overrides?: any): ChatInputCommandInteract
     replied: false,
     reply: mock(() => Promise.resolve()),
     deferReply: mock(() => Promise.resolve()),
-    editReply: mock(() => Promise.resolve()),
+    editReply: mock(() => Promise.resolve({} as Message)),
     deleteReply: mock(() => Promise.resolve()),
     followUp: mock(() => Promise.resolve()),
   };
