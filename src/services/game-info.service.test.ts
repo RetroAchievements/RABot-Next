@@ -133,7 +133,7 @@ describe("Service: GameInfoService", () => {
       // ARRANGE
       mockGetGameExtended.mockRejectedValueOnce(new Error("API Error"));
 
-      // ACT & ASSERT
+      // ASSERT
       await expect(GameInfoService.fetchGameInfo(88888)).rejects.toThrow("API Error");
     });
   });

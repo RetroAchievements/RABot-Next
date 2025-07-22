@@ -141,6 +141,7 @@ async execute(interaction, _client) {
 - Use `@retroachievements/api` package
 - Build authorization with `buildAuthorization()`
 - Handle game IDs and URLs in gan commands
+- Memory parsing utility for achievement logic analysis (mem command)
 
 ## Logging System
 
