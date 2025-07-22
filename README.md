@@ -151,6 +151,7 @@ The bot still supports the following legacy prefix commands (all prefixed with `
 - `!poll` - Create a simple poll
 - `!tpoll` - Create a timed poll
 - `!gan <game_id>` - Generate achievement news template
+- `!mem <achievement_id|achievement_url|memaddr>` - Parse MemAddr strings and show achievement logic
 - `!dadjoke` - Get a random dad joke
 - `!frames <time|frames> [fps]` - Convert between time and frames at different frame rates
 

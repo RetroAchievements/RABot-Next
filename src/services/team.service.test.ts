@@ -296,7 +296,7 @@ describe("Service: TeamService", () => {
       // ARRANGE
       mockDb.where.mockResolvedValueOnce([]);
 
-      // ACT & ASSERT
+      // ASSERT
       await expect(
         TeamService.addMemberByTeamName("nonexistent", "user456", "admin789"),
       ).rejects.toThrow('Team "nonexistent" not found');

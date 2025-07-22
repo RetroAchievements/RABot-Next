@@ -3,6 +3,7 @@ export const DISCORD_TOKEN = process.env.DISCORD_TOKEN || "";
 export const DISCORD_APPLICATION_ID = process.env.DISCORD_APPLICATION_ID || "";
 export const RA_WEB_API_KEY = process.env.RA_WEB_API_KEY || "";
 export const RA_CONNECT_API_KEY = process.env.RA_CONNECT_API_KEY || "";
+export const RA_CONNECT_API_USER = process.env.RA_CONNECT_API_USER || "RABot";
 export const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || "";
 
 // RetroAchievements Workshop server config.
