@@ -1,4 +1,4 @@
-import { ChannelType, MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { ChannelType, MessageFlags, SlashCommandBuilder } from "discord.js";
 
 import { CHEAT_INVESTIGATION_CATEGORY_ID, WORKSHOP_GUILD_ID } from "../config/constants";
 import type { SlashCommand } from "../models";
@@ -82,8 +82,7 @@ const pingteamSlashCommand: SlashCommand = {
         .addStringOption((option) =>
           option.setName("name").setDescription("Team name").setRequired(true),
         ),
-    )
-    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+    ),
 
   // 30-second cooldown prevents spam and reduces notification fatigue.
   // Team pings can be disruptive, so we limit frequency to encourage thoughtful usage.
