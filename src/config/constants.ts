@@ -21,6 +21,11 @@ export const MAX_POLL_DURATION = 604800; // 1 week in seconds.
 // Rate limiting.
 export const COMMAND_COOLDOWN_MS = 3000; // 3 seconds.
 
+// Auto-publish configuration.
+export const AUTO_PUBLISH_CHANNEL_IDS = process.env.AUTO_PUBLISH_CHANNEL_IDS
+  ? process.env.AUTO_PUBLISH_CHANNEL_IDS.split(",").map((id) => id.trim())
+  : [];
+
 // Colors for embeds.
 export const COLORS = {
   PRIMARY: 0x0099ff,
