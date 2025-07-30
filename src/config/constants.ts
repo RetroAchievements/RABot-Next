@@ -13,6 +13,10 @@ export const CHEAT_INVESTIGATION_CATEGORY_ID = process.env.CHEAT_INVESTIGATION_C
 export const MAIN_GUILD_ID = process.env.MAIN_GUILD_ID || "";
 export const WORKSHOP_GUILD_ID = process.env.WORKSHOP_GUILD_ID || "";
 
+// UWC Poll configuration.
+export const UWC_VOTING_TAG_ID = process.env.UWC_VOTING_TAG_ID || "";
+export const UWC_VOTE_CONCLUDED_TAG_ID = process.env.UWC_VOTE_CONCLUDED_TAG_ID || "";
+
 // Poll configuration.
 export const MAX_POLL_OPTIONS = 10;
 export const MIN_POLL_OPTIONS = 2;

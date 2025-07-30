@@ -75,6 +75,14 @@ client.once(Events.ClientReady, async (readyClient) => {
   logger.info(`📦 Loaded ${client.commands.size} prefix commands`);
   logger.info(`🗲 Loaded ${client.slashCommands.size} slash commands`);
 
+  // Check for any UWC polls that may have ended while the bot was offline.
+  try {
+    const { checkExpiredUwcPolls } = await import("./utils/poll-checker");
+    await checkExpiredUwcPolls(readyClient);
+  } catch (error) {
+    logError(error, { event: "uwc_poll_startup_check_error" });
+  }
+
   // Debug: List loaded slash commands
   if (client.slashCommands.size > 0) {
     logger.debug("Slash commands loaded:");
@@ -105,6 +113,13 @@ client.once(Events.ClientReady, async (readyClient) => {
 // Handle messages.
 client.on(Events.MessageCreate, async (message) => {
   await handleMessage(message, client);
+});
+
+// Handle message updates (for poll completion).
+client.on(Events.MessageUpdate, async (oldMessage, newMessage) => {
+  // Import dynamically to avoid circular dependencies.
+  const { handlePollUpdate } = await import("./handlers/poll-update.handler");
+  await handlePollUpdate(oldMessage, newMessage);
 });
 
 // Handle slash command interactions.

@@ -160,7 +160,13 @@ export function createMockInteraction(overrides?: any): ChatInputCommandInteract
     deferred: false,
     ephemeral: null,
     replied: false,
-    reply: mock(() => Promise.resolve()),
+    reply: mock((options: any) => {
+      if (options?.fetchReply) {
+        return Promise.resolve({ id: "pollMessage123" } as Message);
+      }
+
+      return Promise.resolve();
+    }),
     deferReply: mock(() => Promise.resolve()),
     editReply: mock(() => Promise.resolve({} as Message)),
     deleteReply: mock(() => Promise.resolve()),

@@ -1,13 +1,17 @@
 import {
+  ChannelType,
   type GuildMember,
   MessageFlags,
   PermissionFlagsBits,
   SlashCommandBuilder,
+  type ThreadChannel,
 } from "discord.js";
 
-import { WORKSHOP_GUILD_ID } from "../config/constants";
+import { UWC_VOTING_TAG_ID, WORKSHOP_GUILD_ID } from "../config/constants";
 import type { SlashCommand } from "../models";
+import { UwcPollService } from "../services/uwc-poll.service";
 import { requireGuild } from "../utils/guild-restrictions";
+import { logError, logger } from "../utils/logger";
 
 const UWC_ROLE_ID = "1002687198757388299";
 
@@ -50,7 +54,7 @@ const uwcSlashCommand: SlashCommand = {
     }
 
     // Create the poll.
-    await interaction.reply({
+    const pollReply = await interaction.reply({
       poll: {
         question: {
           text: "Is this an Unwelcome Concept?",
@@ -65,7 +69,92 @@ const uwcSlashCommand: SlashCommand = {
         allowMultiselect: false,
         duration: 72, // 3 days in hours.
       },
+      fetchReply: true,
     });
+
+    // Extract achievement/game info from thread if available.
+    let achievementId: number | undefined;
+    let achievementName: string | undefined;
+    let gameId: number | undefined;
+    let gameName: string | undefined;
+
+    // Try to extract context from thread name or first message.
+    if (interaction.channel && interaction.channel.type === ChannelType.PublicThread) {
+      const thread = interaction.channel as ThreadChannel;
+
+      // Extract achievement ID from thread name if it follows a pattern like "243323: Title (Game)".
+      const achievementIdMatch = thread.name.match(/^(\d+):/);
+      if (achievementIdMatch && achievementIdMatch[1]) {
+        achievementId = parseInt(achievementIdMatch[1], 10);
+      }
+
+      // Extract achievement name and game from pattern "ID: Achievement Title (Game Name)".
+      const nameMatch = thread.name.match(/^\d+:\s*(.+?)\s*\((.+)\)$/);
+      if (nameMatch && nameMatch[1]) {
+        achievementName = nameMatch[1].trim();
+        if (nameMatch[2]) {
+          gameName = nameMatch[2].trim();
+        }
+      }
+    }
+
+    // Store the poll in the database.
+    try {
+      await UwcPollService.createUwcPoll({
+        messageId: pollReply.id,
+        channelId: interaction.channelId,
+        threadId:
+          interaction.channel?.type === ChannelType.PublicThread
+            ? interaction.channel.id
+            : undefined,
+        creatorId: interaction.user.id,
+        achievementId,
+        achievementName,
+        gameId,
+        gameName,
+        pollUrl: `https://discord.com/channels/${interaction.guildId}/${interaction.channelId}/${pollReply.id}`,
+      });
+
+      logger.info("Created UWC poll", {
+        messageId: pollReply.id,
+        channelId: interaction.channelId,
+        threadId: interaction.channel?.id,
+        achievementId,
+      });
+    } catch (error) {
+      logError(error, {
+        event: "uwc_poll_create_error",
+        messageId: pollReply.id,
+        channelId: interaction.channelId,
+      });
+    }
+
+    // Apply voting tag if in a forum thread.
+    if (
+      interaction.channel &&
+      interaction.channel.type === ChannelType.PublicThread &&
+      UWC_VOTING_TAG_ID
+    ) {
+      try {
+        const thread = interaction.channel as ThreadChannel;
+        const currentTags = thread.appliedTags || [];
+
+        // Only add the tag if it's not already applied.
+        if (!currentTags.includes(UWC_VOTING_TAG_ID)) {
+          await thread.setAppliedTags([...currentTags, UWC_VOTING_TAG_ID]);
+          logger.info("Applied voting tag to thread", {
+            threadId: thread.id,
+            tagId: UWC_VOTING_TAG_ID,
+          });
+        }
+      } catch (error) {
+        logError(error, {
+          event: "uwc_tag_apply_error",
+          threadId: interaction.channel.id,
+          tagId: UWC_VOTING_TAG_ID,
+        });
+      }
+    }
   },
 };
 
