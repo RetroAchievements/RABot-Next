@@ -59,6 +59,8 @@ Then edit `.env` with your configuration:
 - `YOUTUBE_API_KEY` - Your YouTube Data API v3 key (optional, for `/gan` longplay searches)
 - `MAIN_GUILD_ID` - Discord guild ID for the main RetroAchievements server
 - `WORKSHOP_GUILD_ID` - Discord guild ID for the RetroAchievements Workshop server
+- `UWC_VOTING_TAG_ID` - Forum tag ID for active UWC polls (optional)
+- `UWC_VOTE_CONCLUDED_TAG_ID` - Forum tag ID for completed UWC polls (optional)
 - `NODE_ENV` - Environment mode: `development` or `production` (default: `development`)
 - `LOG_LEVEL` - Logging level: `trace`, `debug`, `info`, `warn`, `error`, `fatal` (default: `debug` in dev, `info` in prod)
 
@@ -137,7 +139,7 @@ RABot is transitioning to slash commands! When you use a legacy prefix command (
   - `/pingteam remove <team> <user>` - Remove user from team (admin only)
   - `/pingteam list <team>` - List team members
   - `/pingteam create <name>` - Create a new team (admin only)
-- `/uwc` - Create an Unwelcome Concept poll (Workshop server only)
+- `/uwc` - Create an Unwelcome Concept poll (Workshop server only, auto-manages forum tags)
 - `/dadjoke` - Get a random dad joke
 - `/frames <input>` - Convert between time and frames at different frame rates
 

@@ -60,7 +60,7 @@ When users use legacy commands that have slash equivalents:
 - **Drizzle ORM** with SQLite (`bun:sqlite`)
 - Schema defined in `src/database/schema.ts`
 - Services pattern for database operations (`src/services/*.service.ts`)
-- Tables: `teams`, `team_members`, `polls`, `poll_votes`
+- Tables: `teams`, `team_members`, `polls`, `poll_votes`, `uwc_polls`, `uwc_poll_results`
 
 ### Command Registration
 
@@ -72,6 +72,7 @@ When users use legacy commands that have slash equivalents:
 
 - **TeamService**: Manages teams and members, supports both ID and name lookups
 - **PollService**: Handles poll creation and voting
+- **UwcPollService**: Tracks UWC polls, stores results, enables searching by achievement/game
 
 ### Environment Variables
 
@@ -86,6 +87,8 @@ Required in `.env`:
 - `MAIN_GUILD_ID`: Discord guild ID for the main RetroAchievements server (optional, but recommended)
 - `WORKSHOP_GUILD_ID`: Discord guild ID for the RetroAchievements Workshop server (optional, but recommended)
 - `CHEAT_INVESTIGATION_CATEGORY_ID`: Category ID for RACheats team restrictions
+- `UWC_VOTING_TAG_ID`: Forum tag ID for active UWC polls (optional)
+- `UWC_VOTE_CONCLUDED_TAG_ID`: Forum tag ID for completed UWC polls (optional)
 - `NODE_ENV`: Set to "production" in production (default: "development")
 - `LOG_LEVEL`: Logging level - trace, debug, info, warn, error, fatal (default: "debug" in dev, "info" in prod)
 

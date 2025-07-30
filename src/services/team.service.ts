@@ -127,7 +127,7 @@ export class TeamService {
       .from(teamMembers)
       .where(eq(teamMembers.teamId, teamId));
 
-    return members.map((m) => m.userId);
+    return members.map((m: { userId: string }) => m.userId);
   }
 
   /**
