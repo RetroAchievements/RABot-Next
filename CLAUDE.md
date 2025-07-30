@@ -72,6 +72,7 @@ When users use legacy commands that have slash equivalents:
 
 - **TeamService**: Manages teams and members, supports both ID and name lookups
 - **PollService**: Handles poll creation and voting
+- **AutoPublishService**: Automatically publishes messages in configured announcement channels
 
 ### Environment Variables
 
@@ -86,6 +87,7 @@ Required in `.env`:
 - `MAIN_GUILD_ID`: Discord guild ID for the main RetroAchievements server (optional, but recommended)
 - `WORKSHOP_GUILD_ID`: Discord guild ID for the RetroAchievements Workshop server (optional, but recommended)
 - `CHEAT_INVESTIGATION_CATEGORY_ID`: Category ID for RACheats team restrictions
+- `AUTO_PUBLISH_CHANNEL_IDS`: Comma-separated list of announcement channel IDs to auto-publish from (optional)
 - `NODE_ENV`: Set to "production" in production (default: "development")
 - `LOG_LEVEL`: Logging level - trace, debug, info, warn, error, fatal (default: "debug" in dev, "info" in prod)
 
@@ -96,6 +98,16 @@ Required in `.env`:
 - Use `MessageFlags.Ephemeral` instead of `ephemeral: true`
 - Autocomplete handlers in main interaction event
 - Proper intent configuration for message content access
+
+### Auto-Publishing Feature
+
+The bot can automatically publish messages in Discord announcement channels:
+
+- Configure channel IDs via `AUTO_PUBLISH_CHANNEL_IDS` environment variable
+- Bot requires "Manage Messages" permission in announcement channels
+- Automatically publishes non-bot messages that aren't already crossposted
+- Handles rate limits and permission errors gracefully
+- Logs all publishing activities for monitoring
 
 ## Command Implementation Notes
 

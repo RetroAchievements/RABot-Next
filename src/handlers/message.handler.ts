@@ -1,6 +1,7 @@
 import type { Message } from "discord.js";
 
 import type { BotClient } from "../models";
+import { AutoPublishService } from "../services/auto-publish.service";
 import { AdminChecker } from "../utils/admin-checker";
 import { CommandAnalytics } from "../utils/command-analytics";
 import { CooldownManager } from "../utils/cooldown-manager";
@@ -24,6 +25,9 @@ import { sendMigrationNotice } from "../utils/migration-helper";
 export async function handleMessage(message: Message, client: BotClient): Promise<void> {
   // Ignore bot messages to prevent infinite loops and command spam.
   if (message.author.bot) return;
+
+  // Handle auto-publishing for announcement channels.
+  await AutoPublishService.handleMessage(message);
 
   // Early exit if message doesn't start with our command prefix.
   const prefix = client.commandPrefix || "!";
