@@ -73,6 +73,7 @@ When users use legacy commands that have slash equivalents:
 - **TeamService**: Manages teams and members, supports both ID and name lookups
 - **PollService**: Handles poll creation and voting
 - **UwcPollService**: Tracks UWC polls, stores results, enables searching by achievement/game
+- **AutoPublishService**: Automatically publishes messages in configured announcement channels
 
 ### Environment Variables
 
@@ -89,6 +90,7 @@ Required in `.env`:
 - `CHEAT_INVESTIGATION_CATEGORY_ID`: Category ID for RACheats team restrictions
 - `UWC_VOTING_TAG_ID`: Forum tag ID for active UWC polls (optional)
 - `UWC_VOTE_CONCLUDED_TAG_ID`: Forum tag ID for completed UWC polls (optional)
+- `AUTO_PUBLISH_CHANNEL_IDS`: Comma-separated list of announcement channel IDs to auto-publish from (optional)
 - `NODE_ENV`: Set to "production" in production (default: "development")
 - `LOG_LEVEL`: Logging level - trace, debug, info, warn, error, fatal (default: "debug" in dev, "info" in prod)
 
@@ -99,6 +101,16 @@ Required in `.env`:
 - Use `MessageFlags.Ephemeral` instead of `ephemeral: true`
 - Autocomplete handlers in main interaction event
 - Proper intent configuration for message content access
+
+### Auto-Publishing Feature
+
+The bot can automatically publish messages in Discord announcement channels:
+
+- Configure channel IDs via `AUTO_PUBLISH_CHANNEL_IDS` environment variable
+- Bot requires "Manage Messages" permission in announcement channels
+- Automatically publishes non-bot messages that aren't already crossposted
+- Handles rate limits and permission errors gracefully
+- Logs all publishing activities for monitoring
 
 ## Command Implementation Notes
 
@@ -151,6 +163,7 @@ async execute(interaction, _client) {
 The bot uses Pino for structured logging with the following features:
 
 ### Log Levels
+
 - `trace`: Most detailed logging
 - `debug`: Detailed information for debugging
 - `info`: General informational messages
@@ -181,6 +194,7 @@ The bot uses Pino for structured logging with the following features:
    - Access statistics via `CommandAnalytics.getStatistics()`
 
 ### Best Practices
+
 - Always use structured logging with context objects
 - Include user ID, guild ID, and command name in error logs
 - Use appropriate log levels (don't use `info` for debugging)
@@ -222,6 +236,7 @@ describeOrSkip("DatabaseDependentService", () => {
 ```
 
 This ensures:
+
 - Tests run normally in local development
 - CI builds pass by skipping problematic tests
 - Easy to remove when underlying issues are resolved
