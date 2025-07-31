@@ -455,6 +455,72 @@ describeOrSkip("SlashCommand: uwc", () => {
       expect(storedPoll?.gameName).toBe("Ys: The Vanished Omens");
     });
 
+    it("extracts achievement name with parentheses and game info correctly", async () => {
+      // ARRANGE
+      const member = createMockGuildMember({
+        roles: {
+          cache: {
+            has: mock(() => true),
+          },
+        },
+      });
+
+      const interaction = createMockInteraction({
+        commandName: "uwc",
+        guildId: WORKSHOP_GUILD_ID,
+        member,
+        channel: {
+          id: "thread123",
+          type: ChannelType.PublicThread,
+          name: "136277: Eternal Champion XIII (Dalles) (Ys: Book I & II)",
+          appliedTags: [],
+          setAppliedTags: mock(() => Promise.resolve()),
+        },
+      });
+
+      // ACT
+      await uwcSlashCommand.execute(interaction, null as any);
+
+      // ASSERT
+      const storedPoll = await UwcPollService.getUwcPollByMessageId("pollMessage123");
+      expect(storedPoll?.achievementId).toBe(136277);
+      expect(storedPoll?.achievementName).toBe("Eternal Champion XIII (Dalles)");
+      expect(storedPoll?.gameName).toBe("Ys: Book I & II");
+    });
+
+    it("extracts game name with parentheses correctly", async () => {
+      // ARRANGE
+      const member = createMockGuildMember({
+        roles: {
+          cache: {
+            has: mock(() => true),
+          },
+        },
+      });
+
+      const interaction = createMockInteraction({
+        commandName: "uwc",
+        guildId: WORKSHOP_GUILD_ID,
+        member,
+        channel: {
+          id: "thread123",
+          type: ChannelType.PublicThread,
+          name: "123456: Test Achievement (Game Name (with parentheses))",
+          appliedTags: [],
+          setAppliedTags: mock(() => Promise.resolve()),
+        },
+      });
+
+      // ACT
+      await uwcSlashCommand.execute(interaction, null as any);
+
+      // ASSERT
+      const storedPoll = await UwcPollService.getUwcPollByMessageId("pollMessage123");
+      expect(storedPoll?.achievementId).toBe(123456);
+      expect(storedPoll?.achievementName).toBe("Test Achievement");
+      expect(storedPoll?.gameName).toBe("Game Name (with parentheses)");
+    });
+
     it("extracts only achievement ID when format doesn't match", async () => {
       // ARRANGE
       const member = createMockGuildMember({

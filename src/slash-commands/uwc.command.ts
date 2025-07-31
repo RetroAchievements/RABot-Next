@@ -89,11 +89,26 @@ const uwcSlashCommand: SlashCommand = {
       }
 
       // Extract achievement name and game from pattern "ID: Achievement Title (Game Name)".
-      const nameMatch = thread.name.match(/^\d+:\s*(.+?)\s*\((.+)\)$/);
-      if (nameMatch && nameMatch[1]) {
-        achievementName = nameMatch[1].trim();
-        if (nameMatch[2]) {
-          gameName = nameMatch[2].trim();
+      // Use reverse search to handle cases where achievement or game names contain parentheses.
+      const afterId = thread.name.substring(thread.name.indexOf(":") + 1).trim();
+      const lastCloseParen = afterId.lastIndexOf(")");
+
+      if (lastCloseParen !== -1) {
+        // Find the matching opening paren for the last closing paren.
+        let openParenIndex = -1;
+        let parenDepth = 1;
+        for (let i = lastCloseParen - 1; i >= 0; i--) {
+          if (afterId[i] === ")") parenDepth++;
+          if (afterId[i] === "(") parenDepth--;
+          if (parenDepth === 0) {
+            openParenIndex = i;
+            break;
+          }
+        }
+
+        if (openParenIndex !== -1) {
+          achievementName = afterId.substring(0, openParenIndex).trim();
+          gameName = afterId.substring(openParenIndex + 1, lastCloseParen).trim();
         }
       }
     }
