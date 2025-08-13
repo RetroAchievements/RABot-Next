@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import type { ChatInputCommandInteraction, Message } from "discord.js";
+import { describe, expect, it } from "vitest";
 
 import { AdminChecker } from "./admin-checker";
 

@@ -17,8 +17,8 @@ bun run dev             # Run with hot reload (--watch)
 bun run tsc             # TypeScript type checking
 bun run lint            # Run ESLint
 bun run lint:fix        # Auto-fix linting issues
-bun test                # Run all tests
-bun test:watch          # Run tests in watch mode
+bun run test            # Run all tests
+bun run test:watch      # Run tests in watch mode
 bun run verify          # Run lint, type checking, and tests (comprehensive check)
 
 # Deployment
@@ -57,7 +57,7 @@ When users use legacy commands that have slash equivalents:
 
 ### Database Architecture
 
-- **Drizzle ORM** with SQLite (`bun:sqlite`)
+- **Drizzle ORM** with SQLite (`better-sqlite3`)
 - Schema defined in `src/database/schema.ts`
 - Services pattern for database operations (`src/services/*.service.ts`)
 - Tables: `teams`, `team_members`, `polls`, `poll_votes`, `uwc_polls`, `uwc_poll_results`

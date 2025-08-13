@@ -1,6 +1,6 @@
-import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from "vitest";
-import type { Message } from "discord.js";
 import * as ra from "@retroachievements/api";
+import type { Message } from "discord.js";
+import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 
 import { connectApiService } from "../services/connect-api.service";
 import { createMockMessage } from "../test/mocks/discord.mock";
@@ -80,8 +80,8 @@ describe("Command: mem", () => {
       (mockMessage.reply as Mock<() => Promise<Message>>).mockResolvedValueOnce(sentMsg);
 
       mockGetAchievementUnlocks.mockResolvedValueOnce({
-        game: { id: 789 },
-      });
+        game: { id: 789, title: "Test Game" },
+      } as any);
 
       vi.spyOn(connectApiService, "getMemAddr").mockResolvedValueOnce("0xH1234=5");
 
@@ -101,8 +101,8 @@ describe("Command: mem", () => {
       (mockMessage.reply as Mock<() => Promise<Message>>).mockResolvedValueOnce(sentMsg);
 
       mockGetAchievementUnlocks.mockResolvedValueOnce({
-        game: { id: 789 },
-      });
+        game: { id: 789, title: "Test Game" },
+      } as any);
 
       vi.spyOn(connectApiService, "getMemAddr").mockResolvedValueOnce("0xH1234=5");
 
@@ -125,14 +125,21 @@ describe("Command: mem", () => {
       const sentMsg = { edit: vi.fn() } as unknown as Message;
       (mockMessage.reply as Mock<() => Promise<Message>>).mockResolvedValueOnce(sentMsg);
 
-      mockGetAchievementUnlocks.mockResolvedValueOnce({});
+      mockGetAchievementUnlocks.mockResolvedValueOnce({
+        achievement: { id: 123456, title: "Test Achievement" },
+        console: { id: 1, title: "NES" },
+        game: { id: 789, title: "Test Game" },
+        unlocksCount: 100,
+        unlocksHardcoreCount: 50,
+        totalPlayers: 200,
+      } as any);
 
       // ACT
       await memCommand.execute(mockMessage, ["123456"], {} as any);
 
       // ASSERT
       expect(sentMsg.edit).toHaveBeenCalledWith(
-        "**Whoops!**\nI didn't find the game ID for achievement ID **123456**.",
+        "**Whoops!**\nI didn't find the MemAddr for achievement ID **123456**.",
       );
     });
 
@@ -142,8 +149,8 @@ describe("Command: mem", () => {
       (mockMessage.reply as Mock<() => Promise<Message>>).mockResolvedValueOnce(sentMsg);
 
       mockGetAchievementUnlocks.mockResolvedValueOnce({
-        game: { id: 789 },
-      });
+        game: { id: 789, title: "Test Game" },
+      } as any);
 
       vi.spyOn(connectApiService, "getMemAddr").mockResolvedValueOnce(null);
 

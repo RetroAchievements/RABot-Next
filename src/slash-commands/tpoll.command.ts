@@ -2,7 +2,7 @@ import type { MessageReaction, User } from "discord.js";
 import { Collection, SlashCommandBuilder } from "discord.js";
 
 import type { SlashCommand } from "../models";
-import { PollService } from "../services/poll.service";
+import { pollService } from "../services";
 import { logError } from "../utils/logger";
 import { EMOJI_ALPHABET } from "../utils/poll-constants";
 
@@ -129,7 +129,7 @@ const tpollSlashCommand: SlashCommand = {
     }
 
     // Store poll in database
-    const poll = await PollService.createPoll(
+    const poll = await pollService.createPoll(
       sentMsg.id,
       interaction.channel!.id,
       interaction.user.id,
@@ -166,7 +166,7 @@ const tpollSlashCommand: SlashCommand = {
       const optionIndex = reactions.indexOf(emojiName);
       if (optionIndex !== -1) {
         // Add vote to database
-        PollService.addVote(poll.id, user.id, optionIndex);
+        pollService.addVote(poll.id, user.id, optionIndex);
 
         // Track in memory for immediate results
         const currentVotes = pollResults.get(emojiName) || 0;

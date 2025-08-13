@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from "vitest";
 import { type ChatInputCommandInteraction, MessageFlags } from "discord.js";
+import { describe, expect, it, vi } from "vitest";
 
 import { requireGuild } from "./guild-restrictions";
 

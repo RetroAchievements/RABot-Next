@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Collection, PermissionsBitField } from "discord.js";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { BotClient, Command, SlashCommand } from "../models";
 import { createMockClient, createMockMessage } from "../test/mocks/discord.mock";
@@ -48,7 +48,9 @@ describe("Handler: handleMessage", () => {
     // ... spy on utility functions ...
     vi.spyOn(CooldownManager, "checkCooldown").mockReturnValue(0);
     vi.spyOn(CooldownManager, "setCooldown").mockImplementation(() => {});
-    vi.spyOn(CooldownManager, "formatCooldownMessage").mockReturnValue("⏱️ Please wait **3** seconds");
+    vi.spyOn(CooldownManager, "formatCooldownMessage").mockReturnValue(
+      "⏱️ Please wait **3** seconds",
+    );
     vi.spyOn(CommandAnalytics, "startTracking").mockReturnValue(Date.now());
     vi.spyOn(CommandAnalytics, "trackLegacyCommand").mockImplementation(() => {});
     vi.spyOn(logger, "logCommandExecution").mockImplementation(() => logger.logger);

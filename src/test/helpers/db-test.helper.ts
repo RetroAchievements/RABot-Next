@@ -1,10 +1,13 @@
-import BetterSqlite3 from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import { randomBytes } from "node:crypto";
 import { existsSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+
+import BetterSqlite3 from "better-sqlite3";
+import { drizzle } from "drizzle-orm/better-sqlite3";
+import { migrate } from "drizzle-orm/better-sqlite3/migrator";
+
+import * as schema from "../../database/schema";
 
 /**
  * Creates an isolated test database instance.
@@ -16,12 +19,12 @@ export function createTestDatabase() {
 
   // Create a new database instance.
   const sqlite = new BetterSqlite3(testDbPath);
-  
+
   // Enable WAL mode for better concurrent access.
   sqlite.exec("PRAGMA journal_mode = WAL");
   sqlite.exec("PRAGMA synchronous = NORMAL");
-  
-  const db = drizzle(sqlite);
+
+  const db = drizzle(sqlite, { schema });
 
   // Run migrations on the test database.
   migrate(db, { migrationsFolder: "./drizzle" });
@@ -52,10 +55,10 @@ export function createTestDatabase() {
  */
 export function createTransactionalTestDatabase() {
   const { db, sqlite, cleanup: originalCleanup } = createTestDatabase();
-  
+
   // Start a transaction.
   sqlite.exec("BEGIN");
-  
+
   return {
     db,
     sqlite,
@@ -72,15 +75,15 @@ export function createTransactionalTestDatabase() {
  */
 export function createInMemoryTestDatabase() {
   const sqlite = new BetterSqlite3(":memory:");
-  
+
   // Enable foreign keys.
   sqlite.exec("PRAGMA foreign_keys = ON");
-  
-  const db = drizzle(sqlite);
-  
+
+  const db = drizzle(sqlite, { schema });
+
   // Run migrations on the in-memory database.
   migrate(db, { migrationsFolder: "./drizzle" });
-  
+
   return {
     db,
     sqlite,

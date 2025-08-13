@@ -1,6 +1,6 @@
 import type { GameExtended } from "@retroachievements/api";
-import { describe, expect, it } from "vitest";
 import type { User } from "discord.js";
+import { describe, expect, it } from "vitest";
 
 import { TemplateService } from "./template.service";
 

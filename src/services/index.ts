@@ -1,9 +1,9 @@
 /**
  * Service Registry
- * 
+ *
  * This module provides singleton instances of all services for use throughout the application.
  * Services are instantiated with the production database connection.
- * 
+ *
  * For testing, services should be instantiated directly with test database instances.
  */
 
@@ -21,7 +21,7 @@ export { TeamService } from "./team.service";
 
 // Export other services that don't need refactoring.
 export { connectApiService } from "./connect-api.service";
-export { DadJokeService } from "./dadjoke.service";
+export { DadjokeService } from "./dadjoke.service";
 export { FramesService } from "./frames.service";
 export { GameInfoService } from "./game-info.service";
 export { UwcPollService } from "./uwc-poll.service";

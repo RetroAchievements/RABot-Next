@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ChannelType, MessageFlags } from "discord.js";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AutoPublishService } from "./auto-publish.service";
 
@@ -185,9 +185,9 @@ describe("Service: AutoPublishService", () => {
       const message = createMockMessage({
         channel: { type: ChannelType.GuildText },
       });
-      const shouldAutoPublishSpy = vi.spyOn(AutoPublishService, "shouldAutoPublish").mockReturnValue(
-        false,
-      );
+      const shouldAutoPublishSpy = vi
+        .spyOn(AutoPublishService, "shouldAutoPublish")
+        .mockReturnValue(false);
       const publishMessageSpy = vi.spyOn(AutoPublishService, "publishMessage");
 
       // ACT
@@ -201,10 +201,12 @@ describe("Service: AutoPublishService", () => {
     it("attempts to publish if message should be auto-published", async () => {
       // ARRANGE
       const message = createMockMessage();
-      const shouldAutoPublishSpy = vi.spyOn(AutoPublishService, "shouldAutoPublish").mockReturnValue(
-        true,
-      );
-      const publishMessageSpy = vi.spyOn(AutoPublishService, "publishMessage").mockResolvedValue(true);
+      const shouldAutoPublishSpy = vi
+        .spyOn(AutoPublishService, "shouldAutoPublish")
+        .mockReturnValue(true);
+      const publishMessageSpy = vi
+        .spyOn(AutoPublishService, "publishMessage")
+        .mockResolvedValue(true);
 
       // ACT
       await AutoPublishService.handleMessage(message as any);

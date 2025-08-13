@@ -140,9 +140,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       if (focusedOption.name === "team") {
         try {
-          // Import TeamService dynamically to avoid circular dependencies
-          const { TeamService } = await import("./services/team.service");
-          const teams = await TeamService.getAllTeams();
+          // Import teamService dynamically to avoid circular dependencies
+          const { teamService } = await import("./services");
+          const teams = await teamService.getAllTeams();
 
           const filtered = teams
             .filter((team) => team.name.toLowerCase().includes(focusedOption.value.toLowerCase()))

@@ -1,4 +1,3 @@
-import { type Mock, vi } from "vitest";
 import {
   ChannelType,
   type ChatInputCommandInteraction,
@@ -10,6 +9,7 @@ import {
   type TextChannel,
   type User,
 } from "discord.js";
+import { type Mock, vi } from "vitest";
 
 import type { BotClient } from "../../models";
 

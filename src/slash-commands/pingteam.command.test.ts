@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ChannelType, MessageFlags } from "discord.js";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CHEAT_INVESTIGATION_CATEGORY_ID, WORKSHOP_GUILD_ID } from "../config/constants";
 import { teamService } from "../services";

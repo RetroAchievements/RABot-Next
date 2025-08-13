@@ -115,8 +115,8 @@ For production deployments, the bot is automatically deployed via Forge when cha
 - `bun lint` - Run ESLint
 - `bun lint:fix` - Run ESLint with auto-fix
 - `bun tsc` - Run TypeScript type checking
-- `bun test` - Run all tests
-- `bun test:watch` - Run tests in watch mode
+- `bun run test` - Run all tests
+- `bun run test:watch` - Run tests in watch mode
 - `bun verify` - Run lint, type checking, and tests (comprehensive check)
 
 ## Commands

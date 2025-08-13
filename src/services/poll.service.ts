@@ -1,12 +1,13 @@
 import { and, eq, isNull } from "drizzle-orm";
 import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 
+import type * as schema from "../database/schema";
 import { polls, pollVotes } from "../database/schema";
 import type { PollOption } from "../models";
 
 type Poll = typeof polls.$inferSelect;
 type PollVote = typeof pollVotes.$inferSelect;
-type DrizzleDb = BetterSQLite3Database<any>;
+type DrizzleDb = BetterSQLite3Database<typeof schema>;
 
 export class PollService {
   constructor(private db: DrizzleDb) {}
@@ -80,6 +81,6 @@ export class PollService {
   }
 
   async getActivePolls(): Promise<Poll[]> {
-    return await this.db.select().from(polls).where(isNull(polls.endTime));
+    return this.db.select().from(polls).where(isNull(polls.endTime));
   }
 }

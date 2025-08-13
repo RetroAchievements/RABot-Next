@@ -35,7 +35,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "verify": "bun run lint && bun run tsc && vitest run",
+    "verify": "bun run lint:fix && bun run tsc && vitest run",
     "postinstall": "git config core.hooksPath .hooks && chmod +x .hooks/*"
   },
   "dependencies": {

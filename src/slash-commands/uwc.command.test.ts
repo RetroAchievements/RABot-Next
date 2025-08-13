@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ChannelType, MessageFlags, PermissionFlagsBits } from "discord.js";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { db } from "../database/db";
 import { uwcPollResults, uwcPolls } from "../database/schema";
@@ -13,7 +13,7 @@ const describeOrSkip = isCI ? describe.skip : describe;
 
 // Mock the tag IDs for testing
 const MOCK_UWC_VOTING_TAG_ID = "mockVotingTag123";
-const MOCK_UWC_VOTE_CONCLUDED_TAG_ID = "mockConcludedTag123";
+const _MOCK_UWC_VOTE_CONCLUDED_TAG_ID = "mockConcludedTag123";
 const WORKSHOP_GUILD_ID = "565670106095362069";
 
 // Replace the constants module

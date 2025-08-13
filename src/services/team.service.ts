@@ -1,11 +1,12 @@
 import { and, eq } from "drizzle-orm";
 import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 
+import type * as schema from "../database/schema";
 import { teamMembers, teams } from "../database/schema";
 
 type Team = typeof teams.$inferSelect;
 // type TeamMember = typeof teamMembers.$inferSelect;
-type DrizzleDb = BetterSQLite3Database<any>;
+type DrizzleDb = BetterSQLite3Database<typeof schema>;
 
 /**
  * Service for managing Discord bot teams and their members.
@@ -160,7 +161,7 @@ export class TeamService {
    * @returns Array of all teams
    */
   async getAllTeams(): Promise<Team[]> {
-    return await this.db.select().from(teams);
+    return this.db.select().from(teams);
   }
 
   /**
@@ -217,7 +218,7 @@ export class TeamService {
       return false;
     }
 
-    return await this.removeMember(team.id, userId);
+    return this.removeMember(team.id, userId);
   }
 
   /**
@@ -236,6 +237,6 @@ export class TeamService {
       return [];
     }
 
-    return await this.getTeamMembers(team.id);
+    return this.getTeamMembers(team.id);
   }
 }

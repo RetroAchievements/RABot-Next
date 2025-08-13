@@ -23,7 +23,7 @@ describe("Service: YouTubeService", () => {
         throw new Error("YouTube API Error");
       }
       if (searchTerms.includes("no results")) {
-        return { results: [] };
+        return { results: [], pageInfo: { totalResults: 0, resultsPerPage: 0 } } as any;
       }
 
       return {
@@ -34,7 +34,8 @@ describe("Service: YouTubeService", () => {
             description: "A longplay of Test Game",
           },
         ],
-      };
+        pageInfo: { totalResults: 1, resultsPerPage: 1 },
+      } as any;
     });
     vi.spyOn(logger, "logError").mockImplementation(() => {});
   });
@@ -138,7 +139,7 @@ describe("Service: YouTubeService", () => {
       // We need to test the service behavior when API key is not set
       // Since the service is already imported, we can't change the mock
       // Instead, let's test that the service returns null when the search would fail
-      
+
       // This test is actually not needed since we're mocking the API key as always present
       // The important behavior is tested by the error handling test
       // So let's just verify the service handles missing results correctly

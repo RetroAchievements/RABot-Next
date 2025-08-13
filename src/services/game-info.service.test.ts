@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as ra from "@retroachievements/api";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createMockGameExtended } from "../test/mocks/game-data.mock";
 import { GameInfoService } from "./game-info.service";
@@ -20,14 +20,14 @@ describe("Service: GameInfoService", () => {
     // ... reset mocks ...
     mockBuildAuthorization.mockClear();
     mockGetGameExtended.mockClear();
-    
+
     // Set up the default mock implementation for getGameExtended
     mockGetGameExtended.mockImplementation(async (auth, { gameId }) => {
       if (gameId === 14402) {
         return createMockGameExtended();
       }
       if (gameId === 99999) {
-        return null;
+        throw new Error("Game not found");
       }
       throw new Error("API Error");
     });
@@ -126,7 +126,7 @@ describe("Service: GameInfoService", () => {
 
     it("returns null when game is not found", async () => {
       // ARRANGE
-      mockGetGameExtended.mockResolvedValueOnce(null);
+      mockGetGameExtended.mockResolvedValueOnce(null as any);
 
       // ACT
       const result = await GameInfoService.fetchGameInfo(99999);

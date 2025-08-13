@@ -108,13 +108,11 @@ describe("Service: PollService", () => {
 
     it("adds a vote when user has not voted", async () => {
       // ARRANGE
-      const poll = await pollService.createPoll(
-        "msg123",
-        "ch456",
-        "creator",
-        "Question",
-        ["A", "B", "C"],
-      );
+      const poll = await pollService.createPoll("msg123", "ch456", "creator", "Question", [
+        "A",
+        "B",
+        "C",
+      ]);
 
       // ACT
       const result = await pollService.addVote(poll.id, "user123", 0);
@@ -130,13 +128,11 @@ describe("Service: PollService", () => {
 
     it("returns false when user has already voted", async () => {
       // ARRANGE
-      const poll = await pollService.createPoll(
-        "msg123",
-        "ch456",
-        "creator",
-        "Question",
-        ["A", "B", "C"],
-      );
+      const poll = await pollService.createPoll("msg123", "ch456", "creator", "Question", [
+        "A",
+        "B",
+        "C",
+      ]);
       await pollService.addVote(poll.id, "user123", 0);
 
       // ACT
@@ -152,13 +148,11 @@ describe("Service: PollService", () => {
 
     it("allows voting for different option indices", async () => {
       // ARRANGE
-      const poll = await pollService.createPoll(
-        "msg123",
-        "ch456",
-        "creator",
-        "Question",
-        ["A", "B", "C"],
-      );
+      const poll = await pollService.createPoll("msg123", "ch456", "creator", "Question", [
+        "A",
+        "B",
+        "C",
+      ]);
 
       // ACT
       const result = await pollService.addVote(poll.id, "user123", 2);
@@ -178,13 +172,11 @@ describe("Service: PollService", () => {
 
     it("returns a vote when user has voted", async () => {
       // ARRANGE
-      const poll = await pollService.createPoll(
-        "msg123",
-        "ch456",
-        "creator",
-        "Question",
-        ["A", "B", "C"],
-      );
+      const poll = await pollService.createPoll("msg123", "ch456", "creator", "Question", [
+        "A",
+        "B",
+        "C",
+      ]);
       await pollService.addVote(poll.id, "user123", 1);
 
       // ACT
@@ -199,13 +191,11 @@ describe("Service: PollService", () => {
 
     it("returns null when user has not voted", async () => {
       // ARRANGE
-      const poll = await pollService.createPoll(
-        "msg123",
-        "ch456",
-        "creator",
-        "Question",
-        ["A", "B", "C"],
-      );
+      const poll = await pollService.createPoll("msg123", "ch456", "creator", "Question", [
+        "A",
+        "B",
+        "C",
+      ]);
 
       // ACT
       const vote = await pollService.getUserVote(poll.id, "user456");
@@ -223,13 +213,11 @@ describe("Service: PollService", () => {
 
     it("returns vote counts by option index", async () => {
       // ARRANGE
-      const poll = await pollService.createPoll(
-        "msg123",
-        "ch456",
-        "creator",
-        "Question",
-        ["A", "B", "C"],
-      );
+      const poll = await pollService.createPoll("msg123", "ch456", "creator", "Question", [
+        "A",
+        "B",
+        "C",
+      ]);
 
       // Add some votes.
       await pollService.addVote(poll.id, "user1", 0);
@@ -250,13 +238,11 @@ describe("Service: PollService", () => {
 
     it("returns empty map when there are no votes", async () => {
       // ARRANGE
-      const poll = await pollService.createPoll(
-        "msg123",
-        "ch456",
-        "creator",
-        "Question",
-        ["A", "B", "C"],
-      );
+      const poll = await pollService.createPoll("msg123", "ch456", "creator", "Question", [
+        "A",
+        "B",
+        "C",
+      ]);
 
       // ACT
       const results = await pollService.getPollResults(poll.id);
@@ -267,13 +253,14 @@ describe("Service: PollService", () => {
 
     it("handles votes for non-sequential option indices", async () => {
       // ARRANGE
-      const poll = await pollService.createPoll(
-        "msg123",
-        "ch456",
-        "creator",
-        "Question",
-        ["A", "B", "C", "D", "E", "F"],
-      );
+      const poll = await pollService.createPoll("msg123", "ch456", "creator", "Question", [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+      ]);
 
       await pollService.addVote(poll.id, "user1", 0);
       await pollService.addVote(poll.id, "user2", 5);
