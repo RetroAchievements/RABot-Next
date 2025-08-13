@@ -1,10 +1,10 @@
-import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { connectApiService } from "./connect-api.service";
 
 describe("Service: connect-api", () => {
   const originalFetch = global.fetch;
-  const mockFetch = mock();
+  const mockFetch = vi.fn();
 
   beforeEach(() => {
     // @ts-expect-error - global.fetch is assignable

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, spyOn } from "bun:test";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createMockInteraction, createMockMessage } from "../test/mocks/discord.mock";
 import { CommandAnalytics } from "./command-analytics";
@@ -10,7 +10,7 @@ describe("Util: CommandAnalytics", () => {
     CommandAnalytics.reset();
 
     // ... spy on logger ...
-    spyOn(logger, "info").mockImplementation(() => {});
+    vi.spyOn(logger, "info").mockImplementation(() => {});
   });
 
   describe("startTracking", () => {

@@ -2,7 +2,7 @@ import { ChannelType, MessageFlags, SlashCommandBuilder } from "discord.js";
 
 import { CHEAT_INVESTIGATION_CATEGORY_ID, WORKSHOP_GUILD_ID } from "../config/constants";
 import type { SlashCommand } from "../models";
-import { TeamService } from "../services/team.service";
+import { teamService } from "../services";
 import { requireGuild } from "../utils/guild-restrictions";
 
 /**
@@ -155,7 +155,7 @@ const pingteamSlashCommand: SlashCommand = {
           }
         }
 
-        const members = await TeamService.getTeamMembersByName(teamName);
+        const members = await teamService.getTeamMembersByName(teamName);
 
         if (members.length === 0) {
           await interaction.reply({
@@ -177,7 +177,7 @@ const pingteamSlashCommand: SlashCommand = {
         const user = interaction.options.getUser("user", true);
 
         try {
-          await TeamService.addMemberByTeamName(teamName, user.id, interaction.user.id);
+          await teamService.addMemberByTeamName(teamName, user.id, interaction.user.id);
 
           await interaction.reply(`✅ Added ${user} to team "${teamName}".`);
         } catch (_error) {
@@ -193,7 +193,7 @@ const pingteamSlashCommand: SlashCommand = {
         const teamName = interaction.options.getString("team", true);
         const user = interaction.options.getUser("user", true);
 
-        const success = await TeamService.removeMemberByTeamName(teamName, user.id);
+        const success = await teamService.removeMemberByTeamName(teamName, user.id);
 
         if (success) {
           await interaction.reply(`✅ Removed ${user} from team "${teamName}".`);
@@ -252,7 +252,7 @@ const pingteamSlashCommand: SlashCommand = {
           }
         }
 
-        const members = await TeamService.getTeamMembersByName(teamName);
+        const members = await teamService.getTeamMembersByName(teamName);
 
         if (members.length === 0) {
           await interaction.reply({
@@ -288,7 +288,7 @@ const pingteamSlashCommand: SlashCommand = {
          */
         const teamId = teamName.toLowerCase().replace(/\s+/g, "-");
 
-        const team = await TeamService.createTeam(teamId, teamName, interaction.user.id);
+        const team = await teamService.createTeam(teamId, teamName, interaction.user.id);
 
         if (team) {
           await interaction.reply(`✅ Created team "${teamName}".`);

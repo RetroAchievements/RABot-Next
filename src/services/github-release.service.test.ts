@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GithubReleaseService } from "./github-release.service";
 
@@ -17,11 +17,11 @@ describe("GithubReleaseService", () => {
 
   describe("fetchLatestVersion", () => {
     it("should fetch and return the version tag from GitHub API", async () => {
-      const mockFetch = mock(() =>
+      const mockFetch = vi.fn(() =>
         Promise.resolve({
           ok: true,
           status: 200,
-          json: mock(() => Promise.resolve({ tag_name: "2.0.1" })),
+          json: vi.fn(() => Promise.resolve({ tag_name: "2.0.1" })),
         }),
       );
       // @ts-expect-error - global.fetch is assignable
@@ -42,7 +42,7 @@ describe("GithubReleaseService", () => {
     });
 
     it("should return null when API returns non-ok status", async () => {
-      const mockFetch = mock(() =>
+      const mockFetch = vi.fn(() =>
         Promise.resolve({
           ok: false,
           status: 404,
@@ -58,7 +58,7 @@ describe("GithubReleaseService", () => {
     });
 
     it("should return null when fetch throws an error", async () => {
-      const mockFetch = mock(() => Promise.reject(new Error("Network error")));
+      const mockFetch = vi.fn(() => Promise.reject(new Error("Network error")));
       // @ts-expect-error - global.fetch is assignable
       global.fetch = mockFetch;
 
@@ -68,11 +68,11 @@ describe("GithubReleaseService", () => {
     });
 
     it("should return cached version within cache duration", async () => {
-      const mockFetch = mock(() =>
+      const mockFetch = vi.fn(() =>
         Promise.resolve({
           ok: true,
           status: 200,
-          json: mock(() => Promise.resolve({ tag_name: "2.0.1" })),
+          json: vi.fn(() => Promise.resolve({ tag_name: "2.0.1" })),
         }),
       );
       // @ts-expect-error - global.fetch is assignable
@@ -91,11 +91,11 @@ describe("GithubReleaseService", () => {
     });
 
     it("should refetch after cache expires", async () => {
-      const mockFetch = mock(() =>
+      const mockFetch = vi.fn(() =>
         Promise.resolve({
           ok: true,
           status: 200,
-          json: mock(() => Promise.resolve({ tag_name: "2.0.1" })),
+          json: vi.fn(() => Promise.resolve({ tag_name: "2.0.1" })),
         }),
       );
       // @ts-expect-error - global.fetch is assignable

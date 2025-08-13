@@ -1,4 +1,4 @@
-import { mock } from "bun:test";
+import { vi } from "vitest";
 
 import type { teamMembers, teams } from "../../database/schema";
 
@@ -75,17 +75,17 @@ export const applyConditionalDbMocks = (dbInstance: any, mockData?: any) => {
   };
 
   const mockDbMethods = {
-    transaction: mock(async (callback: any) => callback(dbInstance)),
-    delete: mock(() => ({
-      where: mock(() => {
+    transaction: vi.fn(async (callback: any) => callback(dbInstance)),
+    delete: vi.fn(() => ({
+      where: vi.fn(() => {
         mockStorage.clear();
 
         return Promise.resolve();
       }),
     })),
-    insert: mock(() => ({
-      values: mock((data: any) => ({
-        returning: mock(() => {
+    insert: vi.fn(() => ({
+      values: vi.fn((data: any) => ({
+        returning: vi.fn(() => {
           const newRecord = Array.isArray(data) ? data[0] : data;
           const recordWithId = {
             id: idCounter++,
@@ -99,25 +99,25 @@ export const applyConditionalDbMocks = (dbInstance: any, mockData?: any) => {
         }),
       })),
     })),
-    select: mock(() => ({
-      from: mock(() => ({
-        where: mock((_condition: any) => {
+    select: vi.fn(() => ({
+      from: vi.fn(() => ({
+        where: vi.fn((_condition: any) => {
           // Try to extract messageId from condition for more realistic behavior.
           const records = Array.from(mockStorage.values());
 
           return Promise.resolve(records);
         }),
-        orderBy: mock(() => {
+        orderBy: vi.fn(() => {
           const records = Array.from(mockStorage.values());
 
           return Promise.resolve(records);
         }),
       })),
     })),
-    update: mock(() => ({
-      set: mock(() => ({
-        where: mock(() => ({
-          returning: mock(() => {
+    update: vi.fn(() => ({
+      set: vi.fn(() => ({
+        where: vi.fn(() => ({
+          returning: vi.fn(() => {
             const records = Array.from(mockStorage.values());
             const updatedRecords = records.map((record) => ({
               ...record,
@@ -144,26 +144,26 @@ export const applyConditionalDbMocks = (dbInstance: any, mockData?: any) => {
 
 // Legacy mock database instance for testing (kept for backward compatibility).
 export const createMockDb = () => {
-  const mockTransactionFn = mock(async (callback: any) => {
+  const mockTransactionFn = vi.fn(async (callback: any) => {
     // Execute the callback with a mock transaction object.
     return callback({
-      select: mock(() => ({ from: mock(() => ({ where: mock(() => []) })) })),
-      insert: mock(() => ({ values: mock(() => ({ returning: mock(() => []) })) })),
-      update: mock(() => ({
-        set: mock(() => ({ where: mock(() => ({ returning: mock(() => []) })) })),
+      select: vi.fn(() => ({ from: vi.fn(() => ({ where: vi.fn(() => []) })) })),
+      insert: vi.fn(() => ({ values: vi.fn(() => ({ returning: vi.fn(() => []) })) })),
+      update: vi.fn(() => ({
+        set: vi.fn(() => ({ where: vi.fn(() => ({ returning: vi.fn(() => []) })) })),
       })),
-      delete: mock(() => ({ where: mock(() => []) })),
+      delete: vi.fn(() => ({ where: vi.fn(() => []) })),
     });
   });
 
   return {
-    select: mock(() => ({ from: mock(() => ({ where: mock(() => []) })) })),
-    insert: mock(() => ({ values: mock(() => ({ returning: mock(() => []) })) })),
-    update: mock(() => ({
-      set: mock(() => ({ where: mock(() => ({ returning: mock(() => []) })) })),
+    select: vi.fn(() => ({ from: vi.fn(() => ({ where: vi.fn(() => []) })) })),
+    insert: vi.fn(() => ({ values: vi.fn(() => ({ returning: vi.fn(() => []) })) })),
+    update: vi.fn(() => ({
+      set: vi.fn(() => ({ where: vi.fn(() => ({ returning: vi.fn(() => []) })) })),
     })),
-    delete: mock(() => ({ where: mock(() => []) })),
+    delete: vi.fn(() => ({ where: vi.fn(() => []) })),
     transaction: mockTransactionFn,
-    run: mock(() => Promise.resolve()),
+    run: vi.fn(() => Promise.resolve()),
   };
 };

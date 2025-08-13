@@ -1,4 +1,4 @@
-import { type Mock, mock } from "bun:test";
+import { type Mock, vi } from "vitest";
 import {
   ChannelType,
   type ChatInputCommandInteraction,
@@ -24,7 +24,7 @@ export function createMockUser(overrides?: any): User {
     avatar: null,
     banner: null,
     accentColor: null,
-    displayAvatarURL: mock(() => "https://example.com/avatar.png"),
+    displayAvatarURL: vi.fn(() => "https://example.com/avatar.png"),
     ...overrides,
   } as User;
 }
@@ -46,8 +46,8 @@ export function createMockTextChannel(overrides?: Partial<TextChannel>): TextCha
     id: "111111111",
     type: ChannelType.GuildText,
     name: "test-channel",
-    send: mock(() => Promise.resolve({ id: "msg123" })),
-    permissionsFor: mock(() => new PermissionsBitField(["SendMessages", "EmbedLinks"])),
+    send: vi.fn(() => Promise.resolve({ id: "msg123" })),
+    permissionsFor: vi.fn(() => new PermissionsBitField(["SendMessages", "EmbedLinks"])),
     parentId: null,
     parent: null,
     ...overrides,
@@ -67,8 +67,8 @@ export function createMockThreadChannel(overrides?: any): any {
     name: "test-thread",
     parentId: parentChannel.id,
     parent: parentChannel,
-    send: mock(() => Promise.resolve({ id: "msg123" })),
-    permissionsFor: mock(() => new PermissionsBitField(["SendMessages", "EmbedLinks"])),
+    send: vi.fn(() => Promise.resolve({ id: "msg123" })),
+    permissionsFor: vi.fn(() => new PermissionsBitField(["SendMessages", "EmbedLinks"])),
     ...overrides,
   };
 }
@@ -114,10 +114,10 @@ export function createMockMessage(overrides?: any): Message {
       cache: new Collection(),
     },
     reference: null,
-    reply: mock(() => Promise.resolve({} as Message)) as Mock<() => Promise<Message>>,
-    delete: mock(() => Promise.resolve({} as Message)),
-    react: mock(() => Promise.resolve({})),
-    edit: mock(() => Promise.resolve({} as Message)) as Mock<() => Promise<Message>>,
+    reply: vi.fn(() => Promise.resolve({} as Message)) as Mock<() => Promise<Message>>,
+    delete: vi.fn(() => Promise.resolve({} as Message)),
+    react: vi.fn(() => Promise.resolve({})),
+    edit: vi.fn(() => Promise.resolve({} as Message)) as Mock<() => Promise<Message>>,
   };
 
   // Apply overrides
@@ -148,29 +148,29 @@ export function createMockInteraction(overrides?: any): ChatInputCommandInteract
       user: createMockUser({ id: "bot123", bot: true }),
     },
     options: {
-      getString: mock(() => null) as Mock<(name: string, required?: boolean) => string | null>,
-      getInteger: mock(() => null),
-      getBoolean: mock(() => null),
-      getUser: mock(() => null),
-      getMember: mock(() => null),
-      getChannel: mock(() => null),
-      getSubcommand: mock(() => null),
-      getSubcommandGroup: mock(() => null),
+      getString: vi.fn(() => null) as Mock<(name: string, required?: boolean) => string | null>,
+      getInteger: vi.fn(() => null),
+      getBoolean: vi.fn(() => null),
+      getUser: vi.fn(() => null),
+      getMember: vi.fn(() => null),
+      getChannel: vi.fn(() => null),
+      getSubcommand: vi.fn(() => null),
+      getSubcommandGroup: vi.fn(() => null),
     },
     deferred: false,
     ephemeral: null,
     replied: false,
-    reply: mock((options: any) => {
+    reply: vi.fn((options: any) => {
       if (options?.fetchReply) {
         return Promise.resolve({ id: "pollMessage123" } as Message);
       }
 
       return Promise.resolve();
     }),
-    deferReply: mock(() => Promise.resolve()),
-    editReply: mock(() => Promise.resolve({} as Message)),
-    deleteReply: mock(() => Promise.resolve()),
-    followUp: mock(() => Promise.resolve()),
+    deferReply: vi.fn(() => Promise.resolve()),
+    editReply: vi.fn(() => Promise.resolve({} as Message)),
+    deleteReply: vi.fn(() => Promise.resolve()),
+    followUp: vi.fn(() => Promise.resolve()),
   };
 
   // Apply overrides

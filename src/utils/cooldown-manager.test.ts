@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "bun:test";
+import { beforeEach, describe, expect, it } from "vitest";
 import { Collection } from "discord.js";
 
 import { CooldownManager } from "./cooldown-manager";

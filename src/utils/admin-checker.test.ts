@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vitest";
 import type { ChatInputCommandInteraction, Message } from "discord.js";
 
 import { AdminChecker } from "./admin-checker";

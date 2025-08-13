@@ -1,23 +1,23 @@
-import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ChannelType, MessageFlags } from "discord.js";
 
 import { AutoPublishService } from "./auto-publish.service";
 
 // Mock the constants module.
-mock.module("../config/constants", () => ({
+vi.mock("../config/constants", () => ({
   AUTO_PUBLISH_CHANNEL_IDS: ["123456789012345678", "987654321098765432"],
 }));
 
 // Mock the logger module.
-mock.module("../utils/logger", () => ({
+vi.mock("../utils/logger", () => ({
   logger: {
-    info: mock(),
-    warn: mock(),
-    error: mock(),
-    debug: mock(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
   },
-  logError: mock(),
-  logApiCall: mock(),
+  logError: vi.fn(),
+  logApiCall: vi.fn(),
 }));
 
 describe("Service: AutoPublishService", () => {
@@ -27,9 +27,9 @@ describe("Service: AutoPublishService", () => {
     channelId: "123456789012345678",
     author: { bot: false, tag: "TestUser#1234" },
     flags: {
-      has: mock((_flag: MessageFlags) => false),
+      has: vi.fn((_flag: MessageFlags) => false),
     },
-    crosspost: mock(),
+    crosspost: vi.fn(),
     id: "message123",
     guildId: "guild123",
     ...overrides,
@@ -37,7 +37,7 @@ describe("Service: AutoPublishService", () => {
 
   beforeEach(() => {
     // Clear all mocks before each test.
-    mock.restore();
+    vi.restoreAllMocks();
   });
 
   describe("shouldAutoPublish", () => {
@@ -76,7 +76,7 @@ describe("Service: AutoPublishService", () => {
       // ARRANGE
       const message = createMockMessage({
         flags: {
-          has: mock((flag: MessageFlags) => flag === MessageFlags.Crossposted),
+          has: vi.fn((flag: MessageFlags) => flag === MessageFlags.Crossposted),
         },
       });
 
@@ -185,10 +185,10 @@ describe("Service: AutoPublishService", () => {
       const message = createMockMessage({
         channel: { type: ChannelType.GuildText },
       });
-      const shouldAutoPublishSpy = spyOn(AutoPublishService, "shouldAutoPublish").mockReturnValue(
+      const shouldAutoPublishSpy = vi.spyOn(AutoPublishService, "shouldAutoPublish").mockReturnValue(
         false,
       );
-      const publishMessageSpy = spyOn(AutoPublishService, "publishMessage");
+      const publishMessageSpy = vi.spyOn(AutoPublishService, "publishMessage");
 
       // ACT
       await AutoPublishService.handleMessage(message as any);
@@ -201,10 +201,10 @@ describe("Service: AutoPublishService", () => {
     it("attempts to publish if message should be auto-published", async () => {
       // ARRANGE
       const message = createMockMessage();
-      const shouldAutoPublishSpy = spyOn(AutoPublishService, "shouldAutoPublish").mockReturnValue(
+      const shouldAutoPublishSpy = vi.spyOn(AutoPublishService, "shouldAutoPublish").mockReturnValue(
         true,
       );
-      const publishMessageSpy = spyOn(AutoPublishService, "publishMessage").mockResolvedValue(true);
+      const publishMessageSpy = vi.spyOn(AutoPublishService, "publishMessage").mockResolvedValue(true);
 
       // ACT
       await AutoPublishService.handleMessage(message as any);

@@ -1,8 +1,8 @@
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ChannelType, MessageFlags } from "discord.js";
 
 import { CHEAT_INVESTIGATION_CATEGORY_ID, WORKSHOP_GUILD_ID } from "../config/constants";
-import { TeamService } from "../services/team.service";
+import { teamService } from "../services";
 import {
   createMockInteraction,
   createMockTextChannel,
@@ -10,18 +10,28 @@ import {
 } from "../test/mocks/discord.mock";
 import pingteamSlashCommand from "./pingteam.command";
 
+// Mock the teamService from the service registry
+vi.mock("../services", () => ({
+  teamService: {
+    getTeamMembersByName: vi.fn(),
+    addMemberByTeamName: vi.fn(),
+    removeMemberByTeamName: vi.fn(),
+    createTeam: vi.fn(),
+  },
+}));
+
 describe("SlashCommand: pingteam", () => {
   beforeEach(() => {
-    // Spy on TeamService methods and provide default mock implementations.
-    spyOn(TeamService, "getTeamMembersByName").mockResolvedValue([]);
-    spyOn(TeamService, "addMemberByTeamName").mockResolvedValue();
-    spyOn(TeamService, "removeMemberByTeamName").mockResolvedValue(true);
-    spyOn(TeamService, "createTeam").mockResolvedValue({} as any);
+    // Reset mock implementations.
+    vi.mocked(teamService.getTeamMembersByName).mockResolvedValue([]);
+    vi.mocked(teamService.addMemberByTeamName).mockResolvedValue();
+    vi.mocked(teamService.removeMemberByTeamName).mockResolvedValue(true);
+    vi.mocked(teamService.createTeam).mockResolvedValue({} as any);
   });
 
   afterEach(() => {
-    // Restore all spies to prevent test pollution.
-    mock.restore();
+    // Clear all mocks to prevent test pollution.
+    vi.clearAllMocks();
   });
 
   describe("ping subcommand", () => {
@@ -34,8 +44,8 @@ describe("SlashCommand: pingteam", () => {
           guildId: WORKSHOP_GUILD_ID,
           channel: null, // DM channel
           options: {
-            getSubcommand: mock(() => "ping"),
-            getString: mock(() => "racheats"),
+            getSubcommand: vi.fn(() => "ping"),
+            getString: vi.fn(() => "racheats"),
           },
         });
 
@@ -47,7 +57,7 @@ describe("SlashCommand: pingteam", () => {
           content: "The RACheats team can't be pinged here.",
           flags: MessageFlags.Ephemeral,
         });
-        expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
+        expect(teamService.getTeamMembersByName).not.toHaveBeenCalled();
       });
 
       it("denies ping in DM channel type", async () => {
@@ -57,8 +67,8 @@ describe("SlashCommand: pingteam", () => {
           guildId: WORKSHOP_GUILD_ID,
           channel: { type: ChannelType.DM },
           options: {
-            getSubcommand: mock(() => "ping"),
-            getString: mock(() => "racheats"),
+            getSubcommand: vi.fn(() => "ping"),
+            getString: vi.fn(() => "racheats"),
           },
         });
 
@@ -70,7 +80,7 @@ describe("SlashCommand: pingteam", () => {
           content: "The RACheats team can't be pinged here.",
           flags: MessageFlags.Ephemeral,
         });
-        expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
+        expect(teamService.getTeamMembersByName).not.toHaveBeenCalled();
       });
 
       it("denies ping outside cheat investigation category", async () => {
@@ -85,8 +95,8 @@ describe("SlashCommand: pingteam", () => {
           guildId: WORKSHOP_GUILD_ID,
           channel,
           options: {
-            getSubcommand: mock(() => "ping"),
-            getString: mock(() => "racheats"),
+            getSubcommand: vi.fn(() => "ping"),
+            getString: vi.fn(() => "racheats"),
           },
         });
 
@@ -98,7 +108,7 @@ describe("SlashCommand: pingteam", () => {
           content: "The RACheats team can't be pinged here.",
           flags: MessageFlags.Ephemeral,
         });
-        expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
+        expect(teamService.getTeamMembersByName).not.toHaveBeenCalled();
       });
 
       it("allows ping in cheat investigation category", async () => {
@@ -112,18 +122,18 @@ describe("SlashCommand: pingteam", () => {
           guildId: WORKSHOP_GUILD_ID,
           channel,
           options: {
-            getSubcommand: mock(() => "ping"),
-            getString: mock(() => "racheats"),
+            getSubcommand: vi.fn(() => "ping"),
+            getString: vi.fn(() => "racheats"),
           },
         });
 
-        (TeamService.getTeamMembersByName as any).mockResolvedValue(["user1", "user2"]);
+        (teamService.getTeamMembersByName as any).mockResolvedValue(["user1", "user2"]);
 
         // ACT
         await pingteamSlashCommand.execute(interaction, null as any);
 
         // ASSERT
-        expect(TeamService.getTeamMembersByName).toHaveBeenCalledWith("racheats");
+        expect(teamService.getTeamMembersByName).toHaveBeenCalledWith("racheats");
         expect(interaction.reply).toHaveBeenCalledWith(
           "🔔 **racheats team ping:**\n<@user1> <@user2>",
         );
@@ -140,8 +150,8 @@ describe("SlashCommand: pingteam", () => {
           guildId: WORKSHOP_GUILD_ID,
           channel,
           options: {
-            getSubcommand: mock(() => "ping"),
-            getString: mock(() => "RaChEaTs"), // Mixed case
+            getSubcommand: vi.fn(() => "ping"),
+            getString: vi.fn(() => "RaChEaTs"), // Mixed case
           },
         });
 
@@ -168,8 +178,8 @@ describe("SlashCommand: pingteam", () => {
             guildId: WORKSHOP_GUILD_ID,
             channel: threadChannel,
             options: {
-              getSubcommand: mock(() => "ping"),
-              getString: mock(() => "racheats"),
+              getSubcommand: vi.fn(() => "ping"),
+              getString: vi.fn(() => "racheats"),
             },
           });
 
@@ -181,7 +191,7 @@ describe("SlashCommand: pingteam", () => {
             content: "The RACheats team can't be pinged here.",
             flags: MessageFlags.Ephemeral,
           });
-          expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
+          expect(teamService.getTeamMembersByName).not.toHaveBeenCalled();
         });
 
         it("denies ping in PrivateThread outside cheat investigation category", async () => {
@@ -196,8 +206,8 @@ describe("SlashCommand: pingteam", () => {
             guildId: WORKSHOP_GUILD_ID,
             channel: threadChannel,
             options: {
-              getSubcommand: mock(() => "ping"),
-              getString: mock(() => "racheats"),
+              getSubcommand: vi.fn(() => "ping"),
+              getString: vi.fn(() => "racheats"),
             },
           });
 
@@ -209,7 +219,7 @@ describe("SlashCommand: pingteam", () => {
             content: "The RACheats team can't be pinged here.",
             flags: MessageFlags.Ephemeral,
           });
-          expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
+          expect(teamService.getTeamMembersByName).not.toHaveBeenCalled();
         });
 
         it("denies ping in AnnouncementThread outside cheat investigation category", async () => {
@@ -224,8 +234,8 @@ describe("SlashCommand: pingteam", () => {
             guildId: WORKSHOP_GUILD_ID,
             channel: threadChannel,
             options: {
-              getSubcommand: mock(() => "ping"),
-              getString: mock(() => "racheats"),
+              getSubcommand: vi.fn(() => "ping"),
+              getString: vi.fn(() => "racheats"),
             },
           });
 
@@ -237,7 +247,7 @@ describe("SlashCommand: pingteam", () => {
             content: "The RACheats team can't be pinged here.",
             flags: MessageFlags.Ephemeral,
           });
-          expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
+          expect(teamService.getTeamMembersByName).not.toHaveBeenCalled();
         });
 
         it("allows ping in PublicThread within cheat investigation category", async () => {
@@ -252,18 +262,18 @@ describe("SlashCommand: pingteam", () => {
             guildId: WORKSHOP_GUILD_ID,
             channel: threadChannel,
             options: {
-              getSubcommand: mock(() => "ping"),
-              getString: mock(() => "racheats"),
+              getSubcommand: vi.fn(() => "ping"),
+              getString: vi.fn(() => "racheats"),
             },
           });
 
-          (TeamService.getTeamMembersByName as any).mockResolvedValue(["user1", "user2"]);
+          (teamService.getTeamMembersByName as any).mockResolvedValue(["user1", "user2"]);
 
           // ACT
           await pingteamSlashCommand.execute(interaction, null as any);
 
           // ASSERT
-          expect(TeamService.getTeamMembersByName).toHaveBeenCalledWith("racheats");
+          expect(teamService.getTeamMembersByName).toHaveBeenCalledWith("racheats");
           expect(interaction.reply).toHaveBeenCalledWith(
             "🔔 **racheats team ping:**\n<@user1> <@user2>",
           );
@@ -281,18 +291,18 @@ describe("SlashCommand: pingteam", () => {
             guildId: WORKSHOP_GUILD_ID,
             channel: threadChannel,
             options: {
-              getSubcommand: mock(() => "ping"),
-              getString: mock(() => "racheats"),
+              getSubcommand: vi.fn(() => "ping"),
+              getString: vi.fn(() => "racheats"),
             },
           });
 
-          (TeamService.getTeamMembersByName as any).mockResolvedValue(["user1", "user2"]);
+          (teamService.getTeamMembersByName as any).mockResolvedValue(["user1", "user2"]);
 
           // ACT
           await pingteamSlashCommand.execute(interaction, null as any);
 
           // ASSERT
-          expect(TeamService.getTeamMembersByName).toHaveBeenCalledWith("racheats");
+          expect(teamService.getTeamMembersByName).toHaveBeenCalledWith("racheats");
           expect(interaction.reply).toHaveBeenCalledWith(
             "🔔 **racheats team ping:**\n<@user1> <@user2>",
           );
@@ -310,18 +320,18 @@ describe("SlashCommand: pingteam", () => {
             guildId: WORKSHOP_GUILD_ID,
             channel: threadChannel,
             options: {
-              getSubcommand: mock(() => "ping"),
-              getString: mock(() => "racheats"),
+              getSubcommand: vi.fn(() => "ping"),
+              getString: vi.fn(() => "racheats"),
             },
           });
 
-          (TeamService.getTeamMembersByName as any).mockResolvedValue(["user1", "user2"]);
+          (teamService.getTeamMembersByName as any).mockResolvedValue(["user1", "user2"]);
 
           // ACT
           await pingteamSlashCommand.execute(interaction, null as any);
 
           // ASSERT
-          expect(TeamService.getTeamMembersByName).toHaveBeenCalledWith("racheats");
+          expect(teamService.getTeamMembersByName).toHaveBeenCalledWith("racheats");
           expect(interaction.reply).toHaveBeenCalledWith(
             "🔔 **racheats team ping:**\n<@user1> <@user2>",
           );
@@ -341,18 +351,18 @@ describe("SlashCommand: pingteam", () => {
           guildId: WORKSHOP_GUILD_ID,
           channel,
           options: {
-            getSubcommand: mock(() => "ping"),
-            getString: mock(() => "moderators"),
+            getSubcommand: vi.fn(() => "ping"),
+            getString: vi.fn(() => "moderators"),
           },
         });
 
-        (TeamService.getTeamMembersByName as any).mockResolvedValue(["mod1", "mod2"]);
+        (teamService.getTeamMembersByName as any).mockResolvedValue(["mod1", "mod2"]);
 
         // ACT
         await pingteamSlashCommand.execute(interaction, null as any);
 
         // ASSERT
-        expect(TeamService.getTeamMembersByName).toHaveBeenCalledWith("moderators");
+        expect(teamService.getTeamMembersByName).toHaveBeenCalledWith("moderators");
         expect(interaction.reply).toHaveBeenCalledWith(
           "🔔 **moderators team ping:**\n<@mod1> <@mod2>",
         );
@@ -370,8 +380,8 @@ describe("SlashCommand: pingteam", () => {
           guildId: WORKSHOP_GUILD_ID,
           channel: null, // DM channel
           options: {
-            getSubcommand: mock(() => "list"),
-            getString: mock(() => "racheats"),
+            getSubcommand: vi.fn(() => "list"),
+            getString: vi.fn(() => "racheats"),
           },
         });
 
@@ -383,7 +393,7 @@ describe("SlashCommand: pingteam", () => {
           content: "The RACheats team member list can't be viewed here.",
           flags: MessageFlags.Ephemeral,
         });
-        expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
+        expect(teamService.getTeamMembersByName).not.toHaveBeenCalled();
       });
 
       it("denies list in DM channel type", async () => {
@@ -393,8 +403,8 @@ describe("SlashCommand: pingteam", () => {
           guildId: WORKSHOP_GUILD_ID,
           channel: { type: ChannelType.DM },
           options: {
-            getSubcommand: mock(() => "list"),
-            getString: mock(() => "racheats"),
+            getSubcommand: vi.fn(() => "list"),
+            getString: vi.fn(() => "racheats"),
           },
         });
 
@@ -406,7 +416,7 @@ describe("SlashCommand: pingteam", () => {
           content: "The RACheats team member list can't be viewed here.",
           flags: MessageFlags.Ephemeral,
         });
-        expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
+        expect(teamService.getTeamMembersByName).not.toHaveBeenCalled();
       });
 
       it("denies list outside cheat investigation category", async () => {
@@ -421,8 +431,8 @@ describe("SlashCommand: pingteam", () => {
           guildId: WORKSHOP_GUILD_ID,
           channel,
           options: {
-            getSubcommand: mock(() => "list"),
-            getString: mock(() => "racheats"),
+            getSubcommand: vi.fn(() => "list"),
+            getString: vi.fn(() => "racheats"),
           },
         });
 
@@ -434,7 +444,7 @@ describe("SlashCommand: pingteam", () => {
           content: "The RACheats team member list can't be viewed here.",
           flags: MessageFlags.Ephemeral,
         });
-        expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
+        expect(teamService.getTeamMembersByName).not.toHaveBeenCalled();
       });
 
       it("allows list in cheat investigation category", async () => {
@@ -448,18 +458,18 @@ describe("SlashCommand: pingteam", () => {
           guildId: WORKSHOP_GUILD_ID,
           channel,
           options: {
-            getSubcommand: mock(() => "list"),
-            getString: mock(() => "racheats"),
+            getSubcommand: vi.fn(() => "list"),
+            getString: vi.fn(() => "racheats"),
           },
         });
 
-        (TeamService.getTeamMembersByName as any).mockResolvedValue(["user1", "user2"]);
+        (teamService.getTeamMembersByName as any).mockResolvedValue(["user1", "user2"]);
 
         // ACT
         await pingteamSlashCommand.execute(interaction, null as any);
 
         // ASSERT
-        expect(TeamService.getTeamMembersByName).toHaveBeenCalledWith("racheats");
+        expect(teamService.getTeamMembersByName).toHaveBeenCalledWith("racheats");
         expect(interaction.reply).toHaveBeenCalledWith({
           content: "**Members of racheats:**\n• <@user1>\n• <@user2>",
           allowedMentions: { parse: [] },
@@ -477,8 +487,8 @@ describe("SlashCommand: pingteam", () => {
           guildId: WORKSHOP_GUILD_ID,
           channel,
           options: {
-            getSubcommand: mock(() => "list"),
-            getString: mock(() => "RaChEaTs"), // Mixed case
+            getSubcommand: vi.fn(() => "list"),
+            getString: vi.fn(() => "RaChEaTs"), // Mixed case
           },
         });
 
@@ -505,8 +515,8 @@ describe("SlashCommand: pingteam", () => {
             guildId: WORKSHOP_GUILD_ID,
             channel: threadChannel,
             options: {
-              getSubcommand: mock(() => "list"),
-              getString: mock(() => "racheats"),
+              getSubcommand: vi.fn(() => "list"),
+              getString: vi.fn(() => "racheats"),
             },
           });
 
@@ -518,7 +528,7 @@ describe("SlashCommand: pingteam", () => {
             content: "The RACheats team member list can't be viewed here.",
             flags: MessageFlags.Ephemeral,
           });
-          expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
+          expect(teamService.getTeamMembersByName).not.toHaveBeenCalled();
         });
 
         it("denies list in PrivateThread outside cheat investigation category", async () => {
@@ -533,8 +543,8 @@ describe("SlashCommand: pingteam", () => {
             guildId: WORKSHOP_GUILD_ID,
             channel: threadChannel,
             options: {
-              getSubcommand: mock(() => "list"),
-              getString: mock(() => "racheats"),
+              getSubcommand: vi.fn(() => "list"),
+              getString: vi.fn(() => "racheats"),
             },
           });
 
@@ -546,7 +556,7 @@ describe("SlashCommand: pingteam", () => {
             content: "The RACheats team member list can't be viewed here.",
             flags: MessageFlags.Ephemeral,
           });
-          expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
+          expect(teamService.getTeamMembersByName).not.toHaveBeenCalled();
         });
 
         it("denies list in AnnouncementThread outside cheat investigation category", async () => {
@@ -561,8 +571,8 @@ describe("SlashCommand: pingteam", () => {
             guildId: WORKSHOP_GUILD_ID,
             channel: threadChannel,
             options: {
-              getSubcommand: mock(() => "list"),
-              getString: mock(() => "racheats"),
+              getSubcommand: vi.fn(() => "list"),
+              getString: vi.fn(() => "racheats"),
             },
           });
 
@@ -574,7 +584,7 @@ describe("SlashCommand: pingteam", () => {
             content: "The RACheats team member list can't be viewed here.",
             flags: MessageFlags.Ephemeral,
           });
-          expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
+          expect(teamService.getTeamMembersByName).not.toHaveBeenCalled();
         });
 
         it("allows list in PublicThread within cheat investigation category", async () => {
@@ -589,18 +599,18 @@ describe("SlashCommand: pingteam", () => {
             guildId: WORKSHOP_GUILD_ID,
             channel: threadChannel,
             options: {
-              getSubcommand: mock(() => "list"),
-              getString: mock(() => "racheats"),
+              getSubcommand: vi.fn(() => "list"),
+              getString: vi.fn(() => "racheats"),
             },
           });
 
-          (TeamService.getTeamMembersByName as any).mockResolvedValue(["user1", "user2"]);
+          (teamService.getTeamMembersByName as any).mockResolvedValue(["user1", "user2"]);
 
           // ACT
           await pingteamSlashCommand.execute(interaction, null as any);
 
           // ASSERT
-          expect(TeamService.getTeamMembersByName).toHaveBeenCalledWith("racheats");
+          expect(teamService.getTeamMembersByName).toHaveBeenCalledWith("racheats");
           expect(interaction.reply).toHaveBeenCalledWith({
             content: "**Members of racheats:**\n• <@user1>\n• <@user2>",
             allowedMentions: { parse: [] },
@@ -619,18 +629,18 @@ describe("SlashCommand: pingteam", () => {
             guildId: WORKSHOP_GUILD_ID,
             channel: threadChannel,
             options: {
-              getSubcommand: mock(() => "list"),
-              getString: mock(() => "racheats"),
+              getSubcommand: vi.fn(() => "list"),
+              getString: vi.fn(() => "racheats"),
             },
           });
 
-          (TeamService.getTeamMembersByName as any).mockResolvedValue(["user1", "user2"]);
+          (teamService.getTeamMembersByName as any).mockResolvedValue(["user1", "user2"]);
 
           // ACT
           await pingteamSlashCommand.execute(interaction, null as any);
 
           // ASSERT
-          expect(TeamService.getTeamMembersByName).toHaveBeenCalledWith("racheats");
+          expect(teamService.getTeamMembersByName).toHaveBeenCalledWith("racheats");
           expect(interaction.reply).toHaveBeenCalledWith({
             content: "**Members of racheats:**\n• <@user1>\n• <@user2>",
             allowedMentions: { parse: [] },
@@ -649,18 +659,18 @@ describe("SlashCommand: pingteam", () => {
             guildId: WORKSHOP_GUILD_ID,
             channel: threadChannel,
             options: {
-              getSubcommand: mock(() => "list"),
-              getString: mock(() => "racheats"),
+              getSubcommand: vi.fn(() => "list"),
+              getString: vi.fn(() => "racheats"),
             },
           });
 
-          (TeamService.getTeamMembersByName as any).mockResolvedValue(["user1", "user2"]);
+          (teamService.getTeamMembersByName as any).mockResolvedValue(["user1", "user2"]);
 
           // ACT
           await pingteamSlashCommand.execute(interaction, null as any);
 
           // ASSERT
-          expect(TeamService.getTeamMembersByName).toHaveBeenCalledWith("racheats");
+          expect(teamService.getTeamMembersByName).toHaveBeenCalledWith("racheats");
           expect(interaction.reply).toHaveBeenCalledWith({
             content: "**Members of racheats:**\n• <@user1>\n• <@user2>",
             allowedMentions: { parse: [] },
@@ -681,18 +691,18 @@ describe("SlashCommand: pingteam", () => {
           guildId: WORKSHOP_GUILD_ID,
           channel,
           options: {
-            getSubcommand: mock(() => "list"),
-            getString: mock(() => "moderators"),
+            getSubcommand: vi.fn(() => "list"),
+            getString: vi.fn(() => "moderators"),
           },
         });
 
-        (TeamService.getTeamMembersByName as any).mockResolvedValue(["mod1", "mod2"]);
+        (teamService.getTeamMembersByName as any).mockResolvedValue(["mod1", "mod2"]);
 
         // ACT
         await pingteamSlashCommand.execute(interaction, null as any);
 
         // ASSERT
-        expect(TeamService.getTeamMembersByName).toHaveBeenCalledWith("moderators");
+        expect(teamService.getTeamMembersByName).toHaveBeenCalledWith("moderators");
         expect(interaction.reply).toHaveBeenCalledWith({
           content: "**Members of moderators:**\n• <@mod1>\n• <@mod2>",
           allowedMentions: { parse: [] },
@@ -714,9 +724,9 @@ describe("SlashCommand: pingteam", () => {
         guildId: WORKSHOP_GUILD_ID,
         channel,
         options: {
-          getSubcommand: mock(() => "add"),
-          getString: mock(() => "racheats"),
-          getUser: mock(() => mockUser),
+          getSubcommand: vi.fn(() => "add"),
+          getString: vi.fn(() => "racheats"),
+          getUser: vi.fn(() => mockUser),
         },
       });
 
@@ -724,7 +734,7 @@ describe("SlashCommand: pingteam", () => {
       await pingteamSlashCommand.execute(interaction, null as any);
 
       // ASSERT
-      expect(TeamService.addMemberByTeamName).toHaveBeenCalledWith(
+      expect(teamService.addMemberByTeamName).toHaveBeenCalledWith(
         "racheats",
         "user123",
         expect.any(String),
@@ -744,9 +754,9 @@ describe("SlashCommand: pingteam", () => {
         guildId: WORKSHOP_GUILD_ID,
         channel,
         options: {
-          getSubcommand: mock(() => "remove"),
-          getString: mock(() => "racheats"),
-          getUser: mock(() => mockUser),
+          getSubcommand: vi.fn(() => "remove"),
+          getString: vi.fn(() => "racheats"),
+          getUser: vi.fn(() => mockUser),
         },
       });
 
@@ -754,7 +764,7 @@ describe("SlashCommand: pingteam", () => {
       await pingteamSlashCommand.execute(interaction, null as any);
 
       // ASSERT
-      expect(TeamService.removeMemberByTeamName).toHaveBeenCalledWith("racheats", "user123");
+      expect(teamService.removeMemberByTeamName).toHaveBeenCalledWith("racheats", "user123");
       expect(interaction.reply).toHaveBeenCalledWith(expect.stringContaining("✅ Removed"));
     });
 
@@ -769,8 +779,8 @@ describe("SlashCommand: pingteam", () => {
         guildId: WORKSHOP_GUILD_ID,
         channel,
         options: {
-          getSubcommand: mock(() => "create"),
-          getString: mock(() => "newteam"),
+          getSubcommand: vi.fn(() => "create"),
+          getString: vi.fn(() => "newteam"),
         },
       });
 
@@ -778,7 +788,7 @@ describe("SlashCommand: pingteam", () => {
       await pingteamSlashCommand.execute(interaction, null as any);
 
       // ASSERT
-      expect(TeamService.createTeam).toHaveBeenCalledWith("newteam", "newteam", expect.any(String));
+      expect(teamService.createTeam).toHaveBeenCalledWith("newteam", "newteam", expect.any(String));
       expect(interaction.reply).toHaveBeenCalledWith('✅ Created team "newteam".');
     });
   });
@@ -793,9 +803,9 @@ describe("SlashCommand: pingteam", () => {
           commandName: "pingteam",
           guildId: "999999999999999999", // Different guild
           options: {
-            getSubcommand: mock(() => subcommand),
-            getString: mock(() => "testteam"),
-            getUser: mock(() => ({ id: "user123" })),
+            getSubcommand: vi.fn(() => subcommand),
+            getString: vi.fn(() => "testteam"),
+            getUser: vi.fn(() => ({ id: "user123" })),
           },
         });
 
@@ -809,17 +819,17 @@ describe("SlashCommand: pingteam", () => {
         });
 
         // Ensure no service methods were called
-        expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
-        expect(TeamService.addMemberByTeamName).not.toHaveBeenCalled();
-        expect(TeamService.removeMemberByTeamName).not.toHaveBeenCalled();
-        expect(TeamService.createTeam).not.toHaveBeenCalled();
+        expect(teamService.getTeamMembersByName).not.toHaveBeenCalled();
+        expect(teamService.addMemberByTeamName).not.toHaveBeenCalled();
+        expect(teamService.removeMemberByTeamName).not.toHaveBeenCalled();
+        expect(teamService.createTeam).not.toHaveBeenCalled();
 
         // Reset mocks for next iteration
-        mock.restore();
-        spyOn(TeamService, "getTeamMembersByName").mockResolvedValue([]);
-        spyOn(TeamService, "addMemberByTeamName").mockResolvedValue();
-        spyOn(TeamService, "removeMemberByTeamName").mockResolvedValue(true);
-        spyOn(TeamService, "createTeam").mockResolvedValue({} as any);
+        vi.restoreAllMocks();
+        vi.mocked(teamService.getTeamMembersByName).mockResolvedValue([]);
+        vi.mocked(teamService.addMemberByTeamName).mockResolvedValue();
+        vi.mocked(teamService.removeMemberByTeamName).mockResolvedValue(true);
+        vi.mocked(teamService.createTeam).mockResolvedValue({} as any);
       }
     });
 
@@ -829,8 +839,8 @@ describe("SlashCommand: pingteam", () => {
         commandName: "pingteam",
         guildId: null, // DM - no guild ID
         options: {
-          getSubcommand: mock(() => "ping"),
-          getString: mock(() => "testteam"),
+          getSubcommand: vi.fn(() => "ping"),
+          getString: vi.fn(() => "testteam"),
         },
       });
 
@@ -842,7 +852,7 @@ describe("SlashCommand: pingteam", () => {
         content: "You can't use this here.",
         flags: MessageFlags.Ephemeral,
       });
-      expect(TeamService.getTeamMembersByName).not.toHaveBeenCalled();
+      expect(teamService.getTeamMembersByName).not.toHaveBeenCalled();
     });
 
     it("allows all subcommands in the allowed guild", async () => {
@@ -852,33 +862,33 @@ describe("SlashCommand: pingteam", () => {
         guildId: WORKSHOP_GUILD_ID,
         channel: createMockTextChannel({} as any),
         options: {
-          getSubcommand: mock(() => "ping"),
-          getString: mock(() => "testteam"),
+          getSubcommand: vi.fn(() => "ping"),
+          getString: vi.fn(() => "testteam"),
         },
       });
 
-      (TeamService.getTeamMembersByName as any).mockResolvedValue(["user1", "user2"]);
+      (teamService.getTeamMembersByName as any).mockResolvedValue(["user1", "user2"]);
 
       // ACT
       await pingteamSlashCommand.execute(pingInteraction, null as any);
 
       // ASSERT
-      expect(TeamService.getTeamMembersByName).toHaveBeenCalledWith("testteam");
+      expect(teamService.getTeamMembersByName).toHaveBeenCalledWith("testteam");
       expect(pingInteraction.reply).toHaveBeenCalledWith(
         "🔔 **testteam team ping:**\n<@user1> <@user2>",
       );
 
       // Reset for next test
-      mock.restore();
-      spyOn(TeamService, "createTeam").mockResolvedValue({} as any);
+      vi.restoreAllMocks();
+      vi.mocked(teamService.createTeam).mockResolvedValue({} as any);
 
       // ARRANGE - Test create subcommand
       const createInteraction = createMockInteraction({
         commandName: "pingteam",
         guildId: WORKSHOP_GUILD_ID,
         options: {
-          getSubcommand: mock(() => "create"),
-          getString: mock(() => "newteam"),
+          getSubcommand: vi.fn(() => "create"),
+          getString: vi.fn(() => "newteam"),
         },
       });
 
@@ -886,7 +896,7 @@ describe("SlashCommand: pingteam", () => {
       await pingteamSlashCommand.execute(createInteraction, null as any);
 
       // ASSERT
-      expect(TeamService.createTeam).toHaveBeenCalled();
+      expect(teamService.createTeam).toHaveBeenCalled();
       expect(createInteraction.reply).toHaveBeenCalledWith('✅ Created team "newteam".');
     });
   });

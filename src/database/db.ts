@@ -1,7 +1,7 @@
-import { Database } from "bun:sqlite";
-import { drizzle } from "drizzle-orm/bun-sqlite";
+import BetterSqlite3 from "better-sqlite3";
+import { drizzle } from "drizzle-orm/better-sqlite3";
 
-const sqlite = new Database("rabot.db");
+const sqlite = new BetterSqlite3("rabot.db");
 
 // Enable WAL mode for better concurrent access.
 sqlite.exec("PRAGMA journal_mode = WAL");

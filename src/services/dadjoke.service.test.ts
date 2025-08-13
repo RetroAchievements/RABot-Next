@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import * as logger from "../utils/logger";
 import { DadjokeService } from "./dadjoke.service";
@@ -6,8 +6,8 @@ import { DadjokeService } from "./dadjoke.service";
 describe("DadjokeService", () => {
   beforeEach(() => {
     // Reset mocks.
-    spyOn(logger, "logApiCall").mockImplementation(() => {});
-    spyOn(logger, "logError").mockImplementation(() => {});
+    vi.spyOn(logger, "logApiCall").mockImplementation(() => {});
+    vi.spyOn(logger, "logError").mockImplementation(() => {});
   });
 
   describe("fetchRandomJoke", () => {
@@ -17,9 +17,9 @@ describe("DadjokeService", () => {
       const mockResponse = {
         ok: true,
         status: 200,
-        json: mock(() => Promise.resolve({ joke: mockJoke })),
+        json: vi.fn(() => Promise.resolve({ joke: mockJoke })),
       };
-      global.fetch = mock(() => Promise.resolve(mockResponse)) as any;
+      global.fetch = vi.fn(() => Promise.resolve(mockResponse)) as any;
 
       // When
       const result = await DadjokeService.fetchRandomJoke();
@@ -41,7 +41,7 @@ describe("DadjokeService", () => {
         status: 500,
         statusText: "Internal Server Error",
       };
-      global.fetch = mock(() => Promise.resolve(mockResponse)) as any;
+      global.fetch = vi.fn(() => Promise.resolve(mockResponse)) as any;
 
       // When
       const result = await DadjokeService.fetchRandomJoke();
@@ -52,7 +52,7 @@ describe("DadjokeService", () => {
 
     it("should return null when fetch throws an error", async () => {
       // Given
-      global.fetch = mock(() => Promise.reject(new Error("Network error"))) as any;
+      global.fetch = vi.fn(() => Promise.reject(new Error("Network error"))) as any;
 
       // When
       const result = await DadjokeService.fetchRandomJoke();
@@ -66,9 +66,9 @@ describe("DadjokeService", () => {
       const mockResponse = {
         ok: true,
         status: 200,
-        json: mock(() => Promise.resolve({})),
+        json: vi.fn(() => Promise.resolve({})),
       };
-      global.fetch = mock(() => Promise.resolve(mockResponse)) as any;
+      global.fetch = vi.fn(() => Promise.resolve(mockResponse)) as any;
 
       // When
       const result = await DadjokeService.fetchRandomJoke();

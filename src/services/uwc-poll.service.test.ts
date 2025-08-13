@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { db } from "../database/db";
 import { uwcPollResults, uwcPolls } from "../database/schema";
@@ -123,9 +123,9 @@ describeOrSkip("UwcPollService", () => {
     });
 
     it("throws error for non-existent poll", async () => {
-      expect(async () => {
+      await expect(async () => {
         await UwcPollService.completeUwcPoll("nonexistent", []);
-      }).toThrow();
+      }).rejects.toThrow();
     });
   });
 

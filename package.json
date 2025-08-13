@@ -32,13 +32,15 @@
     "tsc": "tsc --noEmit",
     "lint": "eslint src --cache",
     "lint:fix": "eslint src --fix",
-    "test": "bun test",
-    "test:watch": "bun test --watch",
-    "verify": "bun run lint && bun run tsc && bun test",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "verify": "bun run lint && bun run tsc && vitest run",
     "postinstall": "git config core.hooksPath .hooks && chmod +x .hooks/*"
   },
   "dependencies": {
     "@retroachievements/api": "^2.6.0",
+    "better-sqlite3": "^12.2.0",
     "discord.js": "^14.21.0",
     "drizzle-orm": "0.44.3",
     "figlet": "^1.8.2",
@@ -47,6 +49,7 @@
     "youtube-search": "^1.1.6"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
     "@types/bun": "latest",
     "@types/figlet": "^1.7.0",
     "drizzle-kit": "0.31.4",
@@ -58,7 +61,8 @@
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "eslint-plugin-sort-keys-shorthand": "^3.0.0",
     "eslint-plugin-unicorn": "^59.0.1",
-    "typescript-eslint": "^8.37.0"
+    "typescript-eslint": "^8.37.0",
+    "vitest": "^3.2.4"
   },
   "peerDependencies": {
     "typescript": "^5"

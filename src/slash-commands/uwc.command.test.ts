@@ -1,7 +1,6 @@
-import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ChannelType, MessageFlags, PermissionFlagsBits } from "discord.js";
 
-import { WORKSHOP_GUILD_ID } from "../config/constants";
 import { db } from "../database/db";
 import { uwcPollResults, uwcPolls } from "../database/schema";
 import { UwcPollService } from "../services/uwc-poll.service";
@@ -15,12 +14,13 @@ const describeOrSkip = isCI ? describe.skip : describe;
 // Mock the tag IDs for testing
 const MOCK_UWC_VOTING_TAG_ID = "mockVotingTag123";
 const MOCK_UWC_VOTE_CONCLUDED_TAG_ID = "mockConcludedTag123";
+const WORKSHOP_GUILD_ID = "565670106095362069";
 
 // Replace the constants module
-mock.module("../config/constants", () => ({
-  WORKSHOP_GUILD_ID,
-  UWC_VOTING_TAG_ID: MOCK_UWC_VOTING_TAG_ID,
-  UWC_VOTE_CONCLUDED_TAG_ID: MOCK_UWC_VOTE_CONCLUDED_TAG_ID,
+vi.mock("../config/constants", () => ({
+  WORKSHOP_GUILD_ID: "565670106095362069",
+  UWC_VOTING_TAG_ID: "mockVotingTag123",
+  UWC_VOTE_CONCLUDED_TAG_ID: "mockConcludedTag123",
 }));
 
 const UWC_ROLE_ID = "1002687198757388299";
@@ -33,7 +33,7 @@ describeOrSkip("SlashCommand: uwc", () => {
   });
 
   afterEach(() => {
-    mock.restore();
+    vi.restoreAllMocks();
   });
 
   describe("guild restrictions", () => {
@@ -76,7 +76,7 @@ describeOrSkip("SlashCommand: uwc", () => {
       const member = createMockGuildMember({
         roles: {
           cache: {
-            has: mock(() => true), // Has required role
+            has: vi.fn(() => true), // Has required role
           },
         },
       });
@@ -135,7 +135,7 @@ describeOrSkip("SlashCommand: uwc", () => {
       const member = createMockGuildMember({
         roles: {
           cache: {
-            has: mock(() => false), // No required role
+            has: vi.fn(() => false), // No required role
           },
         },
       });
@@ -145,7 +145,7 @@ describeOrSkip("SlashCommand: uwc", () => {
         guildId: WORKSHOP_GUILD_ID,
         member,
         memberPermissions: {
-          has: mock(() => false), // No admin permission
+          has: vi.fn(() => false), // No admin permission
         },
       });
 
@@ -164,7 +164,7 @@ describeOrSkip("SlashCommand: uwc", () => {
       const member = createMockGuildMember({
         roles: {
           cache: {
-            has: mock((roleId: string) => roleId === UWC_ROLE_ID), // Has required role
+            has: vi.fn((roleId: string) => roleId === UWC_ROLE_ID), // Has required role
           },
         },
       });
@@ -174,7 +174,7 @@ describeOrSkip("SlashCommand: uwc", () => {
         guildId: WORKSHOP_GUILD_ID,
         member,
         memberPermissions: {
-          has: mock(() => false), // No admin permission needed
+          has: vi.fn(() => false), // No admin permission needed
         },
       });
 
@@ -206,7 +206,7 @@ describeOrSkip("SlashCommand: uwc", () => {
       const member = createMockGuildMember({
         roles: {
           cache: {
-            has: mock(() => false), // No required role
+            has: vi.fn(() => false), // No required role
           },
         },
       });
@@ -216,7 +216,7 @@ describeOrSkip("SlashCommand: uwc", () => {
         guildId: WORKSHOP_GUILD_ID,
         member,
         memberPermissions: {
-          has: mock((permission) => permission === PermissionFlagsBits.Administrator), // Has admin
+          has: vi.fn((permission) => permission === PermissionFlagsBits.Administrator), // Has admin
         },
       });
 
@@ -254,7 +254,7 @@ describeOrSkip("SlashCommand: uwc", () => {
         guildId: WORKSHOP_GUILD_ID,
         member,
         memberPermissions: {
-          has: mock(() => false), // No admin permission
+          has: vi.fn(() => false), // No admin permission
         },
       });
 
@@ -275,7 +275,7 @@ describeOrSkip("SlashCommand: uwc", () => {
       const member = createMockGuildMember({
         roles: {
           cache: {
-            has: mock(() => true), // Has required role
+            has: vi.fn(() => true), // Has required role
           },
         },
       });
@@ -314,7 +314,7 @@ describeOrSkip("SlashCommand: uwc", () => {
       const member = createMockGuildMember({
         roles: {
           cache: {
-            has: mock(() => true),
+            has: vi.fn(() => true),
           },
         },
       });
@@ -338,7 +338,7 @@ describeOrSkip("SlashCommand: uwc", () => {
       const member = createMockGuildMember({
         roles: {
           cache: {
-            has: mock(() => true),
+            has: vi.fn(() => true),
           },
         },
       });
@@ -364,7 +364,7 @@ describeOrSkip("SlashCommand: uwc", () => {
       const member = createMockGuildMember({
         roles: {
           cache: {
-            has: mock(() => true),
+            has: vi.fn(() => true),
           },
         },
       });
@@ -393,7 +393,7 @@ describeOrSkip("SlashCommand: uwc", () => {
       const member = createMockGuildMember({
         roles: {
           cache: {
-            has: mock(() => true),
+            has: vi.fn(() => true),
           },
         },
       });
@@ -406,7 +406,7 @@ describeOrSkip("SlashCommand: uwc", () => {
 
       // Mock the database to throw an error
       const originalCreateUwcPoll = UwcPollService.createUwcPoll;
-      UwcPollService.createUwcPoll = mock(() => {
+      UwcPollService.createUwcPoll = vi.fn(() => {
         throw new Error("Database error");
       });
 
@@ -427,7 +427,7 @@ describeOrSkip("SlashCommand: uwc", () => {
       const member = createMockGuildMember({
         roles: {
           cache: {
-            has: mock(() => true),
+            has: vi.fn(() => true),
           },
         },
       });
@@ -441,7 +441,7 @@ describeOrSkip("SlashCommand: uwc", () => {
           type: ChannelType.PublicThread,
           name: "243323: I Guess Two Heads Aren't That Great After All (Ys: The Vanished Omens)",
           appliedTags: [],
-          setAppliedTags: mock(() => Promise.resolve()),
+          setAppliedTags: vi.fn(() => Promise.resolve()),
         },
       });
 
@@ -460,7 +460,7 @@ describeOrSkip("SlashCommand: uwc", () => {
       const member = createMockGuildMember({
         roles: {
           cache: {
-            has: mock(() => true),
+            has: vi.fn(() => true),
           },
         },
       });
@@ -474,7 +474,7 @@ describeOrSkip("SlashCommand: uwc", () => {
           type: ChannelType.PublicThread,
           name: "136277: Eternal Champion XIII (Dalles) (Ys: Book I & II)",
           appliedTags: [],
-          setAppliedTags: mock(() => Promise.resolve()),
+          setAppliedTags: vi.fn(() => Promise.resolve()),
         },
       });
 
@@ -493,7 +493,7 @@ describeOrSkip("SlashCommand: uwc", () => {
       const member = createMockGuildMember({
         roles: {
           cache: {
-            has: mock(() => true),
+            has: vi.fn(() => true),
           },
         },
       });
@@ -507,7 +507,7 @@ describeOrSkip("SlashCommand: uwc", () => {
           type: ChannelType.PublicThread,
           name: "123456: Test Achievement (Game Name (with parentheses))",
           appliedTags: [],
-          setAppliedTags: mock(() => Promise.resolve()),
+          setAppliedTags: vi.fn(() => Promise.resolve()),
         },
       });
 
@@ -526,7 +526,7 @@ describeOrSkip("SlashCommand: uwc", () => {
       const member = createMockGuildMember({
         roles: {
           cache: {
-            has: mock(() => true),
+            has: vi.fn(() => true),
           },
         },
       });
@@ -540,7 +540,7 @@ describeOrSkip("SlashCommand: uwc", () => {
           type: ChannelType.PublicThread,
           name: "14402: Achievement without game info",
           appliedTags: [],
-          setAppliedTags: mock(() => Promise.resolve()),
+          setAppliedTags: vi.fn(() => Promise.resolve()),
         },
       });
 
@@ -559,7 +559,7 @@ describeOrSkip("SlashCommand: uwc", () => {
       const member = createMockGuildMember({
         roles: {
           cache: {
-            has: mock(() => true),
+            has: vi.fn(() => true),
           },
         },
       });
@@ -592,12 +592,12 @@ describeOrSkip("SlashCommand: uwc", () => {
       const member = createMockGuildMember({
         roles: {
           cache: {
-            has: mock(() => true),
+            has: vi.fn(() => true),
           },
         },
       });
 
-      const mockSetAppliedTags = mock(() => Promise.resolve());
+      const mockSetAppliedTags = vi.fn(() => Promise.resolve());
       const interaction = createMockInteraction({
         commandName: "uwc",
         guildId: WORKSHOP_GUILD_ID,
@@ -623,12 +623,12 @@ describeOrSkip("SlashCommand: uwc", () => {
       const member = createMockGuildMember({
         roles: {
           cache: {
-            has: mock(() => true),
+            has: vi.fn(() => true),
           },
         },
       });
 
-      const mockSetAppliedTags = mock(() => Promise.resolve());
+      const mockSetAppliedTags = vi.fn(() => Promise.resolve());
       const interaction = createMockInteraction({
         commandName: "uwc",
         guildId: WORKSHOP_GUILD_ID,
@@ -654,12 +654,12 @@ describeOrSkip("SlashCommand: uwc", () => {
       const member = createMockGuildMember({
         roles: {
           cache: {
-            has: mock(() => true),
+            has: vi.fn(() => true),
           },
         },
       });
 
-      const mockSetAppliedTags = mock(() => {
+      const mockSetAppliedTags = vi.fn(() => {
         throw new Error("Permission denied");
       });
 
@@ -689,12 +689,12 @@ describeOrSkip("SlashCommand: uwc", () => {
       const member = createMockGuildMember({
         roles: {
           cache: {
-            has: mock(() => true),
+            has: vi.fn(() => true),
           },
         },
       });
 
-      const mockSetAppliedTags = mock(() => Promise.resolve());
+      const mockSetAppliedTags = vi.fn(() => Promise.resolve());
       const interaction = createMockInteraction({
         commandName: "uwc",
         guildId: WORKSHOP_GUILD_ID,

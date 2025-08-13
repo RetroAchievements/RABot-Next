@@ -1,10 +1,11 @@
 import { and, eq } from "drizzle-orm";
+import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 
-import { db } from "../database/db";
 import { teamMembers, teams } from "../database/schema";
 
 type Team = typeof teams.$inferSelect;
 // type TeamMember = typeof teamMembers.$inferSelect;
+type DrizzleDb = BetterSQLite3Database<any>;
 
 /**
  * Service for managing Discord bot teams and their members.
@@ -19,6 +20,8 @@ type Team = typeof teams.$inferSelect;
  * to use memorable team names while maintaining referential integrity in the database.
  */
 export class TeamService {
+  constructor(private db: DrizzleDb) {}
+
   /**
    * Creates a new team with a unique ID and human-readable name.
    *
@@ -31,8 +34,8 @@ export class TeamService {
    * @param addedBy - Discord user ID of the administrator who created this team
    * @returns The newly created team record
    */
-  static async createTeam(id: string, name: string, addedBy: string): Promise<Team> {
-    const result = await db
+  async createTeam(id: string, name: string, addedBy: string): Promise<Team> {
+    const result = await this.db
       .insert(teams)
       .values({
         id,
@@ -48,32 +51,33 @@ export class TeamService {
    * Retrieves a team by its unique ID.
    *
    * This is the primary lookup method used internally by other service methods.
-   * Returns null when no team is found to allow callers to handle missing teams
-   * gracefully without throwing exceptions.
+   * The ID is the definitive identifier for a team and ensures consistency
+   * across all operations.
    *
-   * @param id - The unique team identifier
-   * @returns The team record if found, null otherwise
+   * @param id - The unique identifier of the team
+   * @returns The team if found, null otherwise
    */
-  static async getTeam(id: string): Promise<Team | null> {
-    const [team] = await db.select().from(teams).where(eq(teams.id, id));
+  async getTeam(id: string): Promise<Team | null> {
+    const [team] = await this.db.select().from(teams).where(eq(teams.id, id));
 
     return team || null;
   }
 
   /**
-   * Adds a user to a team's member list.
+   * Adds a user to a team.
    *
-   * Uses onConflictDoNothing() to handle duplicate additions gracefully - if a user
-   * is already a team member, the operation silently succeeds. This prevents errors
-   * when administrators accidentally try to add someone twice and ensures idempotent
-   * behavior for team management commands.
+   * This method creates a new membership record linking a Discord user to a team.
+   * We use onConflictDoNothing to ensure idempotency - if the user is already
+   * a member, the operation silently succeeds rather than throwing an error.
+   * This makes the command more user-friendly as users might not remember
+   * if they've already been added.
    *
-   * @param teamId - The team's unique identifier
-   * @param userId - Discord user ID to add to the team
-   * @param addedBy - Discord user ID of the administrator performing this action
+   * @param teamId - The ID of the team to add the member to
+   * @param userId - Discord user ID of the member being added
+   * @param addedBy - Discord user ID of who is adding this member (for audit trail)
    */
-  static async addMember(teamId: string, userId: string, addedBy: string): Promise<void> {
-    await db
+  async addMember(teamId: string, userId: string, addedBy: string): Promise<void> {
+    await this.db
       .insert(teamMembers)
       .values({
         teamId,
@@ -84,25 +88,23 @@ export class TeamService {
   }
 
   /**
-   * Removes a user from a team's member list.
+   * Removes a user from a team.
    *
-   * Returns a boolean to indicate whether removal actually occurred, allowing
-   * calling code to provide appropriate feedback to Discord users (e.g.,
-   * "User was not a member of this team" vs "User removed successfully").
+   * This operation is conditional - it only deletes the membership if it exists.
+   * We return a boolean to indicate whether the removal was successful, which
+   * helps commands provide appropriate feedback to users.
    *
-   * We check existence first to avoid executing unnecessary DELETE operations
-   * and to provide meaningful return values to the caller.
-   *
-   * @param teamId - The team's unique identifier
-   * @param userId - Discord user ID to remove from the team
-   * @returns true if the user was removed, false if they weren't a member
+   * @param teamId - The ID of the team to remove the member from
+   * @param userId - Discord user ID of the member to remove
+   * @returns true if the member was removed, false if they weren't a member
    */
-  static async removeMember(teamId: string, userId: string): Promise<boolean> {
-    // Check if member exists first to avoid unnecessary DELETE operations.
-    const existing = await this.isTeamMember(teamId, userId);
-    if (!existing) return false;
+  async removeMember(teamId: string, userId: string): Promise<boolean> {
+    const isMember = await this.isTeamMember(teamId, userId);
+    if (!isMember) {
+      return false;
+    }
 
-    await db
+    await this.db
       .delete(teamMembers)
       .where(and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId)));
 
@@ -110,39 +112,37 @@ export class TeamService {
   }
 
   /**
-   * Retrieves all member user IDs for a specific team.
+   * Gets all members of a team.
    *
-   * Returns an array of Discord user IDs which can be used to mention or ping
-   * all team members. We only select the userId field to minimize data transfer
-   * since that's all callers need for Discord operations.
+   * This returns a list of Discord user IDs that belong to the specified team.
+   * These IDs can then be used to fetch user objects from Discord's API
+   * for displaying member information or sending notifications.
    *
-   * @param teamId - The team's unique identifier
-   * @returns Array of Discord user IDs belonging to this team
+   * @param teamId - The ID of the team
+   * @returns Array of Discord user IDs
    */
-  static async getTeamMembers(teamId: string): Promise<string[]> {
-    const members = await db
-      .select({
-        userId: teamMembers.userId,
-      })
+  async getTeamMembers(teamId: string): Promise<string[]> {
+    const members = await this.db
+      .select({ userId: teamMembers.userId })
       .from(teamMembers)
       .where(eq(teamMembers.teamId, teamId));
 
-    return members.map((m: { userId: string }) => m.userId);
+    return members.map((m) => m.userId);
   }
 
   /**
-   * Checks if a specific user is a member of a specific team.
+   * Checks if a user is a member of a team.
    *
-   * This method is used for permission checking and validation before performing
-   * team operations. It's also used internally by removeMember to avoid unnecessary
-   * database operations.
+   * This is a utility method used both internally and by commands that need
+   * to verify membership before performing operations. It's particularly useful
+   * for permission checks where only team members can perform certain actions.
    *
-   * @param teamId - The team's unique identifier
+   * @param teamId - The ID of the team
    * @param userId - Discord user ID to check
-   * @returns true if the user is a team member, false otherwise
+   * @returns true if the user is a member, false otherwise
    */
-  static async isTeamMember(teamId: string, userId: string): Promise<boolean> {
-    const [member] = await db
+  async isTeamMember(teamId: string, userId: string): Promise<boolean> {
+    const [member] = await this.db
       .select()
       .from(teamMembers)
       .where(and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId)));
@@ -151,102 +151,91 @@ export class TeamService {
   }
 
   /**
-   * Retrieves all teams in the system.
+   * Gets all teams in the system.
    *
-   * Used primarily for Discord command autocomplete functionality, allowing users
-   * to see available teams when typing commands. Also useful for administrative
-   * overview and debugging purposes.
+   * This is primarily used by admin commands to list available teams
+   * or by autocomplete handlers to provide team suggestions to users.
+   * Teams are returned in the order they were created.
    *
-   * @returns Array of all team records
+   * @returns Array of all teams
    */
-  static async getAllTeams(): Promise<Team[]> {
-    return db.select().from(teams);
+  async getAllTeams(): Promise<Team[]> {
+    return await this.db.select().from(teams);
   }
 
   /**
-   * Helper methods that work with team names instead of IDs.
+   * Gets a team by its human-readable name.
    *
-   * These methods provide the user-facing API for Discord commands where users
-   * type team names rather than remembering internal IDs. They internally resolve
-   * the name to an ID and then delegate to the core ID-based methods.
+   * This is the user-facing lookup method, allowing Discord users to reference
+   * teams by their memorable names rather than internal IDs. This is essential
+   * for a good user experience in Discord commands.
+   *
+   * @param name - The human-readable name of the team
+   * @returns The team if found, null otherwise
    */
-
-  /**
-   * Retrieves a team by its human-readable name.
-   *
-   * This is the primary lookup method for Discord commands where users type
-   * team names. The name field has a unique constraint in the database to
-   * ensure this lookup is unambiguous.
-   *
-   * @param name - The team's display name (case-sensitive)
-   * @returns The team record if found, null otherwise
-   */
-  static async getTeamByName(name: string): Promise<Team | null> {
-    const [team] = await db.select().from(teams).where(eq(teams.name, name));
+  async getTeamByName(name: string): Promise<Team | null> {
+    const [team] = await this.db.select().from(teams).where(eq(teams.name, name));
 
     return team || null;
   }
 
   /**
-   * Adds a user to a team identified by name rather than ID.
+   * Adds a member to a team using the team's name.
    *
-   * This method throws an error if the team doesn't exist, rather than returning
-   * a boolean, because Discord commands need to provide clear error messages to
-   * users when they specify invalid team names.
+   * This is a convenience method that combines name lookup with member addition,
+   * providing a more user-friendly API for Discord commands. It handles the
+   * common pattern of users specifying teams by name rather than ID.
    *
-   * @param teamName - The team's display name
-   * @param userId - Discord user ID to add to the team
-   * @param addedBy - Discord user ID of the administrator performing this action
-   * @throws Error if the team name doesn't exist
+   * @param teamName - The human-readable name of the team
+   * @param userId - Discord user ID of the member to add
+   * @param addedBy - Discord user ID of who is adding this member
+   * @throws Error if the team doesn't exist
    */
-  static async addMemberByTeamName(
-    teamName: string,
-    userId: string,
-    addedBy: string,
-  ): Promise<void> {
+  async addMemberByTeamName(teamName: string, userId: string, addedBy: string): Promise<void> {
     const team = await this.getTeamByName(teamName);
     if (!team) {
       throw new Error(`Team "${teamName}" not found`);
     }
+
     await this.addMember(team.id, userId, addedBy);
   }
 
   /**
-   * Removes a user from a team identified by name rather than ID.
+   * Removes a member from a team using the team's name.
    *
-   * Returns false if either the team doesn't exist OR the user wasn't a member.
-   * This allows Discord commands to handle both scenarios gracefully without
-   * distinguishing between "team not found" and "user not in team".
+   * Similar to addMemberByTeamName, this provides a user-friendly way to remove
+   * members by specifying the team name. Returns false if either the team doesn't
+   * exist or the user isn't a member, making it safe to call without pre-checks.
    *
-   * @param teamName - The team's display name
-   * @param userId - Discord user ID to remove from the team
-   * @returns true if the user was removed, false if team doesn't exist or user wasn't a member
+   * @param teamName - The human-readable name of the team
+   * @param userId - Discord user ID of the member to remove
+   * @returns true if the member was removed, false otherwise
    */
-  static async removeMemberByTeamName(teamName: string, userId: string): Promise<boolean> {
+  async removeMemberByTeamName(teamName: string, userId: string): Promise<boolean> {
     const team = await this.getTeamByName(teamName);
     if (!team) {
       return false;
     }
 
-    return this.removeMember(team.id, userId);
+    return await this.removeMember(team.id, userId);
   }
 
   /**
-   * Retrieves all member user IDs for a team identified by name.
+   * Gets all members of a team by the team's name.
    *
-   * Returns an empty array if the team doesn't exist, allowing callers to
-   * handle missing teams gracefully (e.g., "No members found" vs explicit
-   * error handling).
+   * Convenience method for retrieving team members when only the team name
+   * is known. Returns an empty array if the team doesn't exist, avoiding
+   * null checks in calling code.
    *
-   * @param teamName - The team's display name
-   * @returns Array of Discord user IDs belonging to this team, or empty array if team doesn't exist
+   * @param teamName - The human-readable name of the team
+   * @returns Array of Discord user IDs, empty if team doesn't exist
    */
-  static async getTeamMembersByName(teamName: string): Promise<string[]> {
+  async getTeamMembersByName(teamName: string): Promise<string[]> {
     const team = await this.getTeamByName(teamName);
     if (!team) {
       return [];
     }
 
-    return this.getTeamMembers(team.id);
+    return await this.getTeamMembers(team.id);
   }
 }

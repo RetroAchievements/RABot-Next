@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Collection, PermissionsBitField } from "discord.js";
 
 import type { BotClient, Command, SlashCommand } from "../models";
@@ -16,7 +16,7 @@ describe("Handler: handleMessage", () => {
 
   afterEach(() => {
     // ... clear all mock calls ...
-    mock.restore();
+    vi.restoreAllMocks();
   });
 
   beforeEach(() => {
@@ -27,7 +27,7 @@ describe("Handler: handleMessage", () => {
       description: "Test command",
       usage: "!test",
       category: "utility",
-      execute: mock(() => Promise.resolve()),
+      execute: vi.fn(() => Promise.resolve()),
     };
 
     mockSlashCommand = {
@@ -36,7 +36,7 @@ describe("Handler: handleMessage", () => {
         description: "Test slash command",
       } as any,
       legacyName: "test",
-      execute: mock(() => Promise.resolve()),
+      execute: vi.fn(() => Promise.resolve()),
     };
 
     mockClient = createMockClient({
@@ -46,15 +46,15 @@ describe("Handler: handleMessage", () => {
     });
 
     // ... spy on utility functions ...
-    spyOn(CooldownManager, "checkCooldown").mockReturnValue(0);
-    spyOn(CooldownManager, "setCooldown").mockImplementation(() => {});
-    spyOn(CooldownManager, "formatCooldownMessage").mockReturnValue("⏱️ Please wait **3** seconds");
-    spyOn(CommandAnalytics, "startTracking").mockReturnValue(Date.now());
-    spyOn(CommandAnalytics, "trackLegacyCommand").mockImplementation(() => {});
-    spyOn(logger, "logCommandExecution").mockImplementation(() => logger.logger);
-    spyOn(logger, "logError").mockImplementation(() => {});
-    spyOn(logger, "logMigrationNotice").mockImplementation(() => {});
-    spyOn(migrationHelper, "sendMigrationNotice").mockResolvedValue(null);
+    vi.spyOn(CooldownManager, "checkCooldown").mockReturnValue(0);
+    vi.spyOn(CooldownManager, "setCooldown").mockImplementation(() => {});
+    vi.spyOn(CooldownManager, "formatCooldownMessage").mockReturnValue("⏱️ Please wait **3** seconds");
+    vi.spyOn(CommandAnalytics, "startTracking").mockReturnValue(Date.now());
+    vi.spyOn(CommandAnalytics, "trackLegacyCommand").mockImplementation(() => {});
+    vi.spyOn(logger, "logCommandExecution").mockImplementation(() => logger.logger);
+    vi.spyOn(logger, "logError").mockImplementation(() => {});
+    vi.spyOn(logger, "logMigrationNotice").mockImplementation(() => {});
+    vi.spyOn(migrationHelper, "sendMigrationNotice").mockResolvedValue(null);
   });
 
   it("is defined", () => {
@@ -153,8 +153,8 @@ describe("Handler: handleMessage", () => {
     });
     (CooldownManager.checkCooldown as any).mockReturnValue(3000); // ... 3 seconds remaining ...
 
-    const mockReply = { delete: mock(() => Promise.resolve()) };
-    message.reply = mock(() => Promise.resolve(mockReply as any));
+    const mockReply = { delete: vi.fn(() => Promise.resolve()) };
+    message.reply = vi.fn(() => Promise.resolve(mockReply as any));
 
     // ACT
     await handleMessage(message, mockClient);
@@ -283,7 +283,7 @@ describe("Handler: handleMessage", () => {
   it("handles and logs command execution errors", async () => {
     // ARRANGE
     const testError = new Error("Test error");
-    mockCommand.execute = mock(() => Promise.reject(testError));
+    mockCommand.execute = vi.fn(() => Promise.reject(testError));
 
     const message = createMockMessage({
       content: "!test",

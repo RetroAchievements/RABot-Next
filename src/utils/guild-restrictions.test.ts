@@ -1,4 +1,4 @@
-import { describe, expect, it, mock } from "bun:test";
+import { describe, expect, it, vi } from "vitest";
 import { type ChatInputCommandInteraction, MessageFlags } from "discord.js";
 
 import { requireGuild } from "./guild-restrictions";
@@ -14,7 +14,7 @@ describe("Util: guild-restrictions", () => {
       // ARRANGE
       const mockInteraction = {
         guildId: "123456789012345678",
-        reply: mock(),
+        reply: vi.fn(),
       } as unknown as ChatInputCommandInteraction;
 
       // ACT
@@ -29,7 +29,7 @@ describe("Util: guild-restrictions", () => {
       // ARRANGE
       const mockInteraction = {
         guildId: "123456789012345678",
-        reply: mock(),
+        reply: vi.fn(),
       } as unknown as ChatInputCommandInteraction;
 
       // ACT
@@ -47,7 +47,7 @@ describe("Util: guild-restrictions", () => {
       // ARRANGE
       const mockInteraction = {
         guildId: null,
-        reply: mock(),
+        reply: vi.fn(),
       } as unknown as ChatInputCommandInteraction;
 
       // ACT
@@ -65,7 +65,7 @@ describe("Util: guild-restrictions", () => {
       // ARRANGE
       const mockInteraction = {
         guildId: undefined,
-        reply: mock(),
+        reply: vi.fn(),
       } as unknown as ChatInputCommandInteraction;
 
       // ACT
@@ -84,7 +84,7 @@ describe("Util: guild-restrictions", () => {
       const customMessage = "This command is restricted to specific servers.";
       const mockInteraction = {
         guildId: "wrong-guild-id",
-        reply: mock(),
+        reply: vi.fn(),
       } as unknown as ChatInputCommandInteraction;
 
       // ACT
@@ -102,7 +102,7 @@ describe("Util: guild-restrictions", () => {
       // ARRANGE
       const mockInteraction = {
         guildId: "wrong-guild-id",
-        reply: mock(),
+        reply: vi.fn(),
       } as unknown as ChatInputCommandInteraction;
 
       // ACT
@@ -120,7 +120,7 @@ describe("Util: guild-restrictions", () => {
       // ARRANGE
       const mockInteraction = {
         guildId: "",
-        reply: mock(),
+        reply: vi.fn(),
       } as unknown as ChatInputCommandInteraction;
 
       // ACT
@@ -138,7 +138,7 @@ describe("Util: guild-restrictions", () => {
       // ARRANGE
       const mockInteraction = {
         guildId: "123456789012345678",
-        reply: mock(),
+        reply: vi.fn(),
       } as unknown as ChatInputCommandInteraction;
 
       // ACT
@@ -156,7 +156,7 @@ describe("Util: guild-restrictions", () => {
       // ARRANGE
       const mockInteraction = {
         guildId: "123456789012345678",
-        reply: mock(),
+        reply: vi.fn(),
       } as unknown as ChatInputCommandInteraction;
 
       // ACT
@@ -175,7 +175,7 @@ describe("Util: guild-restrictions", () => {
       let replyResolved = false;
       const mockInteraction = {
         guildId: "wrong-guild",
-        reply: mock(async () => {
+        reply: vi.fn(async () => {
           replyResolved = true;
 
           return Promise.resolve();
@@ -195,7 +195,7 @@ describe("Util: guild-restrictions", () => {
       // ARRANGE
       const mockInteraction = {
         guildId: "wrong-guild",
-        reply: mock(),
+        reply: vi.fn(),
       } as unknown as ChatInputCommandInteraction;
 
       // ACT
@@ -213,7 +213,7 @@ describe("Util: guild-restrictions", () => {
       const realGuildId = "310192285306454017"; // Main RA server ID
       const mockInteraction = {
         guildId: realGuildId,
-        reply: mock(),
+        reply: vi.fn(),
       } as unknown as ChatInputCommandInteraction;
 
       // ACT
@@ -229,7 +229,7 @@ describe("Util: guild-restrictions", () => {
       const workshopGuildId = "476211979464343552"; // Workshop server ID
       const mockInteraction = {
         guildId: workshopGuildId,
-        reply: mock(),
+        reply: vi.fn(),
       } as unknown as ChatInputCommandInteraction;
 
       // ACT
@@ -246,7 +246,7 @@ describe("Util: guild-restrictions", () => {
       const workshopGuildId = "476211979464343552";
       const mockInteraction = {
         guildId: mainGuildId,
-        reply: mock(),
+        reply: vi.fn(),
       } as unknown as ChatInputCommandInteraction;
 
       // ACT
@@ -266,7 +266,7 @@ describe("Util: guild-restrictions", () => {
       const workshopGuildId = "476211979464343552";
       const mockInteraction = {
         guildId: workshopGuildId,
-        reply: mock(),
+        reply: vi.fn(),
       } as unknown as ChatInputCommandInteraction;
 
       // ACT
