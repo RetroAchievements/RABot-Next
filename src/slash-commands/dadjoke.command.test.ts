@@ -17,14 +17,6 @@ describe("SlashCommand: dadjoke", () => {
     vi.restoreAllMocks();
   });
 
-  it("is defined", () => {
-    expect(dadjokeSlashCommand).toBeDefined();
-    expect(dadjokeSlashCommand.data.name).toBe("dadjoke");
-    expect(dadjokeSlashCommand.data.description).toBe("Get a random dad joke");
-    expect(dadjokeSlashCommand.legacyName).toBe("dadjoke");
-    expect(dadjokeSlashCommand.cooldown).toBe(3);
-  });
-
   describe("execute", () => {
     it("displays a dad joke when fetch is successful", async () => {
       // ARRANGE

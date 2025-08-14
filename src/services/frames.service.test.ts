@@ -4,10 +4,6 @@ import { FramesService } from "./frames.service";
 
 describe("Service: FramesService", () => {
   describe("parseInput", () => {
-    it("is defined", () => {
-      expect(FramesService.parseInput).toBeDefined();
-    });
-
     describe("time format parsing", () => {
       it("parses hours, minutes, seconds, and milliseconds", () => {
         // ACT
@@ -181,10 +177,6 @@ describe("Service: FramesService", () => {
   });
 
   describe("convertTimeToFrames", () => {
-    it("is defined", () => {
-      expect(FramesService.convertTimeToFrames).toBeDefined();
-    });
-
     it("converts time to frames at 60 FPS", () => {
       // ACT
       const frames = FramesService.convertTimeToFrames(0, 1, 0, 0, 60);
@@ -235,10 +227,6 @@ describe("Service: FramesService", () => {
   });
 
   describe("convertFramesToTime", () => {
-    it("is defined", () => {
-      expect(FramesService.convertFramesToTime).toBeDefined();
-    });
-
     it("converts frames to time at 60 FPS", () => {
       // ACT
       const time = FramesService.convertFramesToTime(3600, 60);
@@ -306,10 +294,6 @@ describe("Service: FramesService", () => {
   });
 
   describe("formatOutput", () => {
-    it("is defined", () => {
-      expect(FramesService.formatOutput).toBeDefined();
-    });
-
     it("formats output correctly", () => {
       // ACT
       const output = FramesService.formatOutput(1, 30, 45, 500, 60, 326730);
@@ -342,10 +326,6 @@ describe("Service: FramesService", () => {
   });
 
   describe("processInput", () => {
-    it("is defined", () => {
-      expect(FramesService.processInput).toBeDefined();
-    });
-
     it("processes time input correctly", () => {
       // ACT
       const output = FramesService.processInput("1h 5min 15s");

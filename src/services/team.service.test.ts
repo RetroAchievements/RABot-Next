@@ -19,11 +19,6 @@ describe("Service: TeamService", () => {
   });
 
   describe("createTeam", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(teamService.createTeam).toBeDefined();
-    });
-
     it("creates a new team with the provided details", async () => {
       // ACT
       const team = await teamService.createTeam("test-team-id", "test-team", "admin123");
@@ -37,11 +32,6 @@ describe("Service: TeamService", () => {
   });
 
   describe("getTeam", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(teamService.getTeam).toBeDefined();
-    });
-
     it("returns a team when found", async () => {
       // ARRANGE
       await teamService.createTeam("team123", "Test Team", "admin");
@@ -65,11 +55,6 @@ describe("Service: TeamService", () => {
   });
 
   describe("addMember", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(teamService.addMember).toBeDefined();
-    });
-
     it("adds a member to a team", async () => {
       // ARRANGE
       await teamService.createTeam("team123", "Test Team", "admin");
@@ -98,11 +83,6 @@ describe("Service: TeamService", () => {
   });
 
   describe("removeMember", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(teamService.removeMember).toBeDefined();
-    });
-
     it("removes an existing member from a team", async () => {
       // ARRANGE
       await teamService.createTeam("team123", "Test Team", "admin");
@@ -130,11 +110,6 @@ describe("Service: TeamService", () => {
   });
 
   describe("getTeamMembers", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(teamService.getTeamMembers).toBeDefined();
-    });
-
     it("returns an array of user IDs for team members", async () => {
       // ARRANGE
       await teamService.createTeam("team123", "Test Team", "admin");
@@ -163,11 +138,6 @@ describe("Service: TeamService", () => {
   });
 
   describe("isTeamMember", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(teamService.isTeamMember).toBeDefined();
-    });
-
     it("returns true when user is a team member", async () => {
       // ARRANGE
       await teamService.createTeam("team123", "Test Team", "admin");
@@ -193,11 +163,6 @@ describe("Service: TeamService", () => {
   });
 
   describe("getAllTeams", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(teamService.getAllTeams).toBeDefined();
-    });
-
     it("returns all teams", async () => {
       // ARRANGE
       await teamService.createTeam("team1", "Team One", "admin");
@@ -221,11 +186,6 @@ describe("Service: TeamService", () => {
   });
 
   describe("getTeamByName", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(teamService.getTeamByName).toBeDefined();
-    });
-
     it("returns a team when found by name", async () => {
       // ARRANGE
       await teamService.createTeam("team-id", "test-team", "admin");
@@ -249,11 +209,6 @@ describe("Service: TeamService", () => {
   });
 
   describe("addMemberByTeamName", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(teamService.addMemberByTeamName).toBeDefined();
-    });
-
     it("adds a member when team exists", async () => {
       // ARRANGE
       await teamService.createTeam("team123", "test-team", "admin");
@@ -275,11 +230,6 @@ describe("Service: TeamService", () => {
   });
 
   describe("removeMemberByTeamName", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(teamService.removeMemberByTeamName).toBeDefined();
-    });
-
     it("removes a member when team and member exist", async () => {
       // ARRANGE
       await teamService.createTeam("team123", "test-team", "admin");
@@ -315,11 +265,6 @@ describe("Service: TeamService", () => {
   });
 
   describe("getTeamMembersByName", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(teamService.getTeamMembersByName).toBeDefined();
-    });
-
     it("returns team members when team exists", async () => {
       // ARRANGE
       await teamService.createTeam("team123", "test-team", "admin");

@@ -41,11 +41,6 @@ describe("Service: AutoPublishService", () => {
   });
 
   describe("shouldAutoPublish", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(AutoPublishService.shouldAutoPublish).toBeDefined();
-    });
-
     it("returns false for non-announcement channels", () => {
       // ARRANGE
       const message = createMockMessage({
@@ -113,11 +108,6 @@ describe("Service: AutoPublishService", () => {
   });
 
   describe("publishMessage", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(AutoPublishService.publishMessage).toBeDefined();
-    });
-
     it("successfully publishes a message", async () => {
       // ARRANGE
       const message = createMockMessage();
@@ -175,11 +165,6 @@ describe("Service: AutoPublishService", () => {
   });
 
   describe("handleMessage", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(AutoPublishService.handleMessage).toBeDefined();
-    });
-
     it("does nothing if message should not be auto-published", async () => {
       // ARRANGE
       const message = createMockMessage({

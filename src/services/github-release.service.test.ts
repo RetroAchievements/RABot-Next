@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GithubReleaseService } from "./github-release.service";
 
-describe("GithubReleaseService", () => {
+describe("Service: GithubReleaseService", () => {
   beforeEach(() => {
     // Reset cache before each test
     // @ts-expect-error - Accessing private property for testing

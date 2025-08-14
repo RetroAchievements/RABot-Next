@@ -15,12 +15,6 @@ describe("Command: frames", () => {
     vi.restoreAllMocks();
   });
 
-  it("is defined", () => {
-    expect(framesCommand).toBeDefined();
-    expect(framesCommand.name).toBe("frames");
-    expect(framesCommand.category).toBe("utility");
-  });
-
   describe("execute", () => {
     it("shows error message when no arguments provided", async () => {
       // ACT

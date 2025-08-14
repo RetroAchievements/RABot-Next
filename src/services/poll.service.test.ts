@@ -19,11 +19,6 @@ describe("Service: PollService", () => {
   });
 
   describe("createPoll", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(pollService.createPoll).toBeDefined();
-    });
-
     it("creates a new poll with the provided details", async () => {
       // ACT
       const poll = await pollService.createPoll(
@@ -66,11 +61,6 @@ describe("Service: PollService", () => {
   });
 
   describe("getPoll", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(pollService.getPoll).toBeDefined();
-    });
-
     it("returns a poll when found", async () => {
       // ARRANGE
       const createdPoll = await pollService.createPoll(
@@ -101,11 +91,6 @@ describe("Service: PollService", () => {
   });
 
   describe("addVote", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(pollService.addVote).toBeDefined();
-    });
-
     it("adds a vote when user has not voted", async () => {
       // ARRANGE
       const poll = await pollService.createPoll("msg123", "ch456", "creator", "Question", [
@@ -165,11 +150,6 @@ describe("Service: PollService", () => {
   });
 
   describe("getUserVote", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(pollService.getUserVote).toBeDefined();
-    });
-
     it("returns a vote when user has voted", async () => {
       // ARRANGE
       const poll = await pollService.createPoll("msg123", "ch456", "creator", "Question", [
@@ -206,11 +186,6 @@ describe("Service: PollService", () => {
   });
 
   describe("getPollResults", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(pollService.getPollResults).toBeDefined();
-    });
-
     it("returns vote counts by option index", async () => {
       // ARRANGE
       const poll = await pollService.createPoll("msg123", "ch456", "creator", "Question", [
@@ -277,11 +252,6 @@ describe("Service: PollService", () => {
   });
 
   describe("getActivePolls", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(pollService.getActivePolls).toBeDefined();
-    });
-
     it("returns polls with no end time", async () => {
       // ARRANGE
       await pollService.createPoll("msg1", "ch1", "user1", "Q1", ["A", "B"]);

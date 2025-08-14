@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { connectApiService } from "./connect-api.service";
 
-describe("Service: connect-api", () => {
+describe("Service: ConnectApiService", () => {
   const originalFetch = global.fetch;
   const mockFetch = vi.fn();
 
@@ -14,14 +14,6 @@ describe("Service: connect-api", () => {
 
   afterEach(() => {
     global.fetch = originalFetch;
-  });
-
-  it("is defined", () => {
-    // ASSERT
-    expect(connectApiService).toBeDefined();
-    expect(connectApiService.getPatchData).toBeDefined();
-    expect(connectApiService.getMemAddr).toBeDefined();
-    expect(connectApiService.getCodeNotes).toBeDefined();
   });
 
   describe("getPatchData", () => {

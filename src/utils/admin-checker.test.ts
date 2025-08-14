@@ -5,11 +5,6 @@ import { AdminChecker } from "./admin-checker";
 
 describe("Util: AdminChecker", () => {
   describe("isAdminFromMessage", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(AdminChecker.isAdminFromMessage).toBeDefined();
-    });
-
     it("given a user with Discord Administrator permissions, returns true", () => {
       // ARRANGE
       const mockMessage = {
@@ -94,11 +89,6 @@ describe("Util: AdminChecker", () => {
   });
 
   describe("isAdminFromInteraction", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(AdminChecker.isAdminFromInteraction).toBeDefined();
-    });
-
     it("given a user with Discord Administrator permissions, returns true", () => {
       // ARRANGE
       const mockInteraction = {

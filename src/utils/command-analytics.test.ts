@@ -14,11 +14,6 @@ describe("Util: CommandAnalytics", () => {
   });
 
   describe("startTracking", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(CommandAnalytics.startTracking).toBeDefined();
-    });
-
     it("returns the current timestamp", () => {
       // ARRANGE
       const timeBefore = Date.now();
@@ -33,11 +28,6 @@ describe("Util: CommandAnalytics", () => {
   });
 
   describe("trackLegacyCommand", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(CommandAnalytics.trackLegacyCommand).toBeDefined();
-    });
-
     it("tracks a successful legacy command execution", () => {
       // ARRANGE
       const message = createMockMessage({
@@ -108,11 +98,6 @@ describe("Util: CommandAnalytics", () => {
   });
 
   describe("trackSlashCommand", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(CommandAnalytics.trackSlashCommand).toBeDefined();
-    });
-
     it("tracks a successful slash command execution", () => {
       // ARRANGE
       const interaction = createMockInteraction({
@@ -160,11 +145,6 @@ describe("Util: CommandAnalytics", () => {
   });
 
   describe("getStatistics", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(CommandAnalytics.getStatistics).toBeDefined();
-    });
-
     it("returns empty statistics when no commands have been tracked", () => {
       // ACT
       const stats = CommandAnalytics.getStatistics();
@@ -289,11 +269,6 @@ describe("Util: CommandAnalytics", () => {
   });
 
   describe("reset", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(CommandAnalytics.reset).toBeDefined();
-    });
-
     it("clears all analytics data", () => {
       // ARRANGE
       const message = createMockMessage();

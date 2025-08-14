@@ -32,11 +32,6 @@ describe("Service: TemplateService", () => {
   } as GameExtended;
 
   describe("generateGanTemplate", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(TemplateService.generateGanTemplate).toBeDefined();
-    });
-
     it("generates a template with all game information provided", () => {
       // ARRANGE
       const achievementSetDate = "October 15, 2024";
@@ -94,11 +89,6 @@ describe("Service: TemplateService", () => {
   });
 
   describe("generateGan2Template", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(TemplateService.generateGan2Template).toBeDefined();
-    });
-
     it("generates a colorized template with all game information", () => {
       // ARRANGE
       const achievementSetDate = "October 15, 2024";

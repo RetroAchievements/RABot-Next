@@ -5,11 +5,6 @@ import { requireGuild } from "./guild-restrictions";
 
 describe("Util: guild-restrictions", () => {
   describe("requireGuild", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(requireGuild).toBeDefined();
-    });
-
     it("returns true when interaction guildId matches allowedGuildId", async () => {
       // ARRANGE
       const mockInteraction = {

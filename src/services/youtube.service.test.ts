@@ -41,11 +41,6 @@ describe("Service: YouTubeService", () => {
   });
 
   describe("searchLongplay", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(YouTubeService.searchLongplay).toBeDefined();
-    });
-
     it("returns a YouTube URL when a longplay is found", async () => {
       // ARRANGE
       const gameTitle = "Super Mario 64";

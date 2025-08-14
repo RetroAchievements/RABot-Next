@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as logger from "../utils/logger";
 import { DadjokeService } from "./dadjoke.service";
 
-describe("DadjokeService", () => {
+describe("Service: DadjokeService", () => {
   beforeEach(() => {
     // Reset mocks.
     vi.spyOn(logger, "logApiCall").mockImplementation(() => {});

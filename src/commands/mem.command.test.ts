@@ -30,9 +30,8 @@ describe("Command: mem", () => {
     vi.clearAllMocks();
   });
 
-  it("is defined", () => {
+  it("has correct properties", () => {
     // ASSERT
-    expect(memCommand).toBeDefined();
     expect(memCommand.name).toBe("parsemem");
     expect(memCommand.aliases).toContain("mem");
     expect(memCommand.category).toBe("retroachievements");

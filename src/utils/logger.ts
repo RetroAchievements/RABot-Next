@@ -2,7 +2,8 @@ import type { Logger } from "pino";
 import pino from "pino";
 
 const isDevelopment = process.env.NODE_ENV !== "production";
-const logLevel = process.env.LOG_LEVEL || (isDevelopment ? "debug" : "info");
+const isTest = process.env.NODE_ENV === "test";
+const logLevel = process.env.LOG_LEVEL || (isTest ? "silent" : isDevelopment ? "debug" : "info");
 
 const pinoOptions: pino.LoggerOptions = {
   level: logLevel,

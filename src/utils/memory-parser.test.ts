@@ -9,11 +9,6 @@ import {
 
 describe("Util: memory-parser", () => {
   describe("parseMemory", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(parseMemory).toBeDefined();
-    });
-
     it("parses simple memory string", () => {
       // ARRANGE
       const memoryString = "0xH1234=5";
@@ -217,11 +212,6 @@ describe("Util: memory-parser", () => {
   });
 
   describe("formatParsedRequirement", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(formatParsedRequirement).toBeDefined();
-    });
-
     it("formats requirement correctly", () => {
       // ARRANGE
       const req: ParsedRequirement = {
@@ -277,11 +267,6 @@ describe("Util: memory-parser", () => {
   });
 
   describe("formatMemoryGroups", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(formatMemoryGroups).toBeDefined();
-    });
-
     it("formats single group", () => {
       // ARRANGE
       const result = parseMemory("0xH1234=5");

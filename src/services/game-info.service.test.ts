@@ -34,11 +34,6 @@ describe("Service: GameInfoService", () => {
   });
 
   describe("extractGameId", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(GameInfoService.extractGameId).toBeDefined();
-    });
-
     it("extracts game ID from a numeric string", () => {
       // ACT
       const gameId = GameInfoService.extractGameId("14402");
@@ -99,11 +94,6 @@ describe("Service: GameInfoService", () => {
   });
 
   describe("fetchGameInfo", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(GameInfoService.fetchGameInfo).toBeDefined();
-    });
-
     it("fetches game info successfully", async () => {
       // ARRANGE
       const mockGameData = createMockGameExtended();
@@ -145,11 +135,6 @@ describe("Service: GameInfoService", () => {
   });
 
   describe("getMostRecentAchievementDate", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(GameInfoService.getMostRecentAchievementDate).toBeDefined();
-    });
-
     it("returns the most recent achievement date", () => {
       // ARRANGE
       const gameInfo = createMockGameExtended({

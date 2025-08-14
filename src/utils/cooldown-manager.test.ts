@@ -11,11 +11,6 @@ describe("Util: CooldownManager", () => {
   });
 
   describe("checkCooldown", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(CooldownManager.checkCooldown).toBeDefined();
-    });
-
     it("given the command has no cooldowns set, returns 0", () => {
       // ACT
       const remainingTime = CooldownManager.checkCooldown(cooldowns, "user123", "ping");
@@ -76,11 +71,6 @@ describe("Util: CooldownManager", () => {
   });
 
   describe("setCooldown", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(CooldownManager.setCooldown).toBeDefined();
-    });
-
     it("given a new command, creates a new collection and sets the cooldown", () => {
       // ACT
       CooldownManager.setCooldown(cooldowns, "user123", "ping");
@@ -117,11 +107,6 @@ describe("Util: CooldownManager", () => {
   });
 
   describe("formatCooldownMessage", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(CooldownManager.formatCooldownMessage).toBeDefined();
-    });
-
     it("given 1 second remaining, returns a singular message", () => {
       // ACT
       const message = CooldownManager.formatCooldownMessage(1000);
@@ -148,11 +133,6 @@ describe("Util: CooldownManager", () => {
   });
 
   describe("checkCooldownWithBypass", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(CooldownManager.checkCooldownWithBypass).toBeDefined();
-    });
-
     it("given the user is an admin, returns 0 even if cooldown exists", () => {
       // ARRANGE
       const now = Date.now();
@@ -233,11 +213,6 @@ describe("Util: CooldownManager", () => {
   });
 
   describe("cleanupExpiredCooldowns", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(CooldownManager.cleanupExpiredCooldowns).toBeDefined();
-    });
-
     it("given no cooldowns, returns 0", () => {
       // ACT
       const cleanedCount = CooldownManager.cleanupExpiredCooldowns(cooldowns);

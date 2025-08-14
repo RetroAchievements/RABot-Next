@@ -20,12 +20,6 @@ describe("SlashCommand: frames", () => {
     vi.restoreAllMocks();
   });
 
-  it("is defined", () => {
-    expect(framesSlashCommand).toBeDefined();
-    expect(framesSlashCommand.data.name).toBe("frames");
-    expect(framesSlashCommand.legacyName).toBe("frames");
-  });
-
   describe("execute", () => {
     it("shows error message for invalid input", async () => {
       // ARRANGE

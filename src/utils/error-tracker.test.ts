@@ -11,11 +11,6 @@ describe("Util: ErrorTracker", () => {
   });
 
   describe("trackMessageError", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(ErrorTracker.trackMessageError).toBeDefined();
-    });
-
     it("tracks an error with full message context", () => {
       // ARRANGE
       const error = new Error("Test error");
@@ -107,11 +102,6 @@ describe("Util: ErrorTracker", () => {
   });
 
   describe("trackInteractionError", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(ErrorTracker.trackInteractionError).toBeDefined();
-    });
-
     it("tracks an error with full interaction context", () => {
       // ARRANGE
       const error = new Error("Interaction error");
@@ -160,11 +150,6 @@ describe("Util: ErrorTracker", () => {
   });
 
   describe("trackError", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(ErrorTracker.trackError).toBeDefined();
-    });
-
     it("tracks an error with custom context", () => {
       // ARRANGE
       const error = new Error("Custom error");
@@ -189,11 +174,6 @@ describe("Util: ErrorTracker", () => {
   });
 
   describe("generateErrorId", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(ErrorTracker.generateErrorId).toBeDefined();
-    });
-
     it("generates unique error IDs", () => {
       // ACT
       const id1 = ErrorTracker.generateErrorId();
@@ -220,11 +200,6 @@ describe("Util: ErrorTracker", () => {
   });
 
   describe("formatUserError", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(ErrorTracker.formatUserError).toBeDefined();
-    });
-
     it("formats missing access errors", () => {
       // ARRANGE
       const error = new Error("Missing Access");

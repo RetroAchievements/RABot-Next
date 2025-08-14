@@ -59,11 +59,6 @@ describe("Handler: handleMessage", () => {
     vi.spyOn(migrationHelper, "sendMigrationNotice").mockResolvedValue(null);
   });
 
-  it("is defined", () => {
-    // ASSERT
-    expect(handleMessage).toBeDefined();
-  });
-
   it("ignores messages from bots", async () => {
     // ARRANGE
     const message = createMockMessage({
