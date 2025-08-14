@@ -9,10 +9,14 @@ beforeEach(() => {
   vi.stubEnv("DISCORD_TOKEN", "test-token");
   vi.stubEnv("DISCORD_APPLICATION_ID", "test-app-id");
   vi.stubEnv("RA_WEB_API_KEY", "test-api-key");
+
+  // Mock global Bun object for tests running in Vitest environment.
+  vi.stubGlobal("Bun", { version: "1.0.0" });
 });
 
 // Clean up after each test.
 afterEach(() => {
   vi.clearAllMocks();
   vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
 });

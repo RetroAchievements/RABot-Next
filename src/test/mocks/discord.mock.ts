@@ -119,6 +119,9 @@ export function createMockMessage(overrides?: any): Message {
     delete: vi.fn(() => Promise.resolve({} as Message)),
     react: vi.fn(() => Promise.resolve({})) as Mock<any>,
     edit: vi.fn(() => Promise.resolve({} as Message)) as Mock<() => Promise<Message>>,
+    createMessageComponentCollector: vi.fn(() => ({
+      on: vi.fn(),
+    })),
   };
 
   // Apply overrides
