@@ -50,6 +50,7 @@ export function createMockTextChannel(overrides?: Partial<TextChannel>): TextCha
     permissionsFor: vi.fn(() => new PermissionsBitField(["SendMessages", "EmbedLinks"])),
     parentId: null,
     parent: null,
+    isDMBased: vi.fn(() => false),
     ...overrides,
   } as unknown as TextChannel;
 }
@@ -116,7 +117,7 @@ export function createMockMessage(overrides?: any): Message {
     reference: null,
     reply: vi.fn(() => Promise.resolve({} as Message)) as Mock<() => Promise<Message>>,
     delete: vi.fn(() => Promise.resolve({} as Message)),
-    react: vi.fn(() => Promise.resolve({})),
+    react: vi.fn(() => Promise.resolve({})) as Mock<any>,
     edit: vi.fn(() => Promise.resolve({} as Message)) as Mock<() => Promise<Message>>,
   };
 
