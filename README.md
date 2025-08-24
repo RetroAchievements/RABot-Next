@@ -61,6 +61,7 @@ Then edit `.env` with your configuration:
 - `WORKSHOP_GUILD_ID` - Discord guild ID for the RetroAchievements Workshop server
 - `UWC_VOTING_TAG_ID` - Forum tag ID for active UWC polls (optional)
 - `UWC_VOTE_CONCLUDED_TAG_ID` - Forum tag ID for completed UWC polls (optional)
+- `UWC_FORUM_CHANNEL_ID` - Forum channel ID for UWC auto-detection (optional)
 - `AUTO_PUBLISH_CHANNEL_IDS` - Comma-separated list of announcement channel IDs to auto-publish from (optional)
 - `NODE_ENV` - Environment mode: `development` or `production` (default: `development`)
 - `LOG_LEVEL` - Logging level: `trace`, `debug`, `info`, `warn`, `error`, `fatal` (default: `debug` in dev, `info` in prod)
@@ -141,6 +142,7 @@ RABot is transitioning to slash commands! When you use a legacy prefix command (
   - `/pingteam list <team>` - List team members
   - `/pingteam create <name>` - Create a new team (admin only)
 - `/uwc` - Create an Unwelcome Concept poll (Workshop server only, auto-manages forum tags)
+  - **Auto-detection**: When a new UWC thread is created in the configured forum channel with format `12345: Achievement Title (Game Name)`, the bot automatically posts links to previous discussions for that achievement
 - `/dadjoke` - Get a random dad joke
 - `/frames <input>` - Convert between time and frames at different frame rates
 

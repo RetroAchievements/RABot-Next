@@ -73,6 +73,7 @@ When users use legacy commands that have slash equivalents:
 - **TeamService**: Manages teams and members, supports both ID and name lookups
 - **PollService**: Handles poll creation and voting
 - **UwcPollService**: Tracks UWC polls, stores results, enables searching by achievement/game
+- **UwcHistoryService**: Retrieves and formats previous UWC poll history for auto-detection
 - **AutoPublishService**: Automatically publishes messages in configured announcement channels
 
 ### Environment Variables
@@ -90,6 +91,7 @@ Required in `.env`:
 - `CHEAT_INVESTIGATION_CATEGORY_ID`: Category ID for RACheats team restrictions
 - `UWC_VOTING_TAG_ID`: Forum tag ID for active UWC polls (optional)
 - `UWC_VOTE_CONCLUDED_TAG_ID`: Forum tag ID for completed UWC polls (optional)
+- `UWC_FORUM_CHANNEL_ID`: Forum channel ID for UWC auto-detection feature (optional)
 - `AUTO_PUBLISH_CHANNEL_IDS`: Comma-separated list of announcement channel IDs to auto-publish from (optional)
 - `NODE_ENV`: Set to "production" in production (default: "development")
 - `LOG_LEVEL`: Logging level - trace, debug, info, warn, error, fatal (default: "debug" in dev, "info" in prod)
@@ -101,6 +103,17 @@ Required in `.env`:
 - Use `MessageFlags.Ephemeral` instead of `ephemeral: true`
 - Autocomplete handlers in main interaction event
 - Proper intent configuration for message content access
+
+### UWC Auto-Detection Feature
+
+The bot automatically provides context when new UWC (Unwelcome Concept) reports are created:
+
+- Monitors threads in the configured forum channel (`UWC_FORUM_CHANNEL_ID`)
+- Detects threads matching pattern: `12345: Achievement Title (Game Name)`
+- Queries database for previous UWC polls for the same achievement ID
+- Posts an automated message with links to up to 5 previous discussions
+- Shows poll dates, outcomes (Approved/Denied/Active/No Action), and vote results
+- Uses efficient database queries instead of Discord API calls for performance
 
 ### Auto-Publishing Feature
 
