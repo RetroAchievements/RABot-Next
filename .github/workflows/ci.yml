@@ -21,4 +21,7 @@ jobs:
 
       - run: bun install --force
 
+      - name: Generate migrations
+        run: bun run db:generate
+
       - run: bun run test
