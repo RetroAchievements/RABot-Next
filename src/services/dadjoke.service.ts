@@ -21,7 +21,7 @@ export class DadjokeService {
       logApiCall("icanhazdadjoke", apiUrl, duration, response.status);
 
       if (!response.ok) {
-        logError("Failed to fetch dad joke:", {
+        logError(new Error(`Failed to fetch dad joke: ${response.status} ${response.statusText}`), {
           status: response.status,
           statusText: response.statusText,
         });
@@ -33,7 +33,7 @@ export class DadjokeService {
 
       return data.joke || null;
     } catch (error) {
-      logError("Error fetching dad joke:", { error });
+      logError(error, { context: "dadjoke_service" });
 
       return null;
     }

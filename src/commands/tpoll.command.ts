@@ -210,7 +210,7 @@ const tpollCommand: Command = {
 
         await message.reply(pollEndedMsg.join("\n"));
       } catch (error) {
-        logError("Error ending timed poll:", { error });
+        logError(error, { context: "tpoll_command_end" });
         await message.reply("**`poll` error**: Something went wrong with your poll.");
       }
     });

@@ -1,8 +1,6 @@
 import type { Command } from "../models";
-import { GameInfoService } from "../services/game-info.service";
-import { TemplateService } from "../services/template.service";
-import { YouTubeService } from "../services/youtube.service";
-import { logError } from "../utils/logger";
+import { GanService } from "../services/gan.service";
+import { MESSAGES } from "../utils/messages";
 
 const ganCommand: Command = {
   name: "genachnews",
@@ -15,50 +13,20 @@ const ganCommand: Command = {
 
   async execute(message, args) {
     if (!args[0]) {
-      await message.reply("Please provide a game ID or URL. Example: `!gan 4650`");
+      await message.reply(MESSAGES.GAN_USAGE_EXAMPLE);
 
       return;
     }
 
-    // Extract game ID from argument.
-    const gameId = GameInfoService.extractGameId(args[0]);
-    if (!gameId) {
-      await message.reply("Invalid game ID or URL format.");
+    const gameInput = args[0];
+    const sentMsg = await message.reply(MESSAGES.GETTING_GAME_INFO(gameInput));
 
-      return;
-    }
+    const result = await GanService.processGameId(gameInput, { variant: "gan" });
 
-    const sentMsg = await message.reply(
-      `:hourglass: Getting info for game ID \`${gameId}\`, please wait...`,
-    );
-
-    try {
-      // Fetch game info.
-      const gameInfo = await GameInfoService.fetchGameInfo(gameId);
-      if (!gameInfo) {
-        await sentMsg.edit(`Unable to get info from the game ID \`${gameId}\`... :frowning:`);
-
-        return;
-      }
-
-      // Get achievement date and YouTube link.
-      const achievementSetDate = GameInfoService.getMostRecentAchievementDate(gameInfo);
-      const youtubeLink = await YouTubeService.searchLongplay(gameInfo.title, gameInfo.consoleName);
-
-      // Generate template.
-      const template = TemplateService.generateGanTemplate(
-        gameInfo,
-        achievementSetDate,
-        youtubeLink,
-        gameId,
-      );
-
-      await sentMsg.edit(
-        `${message.author}, here's your achievement-news post template:\n${template}`,
-      );
-    } catch (error) {
-      logError("Error in gan command:", { error });
-      await sentMsg.edit(`Unable to get info from the game ID \`${gameId}\`... :frowning:`);
+    if (result.success && result.template) {
+      await sentMsg.edit(MESSAGES.GAN_TEMPLATE_SUCCESS(message.author.toString(), result.template));
+    } else {
+      await sentMsg.edit(result.error || MESSAGES.UNABLE_TO_GET_GAME_INFO(gameInput));
     }
   },
 };

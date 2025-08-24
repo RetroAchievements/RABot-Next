@@ -5,6 +5,7 @@ import { TemplateService } from "../services/template.service";
 import { YouTubeService } from "../services/youtube.service";
 import { createMockInteraction } from "../test/mocks/discord.mock";
 import { createMockGameExtended } from "../test/mocks/game-data.mock";
+import { MESSAGES } from "../utils/messages";
 import ganSlashCommand from "./gan.command";
 
 describe("SlashCommand: gan", () => {
@@ -36,9 +37,7 @@ describe("SlashCommand: gan", () => {
       expect(mockInteraction.deferReply).toHaveBeenCalled();
       expect(mockInteraction.options.getString).toHaveBeenCalledWith("game-id", true);
       expect(GameInfoService.extractGameId).toHaveBeenCalledWith("invalid");
-      expect(mockInteraction.editReply).toHaveBeenCalledWith(
-        "Invalid game ID or URL format. Please provide a game ID number or a RetroAchievements game URL.",
-      );
+      expect(mockInteraction.editReply).toHaveBeenCalledWith(MESSAGES.INVALID_GAME_ID_DETAILED);
     });
 
     it("shows error when game info cannot be fetched", async () => {
@@ -53,7 +52,7 @@ describe("SlashCommand: gan", () => {
       // ASSERT
       expect(mockInteraction.deferReply).toHaveBeenCalled();
       expect(mockInteraction.editReply).toHaveBeenCalledWith(
-        "Unable to get info from the game ID `4650`... :frowning:",
+        MESSAGES.UNABLE_TO_GET_GAME_INFO("4650"),
       );
     });
 
@@ -106,7 +105,7 @@ describe("SlashCommand: gan", () => {
       // ASSERT
       expect(mockInteraction.deferReply).toHaveBeenCalled();
       expect(mockInteraction.editReply).toHaveBeenCalledWith(
-        "Unable to get info from the game ID `4650`... :frowning:",
+        MESSAGES.UNABLE_TO_GET_GAME_INFO("4650"),
       );
     });
 

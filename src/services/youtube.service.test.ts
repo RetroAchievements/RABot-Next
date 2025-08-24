@@ -123,8 +123,8 @@ describe("Service: YouTubeService", () => {
       const result = await YouTubeService.searchLongplay(gameTitle, consoleName);
 
       // ASSERT
-      expect(logger.logError).toHaveBeenCalledWith("Error searching YouTube:", {
-        error: expect.any(Error),
+      expect(logger.logError).toHaveBeenCalledWith(expect.any(Error), {
+        context: "youtube_service",
       });
       expect(result).toBeNull();
     });

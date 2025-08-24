@@ -32,10 +32,13 @@ export class GithubReleaseService {
       logApiCall("github", apiUrl, duration, response.status);
 
       if (!response.ok) {
-        logError("Failed to fetch GitHub release:", {
-          status: response.status,
-          statusText: response.statusText,
-        });
+        logError(
+          new Error(`Failed to fetch GitHub release: ${response.status} ${response.statusText}`),
+          {
+            status: response.status,
+            statusText: response.statusText,
+          },
+        );
 
         return null;
       }
@@ -51,7 +54,7 @@ export class GithubReleaseService {
 
       return version;
     } catch (error) {
-      logError("Error fetching GitHub release:", { error });
+      logError(error, { context: "github_release_service" });
 
       return null;
     }

@@ -205,7 +205,7 @@ const tpollSlashCommand: SlashCommand = {
           content: `**Your poll has ended.**\n**Click this link to see the results:**\n<${sentMsg.url}>`,
         });
       } catch (error) {
-        logError("Error ending timed poll:", { error });
+        logError(error, { context: "tpoll_slash_command_end" });
       }
     });
   },

@@ -20,7 +20,7 @@ async function seedTeams() {
 
     logger.info("✅ Default teams seeded successfully");
   } catch (error) {
-    logError("❌ Error seeding teams:", { error });
+    logError(error, { context: "seed_teams" });
   }
 }
 

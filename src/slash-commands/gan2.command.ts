@@ -1,10 +1,8 @@
 import { SlashCommandBuilder } from "discord.js";
 
 import type { SlashCommand } from "../models";
-import { GameInfoService } from "../services/game-info.service";
-import { TemplateService } from "../services/template.service";
-import { YouTubeService } from "../services/youtube.service";
-import { logError } from "../utils/logger";
+import { GanService } from "../services/gan.service";
+import { MESSAGES } from "../utils/messages";
 
 const gan2SlashCommand: SlashCommand = {
   data: new SlashCommandBuilder()
@@ -21,47 +19,15 @@ const gan2SlashCommand: SlashCommand = {
     await interaction.deferReply();
 
     const gameInput = interaction.options.getString("game-id", true);
+    const result = await GanService.processGameId(gameInput, {
+      variant: "gan2",
+      user: interaction.user,
+    });
 
-    // Extract game ID from argument.
-    const gameId = GameInfoService.extractGameId(gameInput);
-    if (!gameId) {
-      await interaction.editReply(
-        "Invalid game ID or URL format. Please provide a game ID number or a RetroAchievements game URL.",
-      );
-
-      return;
-    }
-
-    try {
-      // Fetch game info.
-      const gameInfo = await GameInfoService.fetchGameInfo(gameId);
-      if (!gameInfo) {
-        await interaction.editReply(
-          `Unable to get info from the game ID \`${gameId}\`... :frowning:`,
-        );
-
-        return;
-      }
-
-      // Get achievement date and YouTube link.
-      const achievementSetDate = GameInfoService.getMostRecentAchievementDate(gameInfo);
-      const youtubeLink = await YouTubeService.searchLongplay(gameInfo.title, gameInfo.consoleName);
-
-      // Generate template.
-      const output = TemplateService.generateGan2Template(
-        gameInfo,
-        achievementSetDate,
-        youtubeLink,
-        gameId,
-        interaction.user,
-      );
-
-      await interaction.editReply(output);
-    } catch (error) {
-      logError("Error in gan2 slash command:", { error });
-      await interaction.editReply(
-        `Unable to get info from the game ID \`${gameId}\`... :frowning:`,
-      );
+    if (result.success && result.output) {
+      await interaction.editReply(result.output);
+    } else {
+      await interaction.editReply(result.error || MESSAGES.UNABLE_TO_GET_GAME_INFO(gameInput));
     }
   },
 };

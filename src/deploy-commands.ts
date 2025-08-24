@@ -61,6 +61,6 @@ const commandsPath = join(__dirname, "slash-commands");
       `✅ Successfully reloaded ${(data as unknown as { length: number }).length} application (/) commands.`,
     );
   } catch (error) {
-    logError("❌ Error deploying commands:", { error });
+    logError(error, { context: "deploy_commands" });
   }
 })();

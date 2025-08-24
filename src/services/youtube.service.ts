@@ -31,7 +31,7 @@ export class YouTubeService {
 
       return null;
     } catch (error) {
-      logError("Error searching YouTube:", { error });
+      logError(error, { context: "youtube_service" });
 
       return null;
     }

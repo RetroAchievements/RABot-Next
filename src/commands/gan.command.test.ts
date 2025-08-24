@@ -5,6 +5,7 @@ import { TemplateService } from "../services/template.service";
 import { YouTubeService } from "../services/youtube.service";
 import { createMockMessage } from "../test/mocks/discord.mock";
 import { createMockGameExtended } from "../test/mocks/game-data.mock";
+import { MESSAGES } from "../utils/messages";
 import ganCommand from "./gan.command";
 
 describe("Command: gan", () => {
@@ -24,21 +25,20 @@ describe("Command: gan", () => {
       await ganCommand.execute(mockMessage, [], {} as any);
 
       // ASSERT
-      expect(mockMessage.reply).toHaveBeenCalledWith(
-        "Please provide a game ID or URL. Example: `!gan 4650`",
-      );
+      expect(mockMessage.reply).toHaveBeenCalledWith(MESSAGES.GAN_USAGE_EXAMPLE);
     });
 
     it("shows error message for invalid game ID format", async () => {
       // ARRANGE
-      vi.spyOn(GameInfoService, "extractGameId").mockReturnValue(null);
+      const sentMsg = { edit: vi.fn() };
+      mockMessage.reply = vi.fn().mockResolvedValue(sentMsg);
 
       // ACT
       await ganCommand.execute(mockMessage, ["invalid"], {} as any);
 
       // ASSERT
-      expect(GameInfoService.extractGameId).toHaveBeenCalledWith("invalid");
-      expect(mockMessage.reply).toHaveBeenCalledWith("Invalid game ID or URL format.");
+      expect(mockMessage.reply).toHaveBeenCalledWith(MESSAGES.GETTING_GAME_INFO("invalid"));
+      expect(sentMsg.edit).toHaveBeenCalledWith(MESSAGES.INVALID_GAME_ID_DETAILED);
     });
 
     it("shows error when game info cannot be fetched", async () => {
@@ -52,12 +52,8 @@ describe("Command: gan", () => {
       await ganCommand.execute(mockMessage, ["4650"], {} as any);
 
       // ASSERT
-      expect(mockMessage.reply).toHaveBeenCalledWith(
-        ":hourglass: Getting info for game ID `4650`, please wait...",
-      );
-      expect(sentMsg.edit).toHaveBeenCalledWith(
-        "Unable to get info from the game ID `4650`... :frowning:",
-      );
+      expect(mockMessage.reply).toHaveBeenCalledWith(MESSAGES.GETTING_GAME_INFO("4650"));
+      expect(sentMsg.edit).toHaveBeenCalledWith(MESSAGES.UNABLE_TO_GET_GAME_INFO("4650"));
     });
 
     it("generates template successfully", async () => {
@@ -109,9 +105,7 @@ describe("Command: gan", () => {
       await ganCommand.execute(mockMessage, ["4650"], {} as any);
 
       // ASSERT
-      expect(sentMsg.edit).toHaveBeenCalledWith(
-        "Unable to get info from the game ID `4650`... :frowning:",
-      );
+      expect(sentMsg.edit).toHaveBeenCalledWith(MESSAGES.UNABLE_TO_GET_GAME_INFO("4650"));
     });
 
     it("handles URL input correctly", async () => {
