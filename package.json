@@ -34,7 +34,7 @@
     "lint:fix": "eslint src --fix",
     "test": "bun test",
     "test:watch": "bun test --watch",
-    "verify": "bun run lint && bun run tsc && bun test",
+    "verify": "bun run lint:fix && bun run tsc && bun test",
     "postinstall": "git config core.hooksPath .hooks && chmod +x .hooks/*"
   },
   "dependencies": {

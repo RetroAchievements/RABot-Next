@@ -122,6 +122,13 @@ client.on(Events.MessageUpdate, async (oldMessage, newMessage) => {
   await handlePollUpdate(oldMessage, newMessage);
 });
 
+// Handle thread creation (for UWC auto-detection).
+client.on(Events.ThreadCreate, async (thread) => {
+  // Import dynamically to avoid circular dependencies.
+  const { handleUwcAutoDetect } = await import("./handlers/uwc-auto-detect.handler");
+  await handleUwcAutoDetect(thread);
+});
+
 // Handle slash command interactions.
 client.on(Events.InteractionCreate, async (interaction) => {
   // Handle autocomplete
