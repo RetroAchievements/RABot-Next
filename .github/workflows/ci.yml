@@ -21,9 +21,4 @@ jobs:
 
       - run: bun install --force
 
-      - name: Setup database
-        run: |
-          bun run db:generate
-          bun run db:migrate
-
       - run: bun run test
