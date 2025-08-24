@@ -19,7 +19,7 @@ jobs:
         with:
           bun-version: "1.2.19"
 
-      - run: bun install
+      - run: bun install --force
 
       - name: Setup database
         run: |
