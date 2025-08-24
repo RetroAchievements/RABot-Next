@@ -91,6 +91,15 @@ client.once(Events.ClientReady, async (readyClient) => {
     }
   }
 
+  // Check and leave unauthorized guilds.
+  try {
+    const { checkAndLeaveUnauthorizedGuilds } = await import("./utils/guild-manager");
+    const guilds = Array.from(readyClient.guilds.cache.values());
+    await checkAndLeaveUnauthorizedGuilds(guilds);
+  } catch (error) {
+    logError(error, { event: "guild_authorization_check_error" });
+  }
+
   logger.info(`✅ Ready! Logged in as ${readyClient.user.tag}`);
   logger.info(`🎮 Legacy command prefix: ${client.commandPrefix}`);
   logger.info(
