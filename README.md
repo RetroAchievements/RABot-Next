@@ -139,7 +139,6 @@ RABot is transitioning to slash commands! When you use a legacy prefix command (
   - `/pingteam ping <team>` - Ping all members of a team
   - `/pingteam add <team> <user>` - Add user to team (admin only)
   - `/pingteam remove <team> <user>` - Remove user from team (admin only)
-  - `/pingteam list <team>` - List team members
   - `/pingteam create <name>` - Create a new team (admin only)
 - `/uwc` - Create an Unwelcome Concept poll (Workshop server only, auto-manages forum tags)
   - **Auto-detection**: When a new UWC thread is created in the configured forum channel with format `12345: Achievement Title (Game Name)`, the bot automatically posts links to previous discussions for that achievement

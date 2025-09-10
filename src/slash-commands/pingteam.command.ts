@@ -65,18 +65,6 @@ const pingteamSlashCommand: SlashCommand = {
     )
     .addSubcommand((subcommand) =>
       subcommand
-        .setName("list")
-        .setDescription("List members of a team")
-        .addStringOption((option) =>
-          option
-            .setName("team")
-            .setDescription("Team name")
-            .setRequired(true)
-            .setAutocomplete(true),
-        ),
-    )
-    .addSubcommand((subcommand) =>
-      subcommand
         .setName("create")
         .setDescription("Create a new team")
         .addStringOption((option) =>
@@ -203,73 +191,6 @@ const pingteamSlashCommand: SlashCommand = {
             flags: MessageFlags.Ephemeral,
           });
         }
-        break;
-      }
-
-      case "list": {
-        const teamName = interaction.options.getString("team", true);
-
-        /**
-         * Same security restrictions as ping command for RACheats team.
-         *
-         * Even viewing team membership can be sensitive for investigation teams.
-         * Knowing who is involved in cheat investigations could compromise
-         * ongoing cases or create bias. The category restriction ensures
-         * membership information is only visible in appropriate contexts.
-         */
-        if (teamName.toLowerCase() === "racheats") {
-          if (!interaction.channel || interaction.channel.type === ChannelType.DM) {
-            await interaction.reply({
-              content: "The RACheats team member list can't be viewed here.",
-              flags: MessageFlags.Ephemeral,
-            });
-
-            return;
-          }
-
-          // Check category ID based on channel type.
-          let categoryId: string | null = null;
-
-          if (
-            interaction.channel.type === ChannelType.PublicThread ||
-            interaction.channel.type === ChannelType.PrivateThread ||
-            interaction.channel.type === ChannelType.AnnouncementThread
-          ) {
-            // For threads, the category is in the parent channel's parentId.
-            categoryId = interaction.channel.parent?.parentId ?? null;
-          } else if ("parentId" in interaction.channel) {
-            // For regular channels, parentId points directly to the category.
-            categoryId = interaction.channel.parentId;
-          }
-
-          if (categoryId !== CHEAT_INVESTIGATION_CATEGORY_ID) {
-            await interaction.reply({
-              content: "The RACheats team member list can't be viewed here.",
-              flags: MessageFlags.Ephemeral,
-            });
-
-            return;
-          }
-        }
-
-        const members = await TeamService.getTeamMembersByName(teamName);
-
-        if (members.length === 0) {
-          await interaction.reply({
-            content: `No members found in team "${teamName}".`,
-            flags: MessageFlags.Ephemeral,
-          });
-
-          return;
-        }
-
-        const memberList = members.map((m) => `• <@${m}>`).join("\n");
-        await interaction.reply({
-          content: `**Members of ${teamName}:**\n${memberList}`,
-          // Disable mentions when listing - we want to show usernames but not ping everyone.
-          // This prevents accidental notification spam when viewing team membership.
-          allowedMentions: { parse: [] },
-        });
         break;
       }
 
