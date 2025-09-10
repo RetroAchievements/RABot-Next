@@ -62,7 +62,7 @@ export async function handleUwcAutoDetect(thread: ThreadChannel): Promise<void> 
 
   try {
     // Get previous polls from the database.
-    const previousPolls = await UwcHistoryService.getPreviousPolls(achievementId);
+    const previousPolls = await UwcHistoryService.getPreviousPolls(achievementId, 5);
 
     if (previousPolls.length === 0) {
       logger.debug("No previous UWC polls found", { achievementId });

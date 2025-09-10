@@ -108,8 +108,26 @@ export class UwcHistoryService {
    * Format polls into summaries for display.
    */
   static formatPollSummaries(pollsWithResults: UwcPollWithResults[]): UwcPollSummary[] {
+    const now = new Date();
+    const THREE_DAYS_MS = 72 * 60 * 60 * 1000;
+
     return pollsWithResults.map(({ poll, results }) => {
-      const status = poll.status === "active" ? "active" : this.determinePollOutcome(results);
+      // Check if this is a stale active poll (marked active but over 72 hours old).
+      const pollAge = now.getTime() - poll.startedAt.getTime();
+      const isStaleActive = poll.status === "active" && pollAge > THREE_DAYS_MS;
+
+      // For stale active polls, treat them as having no status.
+      // For truly active polls, keep as "active".
+      // For completed polls, determine the outcome.
+      let status: "active" | "approved" | "denied" | "no_action";
+      if (isStaleActive) {
+        // Don't show a status for stale polls - we don't know the outcome.
+        status = "no_action";
+      } else if (poll.status === "active") {
+        status = "active";
+      } else {
+        status = this.determinePollOutcome(results);
+      }
 
       // Get top 2 results with votes.
       const topResults = results
@@ -160,8 +178,8 @@ export class UwcHistoryService {
           winningOption.percentage > 0 ? `, ${winningOption.percentage.toFixed(1)}%` : "";
         response += `• ${dateStr}: [Poll](${summary.pollUrl}) → "${winningOption.text}" (${winningOption.count} votes${percentage})`;
       } else {
-        // Fallback for polls without results.
-        response += `• ${dateStr}: [Poll](${summary.pollUrl}) → No results available`;
+        // For stale active polls or polls without results, just show the date and link.
+        response += `• ${dateStr}: [Poll](${summary.pollUrl})`;
       }
 
       response += "\n";
