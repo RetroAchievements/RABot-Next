@@ -1,20 +1,21 @@
 import { buildAuthorization, getAchievementUnlocks } from "@retroachievements/api";
+
 import { RA_WEB_API_KEY } from "../config/constants";
 
-const api = new class {
+const api = new (class {
   #sleepBase = 200;
   #failures = 0;
 
   async wait() {
-    return new Promise<void>(
-      resolve => setTimeout(() => resolve(), this.#sleepBase * Math.pow(2, this.#failures++))
+    return new Promise<void>((resolve) =>
+      setTimeout(() => resolve(), this.#sleepBase * Math.pow(2, this.#failures++)),
     );
   }
 
   reset() {
     this.#failures = 0;
   }
-}
+})();
 
 export const PAGE_SIZE = 500;
 
@@ -25,7 +26,7 @@ export class AchievementUnlocksService {
     // retry after waiting upon recieving a 429 response, fail on any other error response
     const fetchUnlocks = async (offset: number) => {
       api.reset();
-      while (true) {
+      for (;;) {
         try {
           return await getAchievementUnlocks(auth, {
             achievementId,
@@ -33,7 +34,7 @@ export class AchievementUnlocksService {
             count: PAGE_SIZE,
           });
         } catch (error) {
-          if (error instanceof Error && error.message.search("429") != -1) {
+          if (error instanceof Error && error.message.search("429") !== -1) {
             await api.wait();
             continue;
           } else {
@@ -41,7 +42,7 @@ export class AchievementUnlocksService {
           }
         }
       }
-    }
+    };
 
     const data = await fetchUnlocks(0);
     if (!data) {
@@ -58,6 +59,6 @@ export class AchievementUnlocksService {
       remaining -= PAGE_SIZE;
     }
 
-    return data.unlocks.map(entity => entity.user);
+    return data.unlocks.map((entity) => entity.user);
   }
 }

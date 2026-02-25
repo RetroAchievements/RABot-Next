@@ -1,34 +1,51 @@
-import { AttachmentBuilder, ChatInputCommandInteraction, Guild, Role, SlashCommandBuilder } from "discord.js";
+import type { ChatInputCommandInteraction, Guild, Role } from "discord.js";
+import { AttachmentBuilder, SlashCommandBuilder } from "discord.js";
 
+import { GAMBLER_ROLE_ID } from "../config/constants";
 import type { SlashCommand } from "../models";
 import { AchievementUnlocksService } from "../services/achievement-unlocks.service";
-import { GAMBLER_ROLE_ID } from "../config/constants";
-import logger from "../utils/logger";
 
 const eventsSlashCommand: SlashCommand = {
   data: new SlashCommandBuilder()
     .setName("events")
     .setDescription("Various commands for Events Team")
-    .addSubcommandGroup(group => group
-      .setName("gambler")
-      .setDescription("Commands to manage the Gambler role")
-      .addSubcommand(sub => sub
-        .setName("reset")
-        .setDescription("Remove Gambler role from all users")
-      )
-      .addSubcommand(sub => sub
-        .setName("award")
-        .setDescription("Manually award the Gambler role to the given user")
-        .addUserOption(option => option.setName("user").setDescription("The user to add the Gambler role to").setRequired(true))
-      )
-      .addSubcommand(sub => sub
-        .setName("award-all")
-        .setDescription("Award Gambler role to all users that have earned at least 3 of the given achievements")
-        .addNumberOption(option => option.setName("ach1").setDescription("Achievement #1").setRequired(true))
-        .addNumberOption(option => option.setName("ach2").setDescription("Achievement #2").setRequired(true))
-        .addNumberOption(option => option.setName("ach3").setDescription("Achievement #3").setRequired(true))
-        .addNumberOption(option => option.setName("ach4").setDescription("Achievement #4").setRequired(false))
-      )
+    .addSubcommandGroup((group) =>
+      group
+        .setName("gambler")
+        .setDescription("Commands to manage the Gambler role")
+        .addSubcommand((sub) =>
+          sub.setName("reset").setDescription("Remove Gambler role from all users"),
+        )
+        .addSubcommand((sub) =>
+          sub
+            .setName("award")
+            .setDescription("Manually award the Gambler role to the given user")
+            .addUserOption((option) =>
+              option
+                .setName("user")
+                .setDescription("The user to add the Gambler role to")
+                .setRequired(true),
+            ),
+        )
+        .addSubcommand((sub) =>
+          sub
+            .setName("award-all")
+            .setDescription(
+              "Award Gambler role to all users that have earned at least 3 of the given achievements",
+            )
+            .addNumberOption((option) =>
+              option.setName("ach1").setDescription("Achievement #1").setRequired(true),
+            )
+            .addNumberOption((option) =>
+              option.setName("ach2").setDescription("Achievement #2").setRequired(true),
+            )
+            .addNumberOption((option) =>
+              option.setName("ach3").setDescription("Achievement #3").setRequired(true),
+            )
+            .addNumberOption((option) =>
+              option.setName("ach4").setDescription("Achievement #4").setRequired(false),
+            ),
+        ),
     ),
 
   cooldown: 3, // 3 seconds cooldown.
@@ -38,6 +55,7 @@ const eventsSlashCommand: SlashCommand = {
 
     if (!interaction.guild) {
       await interaction.editReply("This command is only supported in a server context.");
+
       return;
     }
 
@@ -46,21 +64,26 @@ const eventsSlashCommand: SlashCommand = {
         return new GamblerCommand(interaction).run(interaction.options.getSubcommand(true));
       default:
         await interaction.editReply("Unknown subcommmand group.");
+
         return;
     }
   },
 };
 
-async function replyWithLog(interaction: ChatInputCommandInteraction, message: string, log: string) {
-  if (log.length == 0) {
+async function replyWithLog(
+  interaction: ChatInputCommandInteraction,
+  message: string,
+  log: string,
+) {
+  if (log.length === 0) {
     return interaction.editReply(message);
-  } else {
-    const attachment = new AttachmentBuilder(Buffer.from(log, "utf8"), { name: "log.txt" });
-    return interaction.editReply({
-      content: message,
-      files: [ attachment ],
-    });
   }
+  const attachment = new AttachmentBuilder(Buffer.from(log, "utf8"), { name: "log.txt" });
+
+  return interaction.editReply({
+    content: message,
+    files: [attachment],
+  });
 }
 
 class GamblerCommand {
@@ -74,7 +97,10 @@ class GamblerCommand {
     const guild = this.interaction.guild!;
     const role = await guild.roles.fetch(GAMBLER_ROLE_ID);
     if (!role) {
-      await this.interaction.editReply("Sorry, I couldn't fetch the Gambler role. Please contact an admin.");
+      await this.interaction.editReply(
+        "Sorry, I couldn't fetch the Gambler role. Please contact an admin.",
+      );
+
       return;
     }
 
@@ -87,6 +113,7 @@ class GamblerCommand {
         return this.awardAllGamblers(guild, role);
       default:
         await this.interaction.editReply(`Unknown subcommmand \`${subcommand}\`.`);
+
         return;
     }
   }
@@ -99,14 +126,21 @@ class GamblerCommand {
       removed.push(member.nickname ?? member.displayName);
     }
 
-    replyWithLog(this.interaction, `Removed Gambler role from ${removed.length} user(s).`, removed.join("\n"));
+    replyWithLog(
+      this.interaction,
+      `Removed Gambler role from ${removed.length} user(s).`,
+      removed.join("\n"),
+    );
   }
 
   async awardGambler(guild: Guild, role: Role) {
     const user = this.interaction.options.getUser("user", true);
     const member = await guild.members.fetch(user);
     member.roles.add(role);
-    this.interaction.editReply({ content: `Successfully awarded the Gambler role to <@${member.id}>`, allowedMentions: { parse: [] }});
+    this.interaction.editReply({
+      content: `Successfully awarded the Gambler role to <@${member.id}>`,
+      allowedMentions: { parse: [] },
+    });
   }
 
   async awardAllGamblers(guild: Guild, role: Role) {
@@ -127,7 +161,10 @@ class GamblerCommand {
     for (const id of achievements) {
       const unlocks = await AchievementUnlocksService.getAllAchievementUnlocks(id);
       if (!unlocks) {
-        await this.interaction.editReply("Sorry, I couldn't fetch the achievement earners right now. Try again later!");
+        await this.interaction.editReply(
+          "Sorry, I couldn't fetch the achievement unlocks right now. Please check achievement IDs and try again in a minute.",
+        );
+
         return;
       }
 
@@ -139,16 +176,19 @@ class GamblerCommand {
       }
     }
 
-    const gamblers = scores.entries().filter(pair => pair[1] >= 3).map(pair => pair[0]);
+    const gamblers = scores
+      .entries()
+      .filter((pair) => pair[1] >= 3)
+      .map((pair) => pair[0]);
 
     const members = new Map(
       (await guild.members.fetch())
         .values()
-        .map(member => [member.nickname ?? member.displayName, member])
+        .map((member) => [member.nickname ?? member.displayName, member]),
     );
 
-    let added = [];
-    let skipped = [];
+    const added = [];
+    const skipped = [];
 
     for (const user of gamblers) {
       if (members.has(user)) {
@@ -165,7 +205,7 @@ class GamblerCommand {
     replyWithLog(
       this.interaction,
       `${statusMessage}\nAdded the Gambler role to ${added.length} members, skipped ${skipped.length} users not found on the server.`,
-      `Added:\n${added.map(s => `  ${s}`).join("\n")}\nSkipped:\n${skipped.map(s => `  ${s}`).join("\n")}`
+      `Added:\n${added.map((s) => `  ${s}`).join("\n")}\nSkipped:\n${skipped.map((s) => `  ${s}`).join("\n")}`,
     );
   }
 }
