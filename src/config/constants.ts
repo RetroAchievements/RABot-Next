@@ -15,8 +15,6 @@ export const WORKSHOP_GUILD_ID = process.env.WORKSHOP_GUILD_ID || "";
 
 // Role configuration.
 export const GAMBLER_ROLE_ID = process.env.GAMBLER_ROLE_ID || "";
-export const AOTW_ROLE_ID = process.env.AOTW_ROLE_ID || "";
-export const PEAK_ROLE_ID = process.env.PEAK_ROLE_ID || "";
 
 // UWC Poll configuration.
 export const UWC_VOTING_TAG_ID = process.env.UWC_VOTING_TAG_ID || "";

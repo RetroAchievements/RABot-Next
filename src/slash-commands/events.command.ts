@@ -163,7 +163,7 @@ class GamblerCommand {
       achievements.push(ach4);
     }
 
-    const scores = new Map();
+    const scores = new Map<string, number>();
     let statusMessage = "";
 
     for (const id of achievements) {
