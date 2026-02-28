@@ -1,6 +1,8 @@
 import type { Logger } from "pino";
 import pino from "pino";
 
+const isCI = process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
+const isTest = process.env.NODE_ENV === "test";
 const isDevelopment = process.env.NODE_ENV !== "production";
 const logLevel = process.env.LOG_LEVEL || (isDevelopment ? "debug" : "info");
 
@@ -16,17 +18,19 @@ const pinoOptions: pino.LoggerOptions = {
   },
 };
 
-const transport = isDevelopment
-  ? pino.transport({
-      target: "pino-pretty",
-      options: {
-        colorize: true,
-        ignore: "pid,hostname",
-        translateTime: "HH:MM:ss.l",
-        singleLine: false,
-      },
-    })
-  : undefined;
+// pino.transport() uses worker threads which can break in CI/test environments.
+const transport =
+  isDevelopment && !isCI && !isTest
+    ? pino.transport({
+        target: "pino-pretty",
+        options: {
+          colorize: true,
+          ignore: "pid,hostname",
+          translateTime: "HH:MM:ss.l",
+          singleLine: false,
+        },
+      })
+    : undefined;
 
 export const logger: Logger = pino(pinoOptions, transport);
 
