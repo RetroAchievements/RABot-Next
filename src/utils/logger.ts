@@ -6,25 +6,25 @@ const isCI = !!process.env.CI;
 const logLevel = process.env.LOG_LEVEL || (isDevelopment ? "debug" : "info");
 
 // pino-pretty uses worker threads which don't work reliably in Bun on Linux (CI).
-const usePrettyPrint = isDevelopment && !isCI;
-
 export const logger: Logger = pino({
   level: logLevel,
   timestamp: pino.stdTimeFunctions.isoTime,
   formatters: {
     level: (label) => ({ level: label }),
   },
-  transport: usePrettyPrint
+  ...(isDevelopment && !isCI
     ? {
-        target: "pino-pretty",
-        options: {
-          colorize: true,
-          ignore: "pid,hostname",
-          translateTime: "HH:MM:ss.l",
-          singleLine: false,
+        transport: {
+          target: "pino-pretty",
+          options: {
+            colorize: true,
+            ignore: "pid,hostname",
+            translateTime: "HH:MM:ss.l",
+            singleLine: false,
+          },
         },
       }
-    : undefined,
+    : {}),
 });
 
 export interface LogContext {
