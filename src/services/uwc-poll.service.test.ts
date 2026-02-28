@@ -1,14 +1,23 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { db } from "../database/db";
-import { uwcPollResults, uwcPolls } from "../database/schema";
+import { cleanAllTables, createTestDb } from "../test/create-test-db";
 import { UwcPollService } from "./uwc-poll.service";
 
+let testDb: Awaited<ReturnType<typeof createTestDb>>;
+
+vi.mock("../database/db", () => ({
+  get db() {
+    return testDb;
+  },
+}));
+
 describe("UwcPollService", () => {
-  // Clean up database after each test.
-  afterEach(async () => {
-    await db.delete(uwcPollResults);
-    await db.delete(uwcPolls);
+  beforeAll(async () => {
+    testDb = await createTestDb();
+  });
+
+  beforeEach(async () => {
+    await cleanAllTables(testDb);
   });
 
   describe("createUwcPoll", () => {
@@ -31,11 +40,11 @@ describe("UwcPollService", () => {
 
       // ASSERT
       expect(poll).toBeDefined();
-      expect(poll.messageId).toBe(pollData.messageId);
-      expect(poll.channelId).toBe(pollData.channelId);
-      expect(poll.threadId).toBe(pollData.threadId);
-      expect(poll.achievementId).toBe(pollData.achievementId);
-      expect(poll.status).toBe("active");
+      expect(poll.messageId).toEqual(pollData.messageId);
+      expect(poll.channelId).toEqual(pollData.channelId);
+      expect(poll.threadId).toEqual(pollData.threadId);
+      expect(poll.achievementId).toEqual(pollData.achievementId);
+      expect(poll.status).toEqual("active");
       expect(poll.endedAt).toBeNull();
     });
 
@@ -74,7 +83,7 @@ describe("UwcPollService", () => {
 
       // ASSERT
       expect(poll).toBeDefined();
-      expect(poll?.messageId).toBe("123456789");
+      expect(poll?.messageId).toEqual("123456789");
     });
 
     it("returns null for non-existent poll", async () => {
@@ -108,11 +117,11 @@ describe("UwcPollService", () => {
       );
 
       // ASSERT
-      expect(poll.status).toBe("completed");
+      expect(poll.status).toEqual("completed");
       expect(poll.endedAt).toBeDefined();
       expect(storedResults).toHaveLength(3);
-      expect(storedResults[0]?.optionText).toBe("No, leave as is");
-      expect(storedResults[0]?.voteCount).toBe(5);
+      expect(storedResults[0]?.optionText).toEqual("No, leave as is");
+      expect(storedResults[0]?.voteCount).toEqual(5);
     });
 
     it("throws error for non-existent poll", async () => {
@@ -145,7 +154,7 @@ describe("UwcPollService", () => {
 
       // ASSERT
       expect(activePolls).toHaveLength(1);
-      expect(activePolls[0]?.messageId).toBe("active1");
+      expect(activePolls[0]?.messageId).toEqual("active1");
     });
   });
 
@@ -182,7 +191,7 @@ describe("UwcPollService", () => {
 
       // ASSERT
       expect(polls).toHaveLength(2);
-      expect(polls.every((p) => p.achievementId === 14402)).toBe(true);
+      expect(polls.every((p) => p.achievementId === 14402)).toEqual(true);
     });
   });
 
@@ -218,7 +227,7 @@ describe("UwcPollService", () => {
 
       // ASSERT
       expect(polls).toHaveLength(1);
-      expect(polls[0]?.achievementName).toBe("Sonic Speed");
+      expect(polls[0]?.achievementName).toEqual("Sonic Speed");
     });
 
     it("searches by game name", async () => {
@@ -227,7 +236,7 @@ describe("UwcPollService", () => {
 
       // ASSERT
       expect(polls).toHaveLength(1);
-      expect(polls[0]?.gameName).toBe("Super Mario Bros.");
+      expect(polls[0]?.gameName).toEqual("Super Mario Bros.");
     });
 
     it("returns empty array for no matches", async () => {

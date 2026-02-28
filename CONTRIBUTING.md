@@ -161,7 +161,8 @@ export default {
 ### Testing
 
 - Write tests for services and utilities.
-- Use the existing mock utilities in `src/test/mocks/`.
+- Use `createTestDb()` from `src/test/create-test-db.ts` for service tests that need a real database.
+- Use the existing mock utilities in `src/test/mocks/` for Discord and API mocks.
 - Test both success and error cases.
 - Keep tests focused and independent.
 

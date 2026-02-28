@@ -1,32 +1,23 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { createMockPoll, createMockPollVote } from "../test/mocks/database.mock";
+import { cleanAllTables, createTestDb } from "../test/create-test-db";
 import { PollService } from "./poll.service";
 
-const { mockDb } = vi.hoisted(() => {
-  const mockDb: any = {
-    select: vi.fn(() => mockDb),
-    from: vi.fn(() => mockDb),
-    where: vi.fn(() => Promise.resolve([])),
-    insert: vi.fn(() => mockDb),
-    values: vi.fn(() => mockDb),
-    returning: vi.fn(() => Promise.resolve([])),
-  };
+let testDb: Awaited<ReturnType<typeof createTestDb>>;
 
-  return { mockDb };
-});
-
-vi.mock("../database/db", () => ({ db: mockDb }));
+vi.mock("../database/db", () => ({
+  get db() {
+    return testDb;
+  },
+}));
 
 describe("Service: PollService", () => {
-  beforeEach(() => {
-    // ... reset all mocks before each test ...
-    mockDb.select.mockClear().mockReturnValue(mockDb);
-    mockDb.from.mockClear().mockReturnValue(mockDb);
-    mockDb.where.mockClear().mockResolvedValue([]);
-    mockDb.insert.mockClear().mockReturnValue(mockDb);
-    mockDb.values.mockClear().mockReturnValue(mockDb);
-    mockDb.returning.mockClear().mockResolvedValue([]);
+  beforeAll(async () => {
+    testDb = await createTestDb();
+  });
+
+  beforeEach(async () => {
+    await cleanAllTables(testDb);
   });
 
   describe("createPoll", () => {
@@ -36,21 +27,6 @@ describe("Service: PollService", () => {
     });
 
     it("creates a new poll with the provided details", async () => {
-      // ARRANGE
-      const mockPoll = createMockPoll({
-        messageId: "msg123",
-        channelId: "ch456",
-        creatorId: "user789",
-        question: "What's your favorite color?",
-        options: JSON.stringify([
-          { text: "Red", votes: [] },
-          { text: "Blue", votes: [] },
-          { text: "Green", votes: [] },
-        ]),
-        endTime: null,
-      });
-      mockDb.returning.mockResolvedValue([mockPoll]);
-
       // ACT
       const result = await PollService.createPoll(
         "msg123",
@@ -61,27 +37,22 @@ describe("Service: PollService", () => {
       );
 
       // ASSERT
-      expect(mockDb.insert).toHaveBeenCalledWith(expect.anything());
-      expect(mockDb.values).toHaveBeenCalledWith({
-        messageId: "msg123",
-        channelId: "ch456",
-        creatorId: "user789",
-        question: "What's your favorite color?",
-        options: JSON.stringify([
-          { text: "Red", votes: [] },
-          { text: "Blue", votes: [] },
-          { text: "Green", votes: [] },
-        ]),
-        endTime: undefined,
-      });
-      expect(result).toEqual(mockPoll);
+      expect(result.messageId).toEqual("msg123");
+      expect(result.channelId).toEqual("ch456");
+      expect(result.creatorId).toEqual("user789");
+      expect(result.question).toEqual("What's your favorite color?");
+      expect(JSON.parse(result.options)).toEqual([
+        { text: "Red", votes: [] },
+        { text: "Blue", votes: [] },
+        { text: "Green", votes: [] },
+      ]);
+      expect(result.endTime).toBeNull();
+      expect(result.id).toBeDefined();
     });
 
     it("creates a poll with an end time when provided", async () => {
       // ARRANGE
       const endTime = new Date("2024-12-31T23:59:59Z");
-      const mockPoll = createMockPoll({ endTime });
-      mockDb.returning.mockResolvedValue([mockPoll]);
 
       // ACT
       const result = await PollService.createPoll(
@@ -94,11 +65,6 @@ describe("Service: PollService", () => {
       );
 
       // ASSERT
-      expect(mockDb.values).toHaveBeenCalledWith(
-        expect.objectContaining({
-          endTime,
-        }),
-      );
       expect(result.endTime).toEqual(endTime);
     });
   });
@@ -111,23 +77,17 @@ describe("Service: PollService", () => {
 
     it("returns a poll when found", async () => {
       // ARRANGE
-      const mockPoll = createMockPoll({ messageId: "msg123" });
-      mockDb.where.mockResolvedValue([mockPoll]);
+      await PollService.createPoll("msg123", "ch456", "user789", "Question?", ["A", "B"]);
 
       // ACT
       const result = await PollService.getPoll("msg123");
 
       // ASSERT
-      expect(mockDb.select).toHaveBeenCalled();
-      expect(mockDb.from).toHaveBeenCalledWith(expect.anything());
-      expect(mockDb.where).toHaveBeenCalled();
-      expect(result).toEqual(mockPoll);
+      expect(result).not.toBeNull();
+      expect(result?.messageId).toEqual("msg123");
     });
 
     it("returns null when poll is not found", async () => {
-      // ARRANGE
-      mockDb.where.mockResolvedValue([]);
-
       // ACT
       const result = await PollService.getPoll("nonexistent");
 
@@ -144,50 +104,43 @@ describe("Service: PollService", () => {
 
     it("adds a vote when user has not voted", async () => {
       // ARRANGE
-      // ... mock getUserVote to return null ...
-      mockDb.where.mockResolvedValueOnce([]);
+      const poll = await PollService.createPoll("msg1", "ch1", "creator1", "Q?", ["A", "B"]);
 
       // ACT
-      const result = await PollService.addVote(1, "user123", 0);
+      const result = await PollService.addVote(poll.id, "user123", 0);
 
       // ASSERT
-      expect(mockDb.insert).toHaveBeenCalledWith(expect.anything());
-      expect(mockDb.values).toHaveBeenCalledWith({
-        pollId: 1,
-        userId: "user123",
-        optionIndex: 0,
-      });
       expect(result).toEqual(true);
+
+      const vote = await PollService.getUserVote(poll.id, "user123");
+      expect(vote).not.toBeNull();
+      expect(vote?.optionIndex).toEqual(0);
     });
 
     it("returns false when user has already voted", async () => {
       // ARRANGE
-      const existingVote = createMockPollVote();
-      // ... mock getUserVote to return existing vote ...
-      mockDb.where.mockResolvedValueOnce([existingVote]);
+      const poll = await PollService.createPoll("msg1", "ch1", "creator1", "Q?", ["A", "B"]);
+      await PollService.addVote(poll.id, "user123", 0);
 
       // ACT
-      const result = await PollService.addVote(1, "user123", 1);
+      const result = await PollService.addVote(poll.id, "user123", 1);
 
       // ASSERT
-      expect(mockDb.insert).not.toHaveBeenCalled();
       expect(result).toEqual(false);
     });
 
     it("allows voting for different option indices", async () => {
       // ARRANGE
-      mockDb.where.mockResolvedValueOnce([]); // ... no existing vote ...
+      const poll = await PollService.createPoll("msg1", "ch1", "creator1", "Q?", ["A", "B", "C"]);
 
       // ACT
-      const result = await PollService.addVote(1, "user123", 2);
+      const result = await PollService.addVote(poll.id, "user123", 2);
 
       // ASSERT
-      expect(mockDb.values).toHaveBeenCalledWith({
-        pollId: 1,
-        userId: "user123",
-        optionIndex: 2,
-      });
       expect(result).toEqual(true);
+
+      const vote = await PollService.getUserVote(poll.id, "user123");
+      expect(vote?.optionIndex).toEqual(2);
     });
   });
 
@@ -199,29 +152,25 @@ describe("Service: PollService", () => {
 
     it("returns a vote when user has voted", async () => {
       // ARRANGE
-      const mockVote = createMockPollVote({
-        pollId: 1,
-        userId: "user123",
-        optionIndex: 1,
-      });
-      mockDb.where.mockResolvedValue([mockVote]);
+      const poll = await PollService.createPoll("msg1", "ch1", "creator1", "Q?", ["A", "B"]);
+      await PollService.addVote(poll.id, "user123", 1);
 
       // ACT
-      const result = await PollService.getUserVote(1, "user123");
+      const result = await PollService.getUserVote(poll.id, "user123");
 
       // ASSERT
-      expect(mockDb.select).toHaveBeenCalled();
-      expect(mockDb.from).toHaveBeenCalledWith(expect.anything());
-      expect(mockDb.where).toHaveBeenCalled();
-      expect(result).toEqual(mockVote);
+      expect(result).not.toBeNull();
+      expect(result?.pollId).toEqual(poll.id);
+      expect(result?.userId).toEqual("user123");
+      expect(result?.optionIndex).toEqual(1);
     });
 
     it("returns null when user has not voted", async () => {
       // ARRANGE
-      mockDb.where.mockResolvedValue([]);
+      const poll = await PollService.createPoll("msg1", "ch1", "creator1", "Q?", ["A", "B"]);
 
       // ACT
-      const result = await PollService.getUserVote(1, "user456");
+      const result = await PollService.getUserVote(poll.id, "user456");
 
       // ASSERT
       expect(result).toBeNull();
@@ -236,17 +185,15 @@ describe("Service: PollService", () => {
 
     it("returns vote counts by option index", async () => {
       // ARRANGE
-      const mockVotes = [
-        createMockPollVote({ optionIndex: 0 }),
-        createMockPollVote({ optionIndex: 0 }),
-        createMockPollVote({ optionIndex: 1 }),
-        createMockPollVote({ optionIndex: 0 }),
-        createMockPollVote({ optionIndex: 2 }),
-      ];
-      mockDb.where.mockResolvedValue(mockVotes);
+      const poll = await PollService.createPoll("msg1", "ch1", "creator1", "Q?", ["A", "B", "C"]);
+      await PollService.addVote(poll.id, "user1", 0);
+      await PollService.addVote(poll.id, "user2", 0);
+      await PollService.addVote(poll.id, "user3", 1);
+      await PollService.addVote(poll.id, "user4", 0);
+      await PollService.addVote(poll.id, "user5", 2);
 
       // ACT
-      const results = await PollService.getPollResults(1);
+      const results = await PollService.getPollResults(poll.id);
 
       // ASSERT
       expect(results).toBeInstanceOf(Map);
@@ -257,10 +204,10 @@ describe("Service: PollService", () => {
 
     it("returns empty map when there are no votes", async () => {
       // ARRANGE
-      mockDb.where.mockResolvedValue([]);
+      const poll = await PollService.createPoll("msg1", "ch1", "creator1", "Q?", ["A", "B"]);
 
       // ACT
-      const results = await PollService.getPollResults(1);
+      const results = await PollService.getPollResults(poll.id);
 
       // ASSERT
       expect(results.size).toEqual(0);
@@ -268,15 +215,20 @@ describe("Service: PollService", () => {
 
     it("handles votes for non-sequential option indices", async () => {
       // ARRANGE
-      const mockVotes = [
-        createMockPollVote({ optionIndex: 0 }),
-        createMockPollVote({ optionIndex: 5 }),
-        createMockPollVote({ optionIndex: 5 }),
-      ];
-      mockDb.where.mockResolvedValue(mockVotes);
+      const poll = await PollService.createPoll("msg1", "ch1", "creator1", "Q?", [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+      ]);
+      await PollService.addVote(poll.id, "user1", 0);
+      await PollService.addVote(poll.id, "user2", 5);
+      await PollService.addVote(poll.id, "user3", 5);
 
       // ACT
-      const results = await PollService.getPollResults(1);
+      const results = await PollService.getPollResults(poll.id);
 
       // ASSERT
       expect(results.get(0)).toEqual(1);
@@ -293,25 +245,20 @@ describe("Service: PollService", () => {
 
     it("returns polls with no end time", async () => {
       // ARRANGE
-      const mockPolls = [
-        createMockPoll({ id: 1, endTime: null }),
-        createMockPoll({ id: 2, endTime: null }),
-      ];
-      mockDb.where.mockResolvedValue(mockPolls);
+      await PollService.createPoll("msg1", "ch1", "creator1", "Q1?", ["A", "B"]);
+      await PollService.createPoll("msg2", "ch1", "creator1", "Q2?", ["A", "B"]);
+      await PollService.createPoll("msg3", "ch1", "creator1", "Q3?", ["A", "B"], new Date());
 
       // ACT
       const result = await PollService.getActivePolls();
 
       // ASSERT
-      expect(mockDb.select).toHaveBeenCalled();
-      expect(mockDb.from).toHaveBeenCalledWith(expect.anything());
-      expect(mockDb.where).toHaveBeenCalled();
-      expect(result).toEqual(mockPolls);
+      expect(result).toHaveLength(2);
     });
 
     it("returns empty array when there are no active polls", async () => {
       // ARRANGE
-      mockDb.where.mockResolvedValue([]);
+      await PollService.createPoll("msg1", "ch1", "creator1", "Q?", ["A", "B"], new Date());
 
       // ACT
       const result = await PollService.getActivePolls();
