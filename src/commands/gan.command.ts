@@ -1,7 +1,7 @@
 import type { Command } from "../models";
 import { GameInfoService } from "../services/game-info.service";
 import { TemplateService } from "../services/template.service";
-import { YouTubeService } from "../services/youtube.service";
+import { fetchGanData } from "../utils/fetch-gan-data";
 import { logError } from "../utils/logger";
 
 const ganCommand: Command = {
@@ -33,24 +33,18 @@ const ganCommand: Command = {
     );
 
     try {
-      // Fetch game info.
-      const gameInfo = await GameInfoService.fetchGameInfo(gameId);
-      if (!gameInfo) {
+      const ganData = await fetchGanData(gameId);
+      if (!ganData) {
         await sentMsg.edit(`Unable to get info from the game ID \`${gameId}\`... :frowning:`);
 
         return;
       }
 
-      // Get achievement date and YouTube link.
-      const achievementSetDate = GameInfoService.getMostRecentAchievementDate(gameInfo);
-      const youtubeLink = await YouTubeService.searchLongplay(gameInfo.title, gameInfo.consoleName);
-
-      // Generate template.
       const template = TemplateService.generateGanTemplate(
-        gameInfo,
-        achievementSetDate,
-        youtubeLink,
-        gameId,
+        ganData.gameInfo,
+        ganData.achievementSetDate,
+        ganData.youtubeLink,
+        ganData.gameId,
       );
 
       await sentMsg.edit(

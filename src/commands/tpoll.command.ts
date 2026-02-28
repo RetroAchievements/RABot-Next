@@ -1,10 +1,11 @@
-import type { MessageReaction, User } from "discord.js";
-import { Collection } from "discord.js";
-
 import type { Command } from "../models";
 import { PollService } from "../services/poll.service";
-import { logError } from "../utils/logger";
-import { EMOJI_ALPHABET } from "../utils/poll-constants";
+import {
+  addPollReactions,
+  buildPollMessageLines,
+  getReactionsForOptions,
+  startTimedPollCollector,
+} from "../utils/build-poll-message";
 
 const tpollCommand: Command = {
   name: "tpoll",
@@ -75,23 +76,16 @@ const tpollCommand: Command = {
       return;
     }
 
-    // Build poll message.
-    const reactions = Object.values(EMOJI_ALPHABET).slice(0, opts.length);
-    let options = "";
-
-    for (let i = 0; i < opts.length; i++) {
-      options += `\n${reactions[i]} ${opts[i]}`;
-    }
-
-    const pollMsg = [
-      `__*${message.author} started a poll*__:`,
-      `\n:bar_chart: **${question}**\n${options}`,
-    ];
+    const pollMsgLines = buildPollMessageLines({
+      authorMention: String(message.author),
+      question,
+      options: opts,
+    });
 
     const milliseconds = seconds * 1000;
 
     if (milliseconds > 0) {
-      pollMsg.push(
+      pollMsgLines.push(
         "\n`Notes:\n- only the first reaction is considered a vote\n- unlisted reactions void the vote`",
       );
     }
@@ -103,7 +97,7 @@ const tpollCommand: Command = {
       return;
     }
 
-    const sentMsg = await message.channel.send(pollMsg.join("\n"));
+    const sentMsg = await message.channel.send(pollMsgLines.join("\n"));
 
     if (milliseconds > 0) {
       const endTime = new Date(sentMsg.createdTimestamp);
@@ -111,17 +105,12 @@ const tpollCommand: Command = {
 
       // Use Discord timestamp formatting for local time display
       const endTimestamp = Math.floor(endTime.getTime() / 1000);
-      pollMsg.push(`:stopwatch: *This poll ends <t:${endTimestamp}:F>*`);
-      await sentMsg.edit(pollMsg.join("\n"));
+      pollMsgLines.push(`:stopwatch: *This poll ends <t:${endTimestamp}:F>*`);
+      await sentMsg.edit(pollMsgLines.join("\n"));
     }
 
-    // Add reactions.
-    for (let i = 0; i < opts.length; i++) {
-      const emoji = reactions[i];
-      if (emoji) {
-        await sentMsg.react(emoji);
-      }
-    }
+    const reactions = getReactionsForOptions(opts);
+    await addPollReactions(sentMsg, reactions);
 
     // If no timer, just return.
     if (milliseconds === 0) {
@@ -139,69 +128,16 @@ const tpollCommand: Command = {
       endTime,
     );
 
-    // Track voters and results in memory for this poll session.
-    const voters = new Set<string>();
-    const pollResults = new Collection<string, number>();
+    startTimedPollCollector({
+      sentMsg,
+      pollMsgLines,
+      client,
+      reactions,
+      milliseconds,
+      pollId: poll.id,
+      onEnd: async (finalText) => {
+        await sentMsg.edit(finalText);
 
-    // Set up reaction collector.
-    const filter = (reaction: MessageReaction, user: User) => {
-      // Ignore bot's reactions.
-      if (client.user?.id === user.id) {
-        return false;
-      }
-
-      // Do not allow repeated votes.
-      if (voters.has(user.id)) {
-        return false;
-      }
-
-      // Do not count invalid reactions.
-      if (!reaction.emoji.name || !reactions.includes(reaction.emoji.name)) {
-        return false;
-      }
-
-      // Add voter and count vote.
-      voters.add(user.id);
-
-      const emojiName = reaction.emoji.name!; // Safe after check above
-      const optionIndex = reactions.indexOf(emojiName);
-      if (optionIndex !== -1) {
-        // Add vote to database.
-        PollService.addVote(poll.id, user.id, optionIndex);
-
-        // Track in memory for immediate results.
-        const currentVotes = pollResults.get(emojiName) || 0;
-        pollResults.set(emojiName, currentVotes + 1);
-      }
-
-      return true;
-    };
-
-    const collector = sentMsg.createReactionCollector({ filter, time: milliseconds });
-
-    collector.on("end", async () => {
-      try {
-        // Prepare the final message.
-        const finalPollMsg = [
-          `~~${pollMsg[0]}~~\n:no_entry: **THIS POLL IS ALREADY CLOSED** :no_entry:`,
-          pollMsg[1], // Question and options.
-          "\n`This poll is closed.`",
-          "__**RESULTS:**__\n",
-        ];
-
-        if (pollResults.size === 0) {
-          finalPollMsg.push("No one voted");
-        } else {
-          // Sort results by vote count.
-          const sortedResults = [...pollResults.entries()].sort((a, b) => b[1] - a[1]);
-          for (const [emoji, count] of sortedResults) {
-            finalPollMsg.push(`${emoji}: ${count}`);
-          }
-        }
-
-        await sentMsg.edit(finalPollMsg.join("\n"));
-
-        // Notify the poll creator.
         const pollEndedMsg = [
           "**Your poll has ended.**",
           "**Click this link to see the results:**",
@@ -209,10 +145,7 @@ const tpollCommand: Command = {
         ];
 
         await message.reply(pollEndedMsg.join("\n"));
-      } catch (error) {
-        logError("Error ending timed poll:", { error });
-        await message.reply("**`poll` error**: Something went wrong with your poll.");
-      }
+      },
     });
   },
 };

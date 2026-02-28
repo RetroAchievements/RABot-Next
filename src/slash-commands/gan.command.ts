@@ -3,7 +3,7 @@ import { SlashCommandBuilder } from "discord.js";
 import type { SlashCommand } from "../models";
 import { GameInfoService } from "../services/game-info.service";
 import { TemplateService } from "../services/template.service";
-import { YouTubeService } from "../services/youtube.service";
+import { fetchGanData } from "../utils/fetch-gan-data";
 import { logError } from "../utils/logger";
 
 const ganSlashCommand: SlashCommand = {
@@ -35,9 +35,8 @@ const ganSlashCommand: SlashCommand = {
     }
 
     try {
-      // Fetch game info.
-      const gameInfo = await GameInfoService.fetchGameInfo(gameId);
-      if (!gameInfo) {
+      const ganData = await fetchGanData(gameId);
+      if (!ganData) {
         await interaction.editReply(
           `Unable to get info from the game ID \`${gameId}\`... :frowning:`,
         );
@@ -45,16 +44,11 @@ const ganSlashCommand: SlashCommand = {
         return;
       }
 
-      // Get achievement date and YouTube link.
-      const achievementSetDate = GameInfoService.getMostRecentAchievementDate(gameInfo);
-      const youtubeLink = await YouTubeService.searchLongplay(gameInfo.title, gameInfo.consoleName);
-
-      // Generate template.
       const template = TemplateService.generateGanTemplate(
-        gameInfo,
-        achievementSetDate,
-        youtubeLink,
-        gameId,
+        ganData.gameInfo,
+        ganData.achievementSetDate,
+        ganData.youtubeLink,
+        ganData.gameId,
       );
 
       await interaction.editReply({

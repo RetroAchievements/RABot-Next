@@ -40,5 +40,4 @@ export const COLORS = {
   SUCCESS: 0x00ff00,
   ERROR: 0xff0000,
   WARNING: 0xffff00,
-  INFO: 0x0099ff,
 } as const;

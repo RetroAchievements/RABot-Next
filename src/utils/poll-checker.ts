@@ -1,7 +1,7 @@
-import { ChannelType, type Client, type ThreadChannel } from "discord.js";
+import type { Client } from "discord.js";
 
-import { UWC_VOTE_CONCLUDED_TAG_ID, UWC_VOTING_TAG_ID } from "../config/constants";
-import { type PollResultData, UwcPollService } from "../services/uwc-poll.service";
+import { UwcPollService } from "../services/uwc-poll.service";
+import { extractPollResults, updateUwcThreadTags } from "./extract-poll-results";
 import { logError, logger } from "./logger";
 
 /**
@@ -46,61 +46,19 @@ export async function checkExpiredUwcPolls(client: Client): Promise<void> {
             channelId: poll.channelId,
           });
 
-          // Extract poll results.
-          const results: PollResultData[] = [];
-          let totalVotes = 0;
-
-          // Calculate total votes from all answers.
-          for (const answer of message.poll.answers.values()) {
-            totalVotes += answer.voteCount;
-          }
-
-          // Build results array.
-          for (const answer of message.poll.answers.values()) {
-            const votePercentage = totalVotes > 0 ? (answer.voteCount / totalVotes) * 100 : 0;
-
-            if (answer.text) {
-              results.push({
-                optionText: answer.text,
-                voteCount: answer.voteCount,
-                votePercentage,
-              });
-            }
-          }
+          const results = extractPollResults(message.poll);
 
           // Complete the poll in the database.
           await UwcPollService.completeUwcPoll(poll.messageId, results);
 
           // Update thread tags if applicable.
-          if (
-            poll.threadId &&
-            channel.type === ChannelType.PublicThread &&
-            UWC_VOTING_TAG_ID &&
-            UWC_VOTE_CONCLUDED_TAG_ID
-          ) {
-            try {
-              const thread = channel as ThreadChannel;
-              const currentTags = thread.appliedTags || [];
-
-              // Remove voting tag and add concluded tag.
-              const newTags = currentTags.filter((tag) => tag !== UWC_VOTING_TAG_ID);
-              if (!newTags.includes(UWC_VOTE_CONCLUDED_TAG_ID)) {
-                newTags.push(UWC_VOTE_CONCLUDED_TAG_ID);
-              }
-
-              await thread.setAppliedTags(newTags);
-
-              logger.info("Updated thread tags for expired poll", {
-                threadId: thread.id,
-                messageId: poll.messageId,
-              });
-            } catch (error) {
-              logError(error, {
-                event: "uwc_poll_startup_tag_error",
-                threadId: poll.threadId,
-                messageId: poll.messageId,
-              });
-            }
+          if (poll.threadId) {
+            await updateUwcThreadTags({
+              threadId: poll.threadId,
+              channel,
+              messageId: poll.messageId,
+              logContext: "for expired poll",
+            });
           }
         }
       } catch (error) {

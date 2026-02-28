@@ -80,7 +80,7 @@ export class AutoPublishService {
             channelId: message.channelId,
             messageId: message.id,
             userId: message.author.id,
-            guildId: message.guildId || undefined,
+            guildId: message.guildId,
           });
         }
       }

@@ -55,7 +55,7 @@ describe("Util: ErrorTracker", () => {
       // ASSERT
       expect(logger.logError).toHaveBeenCalledWith(error, {
         userId: message.author.id,
-        guildId: undefined,
+        guildId: null,
         channelId: message.channelId,
         commandName: "unknown",
         messageId: message.id,
@@ -153,7 +153,7 @@ describe("Util: ErrorTracker", () => {
       expect(logger.logError).toHaveBeenCalledWith(
         error,
         expect.objectContaining({
-          guildId: undefined,
+          guildId: null,
         }),
       );
     });

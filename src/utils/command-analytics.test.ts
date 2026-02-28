@@ -13,25 +13,6 @@ describe("Util: CommandAnalytics", () => {
     vi.spyOn(logger, "info").mockImplementation(() => {});
   });
 
-  describe("startTracking", () => {
-    it("is defined", () => {
-      // ASSERT
-      expect(CommandAnalytics.startTracking).toBeDefined();
-    });
-
-    it("returns the current timestamp", () => {
-      // ARRANGE
-      const timeBefore = Date.now();
-
-      // ACT
-      const startTime = CommandAnalytics.startTracking();
-
-      // ASSERT
-      expect(startTime).toBeGreaterThanOrEqual(timeBefore);
-      expect(startTime).toBeLessThanOrEqual(Date.now());
-    });
-  });
-
   describe("trackLegacyCommand", () => {
     it("is defined", () => {
       // ASSERT
@@ -100,7 +81,7 @@ describe("Util: CommandAnalytics", () => {
       // ASSERT
       expect(logger.info).toHaveBeenCalledWith(
         expect.objectContaining({
-          guildId: undefined,
+          guildId: null,
         }),
         expect.any(String),
       );

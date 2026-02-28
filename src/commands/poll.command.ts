@@ -1,5 +1,9 @@
 import type { Command } from "../models";
-import { EMOJI_ALPHABET } from "../utils/poll-constants";
+import {
+  addPollReactions,
+  buildPollMessageLines,
+  getReactionsForOptions,
+} from "../utils/build-poll-message";
 
 const pollCommand: Command = {
   name: "poll",
@@ -47,18 +51,11 @@ const pollCommand: Command = {
       return;
     }
 
-    // Build poll message.
-    const reactions = Object.values(EMOJI_ALPHABET).slice(0, opts.length);
-    let options = "";
-
-    for (let i = 0; i < opts.length; i++) {
-      options += `\n${reactions[i]} ${opts[i]}`;
-    }
-
-    const pollMsg = [
-      `__*${message.author} started a poll*__:`,
-      `\n:bar_chart: **${question}**\n${options}`,
-    ];
+    const pollMsgLines = buildPollMessageLines({
+      authorMention: String(message.author),
+      question,
+      options: opts,
+    });
 
     // Send the poll message.
     if (!("send" in message.channel)) {
@@ -67,15 +64,10 @@ const pollCommand: Command = {
       return;
     }
 
-    const sentMsg = await message.channel.send(pollMsg.join("\n"));
+    const sentMsg = await message.channel.send(pollMsgLines.join("\n"));
 
-    // Add reactions.
-    for (let i = 0; i < opts.length; i++) {
-      const emoji = reactions[i];
-      if (emoji) {
-        await sentMsg.react(emoji);
-      }
-    }
+    const reactions = getReactionsForOptions(opts);
+    await addPollReactions(sentMsg, reactions);
   },
 };
 

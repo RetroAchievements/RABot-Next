@@ -34,6 +34,11 @@ const statusCommand: SlashCommand = {
       .filter(Boolean)
       .join(" ");
 
+    let totalUsers = 0;
+    for (const guild of client.guilds.cache.values()) {
+      totalUsers += guild.memberCount;
+    }
+
     // Create embed.
     const embed = new EmbedBuilder()
       .setTitle("📊 RABot Status")
@@ -67,14 +72,7 @@ const statusCommand: SlashCommand = {
         },
         {
           name: "👥 Total Users",
-          value: (() => {
-            let totalUsers = 0;
-            for (const guild of client.guilds.cache.values()) {
-              totalUsers += guild.memberCount;
-            }
-
-            return totalUsers.toLocaleString();
-          })(),
+          value: totalUsers.toLocaleString(),
           inline: true,
         },
         {

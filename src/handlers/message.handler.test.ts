@@ -51,7 +51,6 @@ describe("Handler: handleMessage", () => {
     vi.spyOn(CooldownManager, "formatCooldownMessage").mockReturnValue(
       "⏱️ Please wait **3** seconds",
     );
-    vi.spyOn(CommandAnalytics, "startTracking").mockReturnValue(Date.now());
     vi.spyOn(CommandAnalytics, "trackLegacyCommand").mockImplementation(() => {});
     vi.spyOn(logger, "logCommandExecution").mockImplementation(() => logger.logger);
     vi.spyOn(logger, "logError").mockImplementation(() => {});
@@ -267,9 +266,6 @@ describe("Handler: handleMessage", () => {
     const message = createMockMessage({
       content: "!test",
     });
-    const startTime = Date.now();
-    (CommandAnalytics.startTracking as any).mockReturnValue(startTime);
-
     // ACT
     await handleMessage(message, mockClient);
 
@@ -277,7 +273,7 @@ describe("Handler: handleMessage", () => {
     expect(CommandAnalytics.trackLegacyCommand).toHaveBeenCalledWith(
       message,
       "test",
-      startTime,
+      expect.any(Number),
       true,
     );
   });
@@ -290,9 +286,6 @@ describe("Handler: handleMessage", () => {
     const message = createMockMessage({
       content: "!test",
     });
-    const startTime = Date.now();
-    (CommandAnalytics.startTracking as any).mockReturnValue(startTime);
-
     // ACT
     await handleMessage(message, mockClient);
 
@@ -307,7 +300,7 @@ describe("Handler: handleMessage", () => {
     expect(CommandAnalytics.trackLegacyCommand).toHaveBeenCalledWith(
       message,
       "test",
-      startTime,
+      expect.any(Number),
       false,
       testError,
     );

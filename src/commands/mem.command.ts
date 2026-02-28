@@ -21,7 +21,7 @@ const memCommand: Command = {
   cooldown: 3,
 
   async execute(message, args) {
-    logCommandExecution("mem", message.author.id, message.guildId || undefined, message.channelId);
+    logCommandExecution("mem", message.author.id, message.guildId, message.channelId);
 
     if (!args[0]) {
       await message.reply("Please provide an achievement ID, URL, or MemAddr string.");
@@ -115,7 +115,7 @@ function createCodeNotesEmbed(
   codeNotes: Array<{ Address: string; Note: string }>,
 ): EmbedBuilder | null {
   const embed = new EmbedBuilder()
-    .setColor(COLORS.INFO)
+    .setColor(COLORS.PRIMARY)
     .setTitle("Code Notes")
     .setURL(`https://retroachievements.org/codenotes.php?g=${gameId}`);
 
