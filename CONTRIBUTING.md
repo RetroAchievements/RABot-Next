@@ -84,8 +84,8 @@ Individual checks:
 ```bash
 bun lint        # Check code style
 bun lint:fix    # Auto-fix style issues
-bun tsc         # TypeScript type checking
-bun test        # Run tests
+bun tsc         # TypeScript type checking (via tsgo)
+bun run test    # Run tests (via vitest)
 ```
 
 ### 4. Commit Your Changes

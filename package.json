@@ -29,7 +29,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "bun run src/database/migrate.ts",
     "db:seed": "bun run src/database/seed-teams.ts",
-    "tsc": "tsc --noEmit",
+    "tsc": "tsgo --noEmit",
     "lint": "eslint src --cache",
     "lint:fix": "eslint src --fix",
     "test": "vitest run",
@@ -48,6 +48,7 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/figlet": "^1.7.0",
+    "@typescript/native-preview": "^7.0.0-dev.20260228.1",
     "drizzle-kit": "0.31.4",
     "eslint": "^9.31.0",
     "eslint-config-prettier": "^10.1.5",
@@ -59,8 +60,5 @@
     "eslint-plugin-unicorn": "^59.0.1",
     "typescript-eslint": "^8.37.0",
     "vitest": "^4.0.18"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
   }
 }

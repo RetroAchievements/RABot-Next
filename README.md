@@ -25,11 +25,10 @@ RABot utilizes:
 - **[Discord.js](https://discord.js.org/)** for tight integration with Discord
 - **[Drizzle ORM](https://orm.drizzle.team/)** with SQLite for data persistence
 - **[@retroachievements/api](https://github.com/RetroAchievements/api-js)** for web API calls
-- **[Pino](https://getpino.io/#/)** for structured logging with command analytics
 
 ## Requirements
 
-- [Bun](https://bun.sh) 1.2.18+
+- [Bun](https://bun.sh) 1.3.6+
 - A Discord bot token
 
 ## Installation
@@ -115,7 +114,7 @@ For production deployments, the bot is automatically deployed via Forge when cha
 - `bun db:migrate` - Apply database migrations
 - `bun lint` - Run ESLint
 - `bun lint:fix` - Run ESLint with auto-fix
-- `bun tsc` - Run TypeScript type checking
+- `bun tsc` - Run TypeScript type checking (via tsgo)
 - `bun run test` - Run all tests
 - `bun run test:watch` - Run tests in watch mode
 - `bun verify` - Run lint, type checking, and tests (comprehensive check)
