@@ -1,36 +1,23 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { createMockTeam, createMockTeamMember } from "../test/mocks/database.mock";
+import { cleanAllTables, createTestDb } from "../test/create-test-db";
 import { TeamService } from "./team.service";
 
-const { mockDb } = vi.hoisted(() => {
-  const mockDb: any = {
-    select: vi.fn(() => mockDb),
-    from: vi.fn(() => mockDb),
-    where: vi.fn(() => Promise.resolve([])),
-    insert: vi.fn(() => mockDb),
-    values: vi.fn(() => mockDb),
-    returning: vi.fn(() => Promise.resolve([])),
-    onConflictDoNothing: vi.fn(() => Promise.resolve()),
-    delete: vi.fn(() => mockDb),
-  };
+let testDb: Awaited<ReturnType<typeof createTestDb>>;
 
-  return { mockDb };
-});
-
-vi.mock("../database/db", () => ({ db: mockDb }));
+vi.mock("../database/db", () => ({
+  get db() {
+    return testDb;
+  },
+}));
 
 describe("Service: TeamService", () => {
-  beforeEach(() => {
-    // ... reset all mocks before each test ...
-    mockDb.select.mockClear().mockReturnValue(mockDb);
-    mockDb.from.mockClear().mockReturnValue(mockDb);
-    mockDb.where.mockClear().mockResolvedValue([]);
-    mockDb.insert.mockClear().mockReturnValue(mockDb);
-    mockDb.values.mockClear().mockReturnValue(mockDb);
-    mockDb.returning.mockClear().mockResolvedValue([]);
-    mockDb.onConflictDoNothing.mockClear().mockResolvedValue(undefined);
-    mockDb.delete.mockClear().mockReturnValue(mockDb);
+  beforeAll(async () => {
+    testDb = await createTestDb();
+  });
+
+  beforeEach(async () => {
+    await cleanAllTables(testDb);
   });
 
   describe("createTeam", () => {
@@ -40,21 +27,14 @@ describe("Service: TeamService", () => {
     });
 
     it("creates a new team with the provided details", async () => {
-      // ARRANGE
-      const mockTeam = createMockTeam({ id: "test-team-id", name: "test-team" });
-      mockDb.returning.mockResolvedValue([mockTeam]);
-
       // ACT
       const result = await TeamService.createTeam("test-team-id", "test-team", "admin123");
 
       // ASSERT
-      expect(mockDb.insert).toHaveBeenCalledWith(expect.anything());
-      expect(mockDb.values).toHaveBeenCalledWith({
-        id: "test-team-id",
-        name: "test-team",
-        addedBy: "admin123",
-      });
-      expect(result).toEqual(mockTeam);
+      expect(result.id).toEqual("test-team-id");
+      expect(result.name).toEqual("test-team");
+      expect(result.addedBy).toEqual("admin123");
+      expect(result.addedAt).toBeDefined();
     });
   });
 
@@ -66,23 +46,18 @@ describe("Service: TeamService", () => {
 
     it("returns a team when found", async () => {
       // ARRANGE
-      const mockTeam = createMockTeam({ id: "team123" });
-      mockDb.where.mockResolvedValue([mockTeam]);
+      await TeamService.createTeam("team123", "My Team", "admin1");
 
       // ACT
       const result = await TeamService.getTeam("team123");
 
       // ASSERT
-      expect(mockDb.select).toHaveBeenCalled();
-      expect(mockDb.from).toHaveBeenCalledWith(expect.anything());
-      expect(mockDb.where).toHaveBeenCalled();
-      expect(result).toEqual(mockTeam);
+      expect(result).not.toBeNull();
+      expect(result?.id).toEqual("team123");
+      expect(result?.name).toEqual("My Team");
     });
 
     it("returns null when team is not found", async () => {
-      // ARRANGE
-      mockDb.where.mockResolvedValue([]);
-
       // ACT
       const result = await TeamService.getTeam("nonexistent");
 
@@ -99,18 +74,27 @@ describe("Service: TeamService", () => {
 
     it("adds a member to a team", async () => {
       // ARRANGE
+      await TeamService.createTeam("team123", "Team", "admin1");
 
       // ACT
       await TeamService.addMember("team123", "user456", "admin789");
 
       // ASSERT
-      expect(mockDb.insert).toHaveBeenCalledWith(expect.anything());
-      expect(mockDb.values).toHaveBeenCalledWith({
-        teamId: "team123",
-        userId: "user456",
-        addedBy: "admin789",
-      });
-      expect(mockDb.onConflictDoNothing).toHaveBeenCalled();
+      const isMember = await TeamService.isTeamMember("team123", "user456");
+      expect(isMember).toEqual(true);
+    });
+
+    it("silently handles duplicate additions", async () => {
+      // ARRANGE
+      await TeamService.createTeam("team123", "Team", "admin1");
+      await TeamService.addMember("team123", "user456", "admin789");
+
+      // ACT - adding the same member again should not throw.
+      await TeamService.addMember("team123", "user456", "admin789");
+
+      // ASSERT
+      const members = await TeamService.getTeamMembers("team123");
+      expect(members).toEqual(["user456"]);
     });
   });
 
@@ -122,31 +106,27 @@ describe("Service: TeamService", () => {
 
     it("removes an existing member from a team", async () => {
       // ARRANGE
-      const mockMember = createMockTeamMember();
-
-      // ... mock isTeamMember to return true ...
-      mockDb.where.mockResolvedValueOnce([mockMember]);
+      await TeamService.createTeam("team123", "Team", "admin1");
+      await TeamService.addMember("team123", "user456", "admin1");
 
       // ACT
       const result = await TeamService.removeMember("team123", "user456");
 
       // ASSERT
-      expect(mockDb.delete).toHaveBeenCalledWith(expect.anything());
-      expect(mockDb.where).toHaveBeenCalled();
       expect(result).toEqual(true);
+
+      const isMember = await TeamService.isTeamMember("team123", "user456");
+      expect(isMember).toEqual(false);
     });
 
     it("returns false when member does not exist", async () => {
       // ARRANGE
-
-      // ... mock isTeamMember to return false ...
-      mockDb.where.mockResolvedValueOnce([]);
+      await TeamService.createTeam("team123", "Team", "admin1");
 
       // ACT
       const result = await TeamService.removeMember("team123", "user456");
 
       // ASSERT
-      expect(mockDb.delete).not.toHaveBeenCalled();
       expect(result).toEqual(false);
     });
   });
@@ -159,20 +139,24 @@ describe("Service: TeamService", () => {
 
     it("returns an array of user IDs for team members", async () => {
       // ARRANGE
-      const mockMembers = [{ userId: "user1" }, { userId: "user2" }, { userId: "user3" }];
-      mockDb.where.mockResolvedValue(mockMembers);
+      await TeamService.createTeam("team123", "Team", "admin1");
+      await TeamService.addMember("team123", "user1", "admin1");
+      await TeamService.addMember("team123", "user2", "admin1");
+      await TeamService.addMember("team123", "user3", "admin1");
 
       // ACT
       const result = await TeamService.getTeamMembers("team123");
 
       // ASSERT
-      expect(mockDb.select).toHaveBeenCalledWith({ userId: expect.anything() });
-      expect(result).toEqual(["user1", "user2", "user3"]);
+      expect(result).toHaveLength(3);
+      expect(result).toContain("user1");
+      expect(result).toContain("user2");
+      expect(result).toContain("user3");
     });
 
     it("returns an empty array when team has no members", async () => {
       // ARRANGE
-      mockDb.where.mockResolvedValue([]);
+      await TeamService.createTeam("team123", "Team", "admin1");
 
       // ACT
       const result = await TeamService.getTeamMembers("team123");
@@ -190,7 +174,8 @@ describe("Service: TeamService", () => {
 
     it("returns true when user is a team member", async () => {
       // ARRANGE
-      mockDb.where.mockResolvedValue([createMockTeamMember()]);
+      await TeamService.createTeam("team123", "Team", "admin1");
+      await TeamService.addMember("team123", "user456", "admin1");
 
       // ACT
       const result = await TeamService.isTeamMember("team123", "user456");
@@ -201,7 +186,7 @@ describe("Service: TeamService", () => {
 
     it("returns false when user is not a team member", async () => {
       // ARRANGE
-      mockDb.where.mockResolvedValue([]);
+      await TeamService.createTeam("team123", "Team", "admin1");
 
       // ACT
       const result = await TeamService.isTeamMember("team123", "user456");
@@ -219,19 +204,14 @@ describe("Service: TeamService", () => {
 
     it("returns all teams", async () => {
       // ARRANGE
-      const mockTeams = [
-        createMockTeam({ id: "team1", name: "Team One" }),
-        createMockTeam({ id: "team2", name: "Team Two" }),
-      ];
-      mockDb.from.mockReturnValue(Promise.resolve(mockTeams));
+      await TeamService.createTeam("team1", "Team One", "admin1");
+      await TeamService.createTeam("team2", "Team Two", "admin1");
 
       // ACT
       const result = await TeamService.getAllTeams();
 
       // ASSERT
-      expect(mockDb.select).toHaveBeenCalled();
-      expect(mockDb.from).toHaveBeenCalledWith(expect.anything());
-      expect(result).toEqual(mockTeams);
+      expect(result).toHaveLength(2);
     });
   });
 
@@ -243,21 +223,17 @@ describe("Service: TeamService", () => {
 
     it("returns a team when found by name", async () => {
       // ARRANGE
-      const mockTeam = createMockTeam({ name: "test-team" });
-      mockDb.where.mockResolvedValue([mockTeam]);
+      await TeamService.createTeam("team-id", "test-team", "admin1");
 
       // ACT
       const result = await TeamService.getTeamByName("test-team");
 
       // ASSERT
-      expect(mockDb.where).toHaveBeenCalled();
-      expect(result).toEqual(mockTeam);
+      expect(result).not.toBeNull();
+      expect(result?.name).toEqual("test-team");
     });
 
     it("returns null when team is not found by name", async () => {
-      // ARRANGE
-      mockDb.where.mockResolvedValue([]);
-
       // ACT
       const result = await TeamService.getTeamByName("nonexistent");
 
@@ -274,27 +250,17 @@ describe("Service: TeamService", () => {
 
     it("adds a member when team exists", async () => {
       // ARRANGE
-      const mockTeam = createMockTeam({ id: "team123", name: "test-team" });
-
-      // ... mock getTeamByName ...
-      mockDb.where.mockResolvedValueOnce([mockTeam]);
+      await TeamService.createTeam("team123", "test-team", "admin1");
 
       // ACT
       await TeamService.addMemberByTeamName("test-team", "user456", "admin789");
 
       // ASSERT
-      expect(mockDb.insert).toHaveBeenCalled();
-      expect(mockDb.values).toHaveBeenCalledWith({
-        teamId: "team123",
-        userId: "user456",
-        addedBy: "admin789",
-      });
+      const isMember = await TeamService.isTeamMember("team123", "user456");
+      expect(isMember).toEqual(true);
     });
 
     it("throws an error when team does not exist", async () => {
-      // ARRANGE
-      mockDb.where.mockResolvedValueOnce([]);
-
       // ASSERT
       await expect(
         TeamService.addMemberByTeamName("nonexistent", "user456", "admin789"),
@@ -310,31 +276,24 @@ describe("Service: TeamService", () => {
 
     it("removes a member when team and member exist", async () => {
       // ARRANGE
-      const mockTeam = createMockTeam({ id: "team123", name: "test-team" });
-      const mockMember = createMockTeamMember();
-
-      // ... mock getTeamByName ...
-      mockDb.where.mockResolvedValueOnce([mockTeam]);
-      // ... mock isTeamMember ...
-      mockDb.where.mockResolvedValueOnce([mockMember]);
+      await TeamService.createTeam("team123", "test-team", "admin1");
+      await TeamService.addMember("team123", "user456", "admin1");
 
       // ACT
       const result = await TeamService.removeMemberByTeamName("test-team", "user456");
 
       // ASSERT
-      expect(mockDb.delete).toHaveBeenCalled();
       expect(result).toEqual(true);
+
+      const isMember = await TeamService.isTeamMember("team123", "user456");
+      expect(isMember).toEqual(false);
     });
 
     it("returns false when team does not exist", async () => {
-      // ARRANGE
-      mockDb.where.mockResolvedValueOnce([]);
-
       // ACT
       const result = await TeamService.removeMemberByTeamName("nonexistent", "user456");
 
       // ASSERT
-      expect(mockDb.delete).not.toHaveBeenCalled();
       expect(result).toEqual(false);
     });
   });
@@ -347,25 +306,20 @@ describe("Service: TeamService", () => {
 
     it("returns team members when team exists", async () => {
       // ARRANGE
-      const mockTeam = createMockTeam({ id: "team123", name: "test-team" });
-      const mockMembers = [{ userId: "user1" }, { userId: "user2" }];
-
-      // ... mock getTeamByName ...
-      mockDb.where.mockResolvedValueOnce([mockTeam]);
-      // ... mock getTeamMembers ...
-      mockDb.where.mockResolvedValueOnce(mockMembers);
+      await TeamService.createTeam("team123", "test-team", "admin1");
+      await TeamService.addMember("team123", "user1", "admin1");
+      await TeamService.addMember("team123", "user2", "admin1");
 
       // ACT
       const result = await TeamService.getTeamMembersByName("test-team");
 
       // ASSERT
-      expect(result).toEqual(["user1", "user2"]);
+      expect(result).toHaveLength(2);
+      expect(result).toContain("user1");
+      expect(result).toContain("user2");
     });
 
     it("returns empty array when team does not exist", async () => {
-      // ARRANGE
-      mockDb.where.mockResolvedValueOnce([]);
-
       // ACT
       const result = await TeamService.getTeamMembersByName("nonexistent");
 

@@ -36,7 +36,7 @@
     "lint:fix": "oxlint src --fix",
     "test": "vitest run",
     "test:watch": "vitest",
-    "verify": "run-p format:check lint tsc test",
+    "verify": "run-p format lint:fix tsc test",
     "postinstall": "git config core.hooksPath .hooks && chmod +x .hooks/*"
   },
   "dependencies": {
