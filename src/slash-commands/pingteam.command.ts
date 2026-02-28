@@ -168,7 +168,7 @@ const pingteamSlashCommand: SlashCommand = {
           await TeamService.addMemberByTeamName(teamName, user.id, interaction.user.id);
 
           await interaction.reply(`✅ Added ${user} to team "${teamName}".`);
-        } catch (_error) {
+        } catch {
           await interaction.reply({
             content: `Failed to add ${user} to team "${teamName}". They might already be a member.`,
             flags: MessageFlags.Ephemeral,

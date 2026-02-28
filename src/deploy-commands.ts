@@ -37,7 +37,7 @@ const commandsPath = join(__dirname, "slash-commands");
         commands.push(slashCommand.data.toJSON());
       }
     }
-  } catch (_error) {
+  } catch {
     logger.info("📁 No slash commands found in src/slash-commands/");
     logger.info("Create slash command files ending with .command.ts to deploy them.");
     process.exit(0);

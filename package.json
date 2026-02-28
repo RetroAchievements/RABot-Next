@@ -32,11 +32,11 @@
     "tsc": "tsgo --noEmit",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
-    "lint": "eslint src --cache",
-    "lint:fix": "eslint src --fix",
+    "lint": "oxlint src",
+    "lint:fix": "oxlint src --fix",
     "test": "vitest run",
     "test:watch": "vitest",
-    "verify": "bun run format:check && bun run lint:fix && bun run tsc && vitest run",
+    "verify": "bun run format:check && bun run lint && bun run tsc && vitest run",
     "postinstall": "git config core.hooksPath .hooks && chmod +x .hooks/*"
   },
   "dependencies": {
@@ -48,19 +48,14 @@
     "youtube-search": "^1.1.6"
   },
   "devDependencies": {
+    "@nkzw/oxlint-config": "^1.0.1",
     "@types/bun": "latest",
     "@types/figlet": "^1.7.0",
     "@typescript/native-preview": "^7.0.0-dev.20260228.1",
+    "@vitest/coverage-v8": "4.0.18",
     "drizzle-kit": "0.31.4",
-    "eslint": "^9.31.0",
-    "eslint-config-prettier": "^10.1.5",
-    "eslint-import-resolver-typescript": "^4.4.4",
-    "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-simple-import-sort": "^12.1.1",
-    "eslint-plugin-sort-keys-shorthand": "^3.0.0",
-    "eslint-plugin-unicorn": "^59.0.1",
     "oxfmt": "^0.35.0",
-    "typescript-eslint": "^8.37.0",
+    "oxlint": "^1.50.0",
     "vitest": "^4.0.18"
   }
 }
