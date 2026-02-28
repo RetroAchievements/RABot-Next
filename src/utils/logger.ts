@@ -1,27 +1,21 @@
 import type { Logger } from "pino";
 import pino from "pino";
 
-const isCI = process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
-const isTest = process.env.NODE_ENV === "test";
 const isDevelopment = process.env.NODE_ENV !== "production";
+const isCI = !!process.env.CI;
 const logLevel = process.env.LOG_LEVEL || (isDevelopment ? "debug" : "info");
 
-const pinoOptions: pino.LoggerOptions = {
+// pino-pretty uses worker threads which don't work reliably in Bun on Linux (CI).
+const usePrettyPrint = isDevelopment && !isCI;
+
+export const logger: Logger = pino({
   level: logLevel,
   timestamp: pino.stdTimeFunctions.isoTime,
   formatters: {
     level: (label) => ({ level: label }),
   },
-  base: {
-    pid: process.pid,
-    hostname: process.env.HOSTNAME || "rabot",
-  },
-};
-
-// pino.transport() uses worker threads which can break in CI/test environments.
-const transport =
-  isDevelopment && !isCI && !isTest
-    ? pino.transport({
+  transport: usePrettyPrint
+    ? {
         target: "pino-pretty",
         options: {
           colorize: true,
@@ -29,10 +23,9 @@ const transport =
           translateTime: "HH:MM:ss.l",
           singleLine: false,
         },
-      })
-    : undefined;
-
-export const logger: Logger = pino(pinoOptions, transport);
+      }
+    : undefined,
+});
 
 export interface LogContext {
   userId?: string;
