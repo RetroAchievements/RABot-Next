@@ -1,26 +1,31 @@
-import * as ra from "@retroachievements/api";
-import { afterEach, beforeEach, describe, expect, it, type Mock, mock, spyOn } from "bun:test";
 import type { Message } from "discord.js";
+import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 
 import { connectApiService } from "../services/connect-api.service";
 import { createMockMessage } from "../test/mocks/discord.mock";
 import memCommand from "./mem.command";
 
+const { mockGetAchievementUnlocks, mockBuildAuthorization } = vi.hoisted(() => ({
+  mockGetAchievementUnlocks: vi.fn(),
+  mockBuildAuthorization: vi.fn(() => ({ username: "RABot", webApiKey: "test" })),
+}));
+
+vi.mock("@retroachievements/api", () => ({
+  getAchievementUnlocks: mockGetAchievementUnlocks,
+  buildAuthorization: mockBuildAuthorization,
+}));
+
 describe("Command: mem", () => {
   let mockMessage: ReturnType<typeof createMockMessage>;
-  const mockGetAchievementUnlocks = mock();
 
   beforeEach(() => {
     mockMessage = createMockMessage();
     mockGetAchievementUnlocks.mockReset();
-
-    // ... mock the @retroachievements/api functions ...
-    spyOn(ra, "getAchievementUnlocks").mockImplementation(mockGetAchievementUnlocks);
-    spyOn(ra, "buildAuthorization").mockReturnValue({ username: "RABot", webApiKey: "test" });
+    mockBuildAuthorization.mockClear();
   });
 
   afterEach(() => {
-    mock.restore();
+    vi.restoreAllMocks();
   });
 
   it("is defined", () => {
@@ -69,14 +74,14 @@ describe("Command: mem", () => {
 
     it("processes achievement ID successfully", async () => {
       // ARRANGE
-      const sentMsg = { edit: mock() } as unknown as Message;
+      const sentMsg = { edit: vi.fn() } as unknown as Message;
       (mockMessage.reply as Mock<() => Promise<Message>>).mockResolvedValueOnce(sentMsg);
 
       mockGetAchievementUnlocks.mockResolvedValueOnce({
         game: { id: 789 },
       });
 
-      spyOn(connectApiService, "getMemAddr").mockResolvedValueOnce("0xH1234=5");
+      vi.spyOn(connectApiService, "getMemAddr").mockResolvedValueOnce("0xH1234=5");
 
       // ACT
       await memCommand.execute(mockMessage, ["123456"], {} as any);
@@ -90,14 +95,14 @@ describe("Command: mem", () => {
 
     it("processes achievement URL successfully", async () => {
       // ARRANGE
-      const sentMsg = { edit: mock() } as unknown as Message;
+      const sentMsg = { edit: vi.fn() } as unknown as Message;
       (mockMessage.reply as Mock<() => Promise<Message>>).mockResolvedValueOnce(sentMsg);
 
       mockGetAchievementUnlocks.mockResolvedValueOnce({
         game: { id: 789 },
       });
 
-      spyOn(connectApiService, "getMemAddr").mockResolvedValueOnce("0xH1234=5");
+      vi.spyOn(connectApiService, "getMemAddr").mockResolvedValueOnce("0xH1234=5");
 
       // ACT
       await memCommand.execute(
@@ -115,7 +120,7 @@ describe("Command: mem", () => {
 
     it("shows error message when game ID not found", async () => {
       // ARRANGE
-      const sentMsg = { edit: mock() } as unknown as Message;
+      const sentMsg = { edit: vi.fn() } as unknown as Message;
       (mockMessage.reply as Mock<() => Promise<Message>>).mockResolvedValueOnce(sentMsg);
 
       mockGetAchievementUnlocks.mockResolvedValueOnce({});
@@ -131,14 +136,14 @@ describe("Command: mem", () => {
 
     it("shows error message when MemAddr not found", async () => {
       // ARRANGE
-      const sentMsg = { edit: mock() } as unknown as Message;
+      const sentMsg = { edit: vi.fn() } as unknown as Message;
       (mockMessage.reply as Mock<() => Promise<Message>>).mockResolvedValueOnce(sentMsg);
 
       mockGetAchievementUnlocks.mockResolvedValueOnce({
         game: { id: 789 },
       });
 
-      spyOn(connectApiService, "getMemAddr").mockResolvedValueOnce(null);
+      vi.spyOn(connectApiService, "getMemAddr").mockResolvedValueOnce(null);
 
       // ACT
       await memCommand.execute(mockMessage, ["123456"], {} as any);
@@ -151,7 +156,7 @@ describe("Command: mem", () => {
 
     it("handles API errors gracefully", async () => {
       // ARRANGE
-      const sentMsg = { edit: mock() } as unknown as Message;
+      const sentMsg = { edit: vi.fn() } as unknown as Message;
       (mockMessage.reply as Mock<() => Promise<Message>>).mockResolvedValueOnce(sentMsg);
 
       mockGetAchievementUnlocks.mockRejectedValueOnce(new Error("API Error"));

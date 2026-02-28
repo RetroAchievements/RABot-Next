@@ -1,14 +1,10 @@
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { db } from "../database/db";
 import { uwcPollResults, uwcPolls } from "../database/schema";
 import { UwcPollService } from "./uwc-poll.service";
 
-// Skip database-dependent tests in CI environment where Drizzle methods are undefined.
-const isCI = process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
-const describeOrSkip = isCI ? describe.skip : describe;
-
-describeOrSkip("UwcPollService", () => {
+describe("UwcPollService", () => {
   // Clean up database after each test.
   afterEach(async () => {
     await db.delete(uwcPollResults);
@@ -17,6 +13,7 @@ describeOrSkip("UwcPollService", () => {
 
   describe("createUwcPoll", () => {
     it("creates a new UWC poll", async () => {
+      // ARRANGE
       const pollData = {
         messageId: "123456789",
         channelId: "987654321",
@@ -29,8 +26,10 @@ describeOrSkip("UwcPollService", () => {
         pollUrl: "https://discord.com/channels/123/456/789",
       };
 
+      // ACT
       const poll = await UwcPollService.createUwcPoll(pollData);
 
+      // ASSERT
       expect(poll).toBeDefined();
       expect(poll.messageId).toBe(pollData.messageId);
       expect(poll.channelId).toBe(pollData.channelId);
@@ -41,6 +40,7 @@ describeOrSkip("UwcPollService", () => {
     });
 
     it("creates a poll without optional fields", async () => {
+      // ARRANGE
       const pollData = {
         messageId: "123456789",
         channelId: "987654321",
@@ -48,8 +48,10 @@ describeOrSkip("UwcPollService", () => {
         pollUrl: "https://discord.com/channels/123/456/789",
       };
 
+      // ACT
       const poll = await UwcPollService.createUwcPoll(pollData);
 
+      // ASSERT
       expect(poll).toBeDefined();
       expect(poll.threadId).toBeNull();
       expect(poll.achievementId).toBeNull();
@@ -59,62 +61,53 @@ describeOrSkip("UwcPollService", () => {
 
   describe("getUwcPollByMessageId", () => {
     it("returns a poll by message ID", async () => {
-      const pollData = {
+      // ARRANGE
+      await UwcPollService.createUwcPoll({
         messageId: "123456789",
         channelId: "987654321",
         creatorId: "111111111",
         pollUrl: "https://discord.com/channels/123/456/789",
-      };
+      });
 
-      await UwcPollService.createUwcPoll(pollData);
+      // ACT
       const poll = await UwcPollService.getUwcPollByMessageId("123456789");
 
+      // ASSERT
       expect(poll).toBeDefined();
       expect(poll?.messageId).toBe("123456789");
     });
 
     it("returns null for non-existent poll", async () => {
+      // ACT
       const poll = await UwcPollService.getUwcPollByMessageId("nonexistent");
+
+      // ASSERT
       expect(poll).toBeNull();
     });
   });
 
   describe("completeUwcPoll", () => {
     it("completes a poll and stores results", async () => {
-      // Create a poll first.
-      const pollData = {
+      // ARRANGE
+      await UwcPollService.createUwcPoll({
         messageId: "123456789",
         channelId: "987654321",
         creatorId: "111111111",
         pollUrl: "https://discord.com/channels/123/456/789",
-      };
-
-      await UwcPollService.createUwcPoll(pollData);
-
-      // Complete the poll with results.
+      });
       const results = [
-        {
-          optionText: "No, leave as is",
-          voteCount: 5,
-          votePercentage: 50.0,
-        },
-        {
-          optionText: "Yes, demote",
-          voteCount: 3,
-          votePercentage: 30.0,
-        },
-        {
-          optionText: "Need further discussion",
-          voteCount: 2,
-          votePercentage: 20.0,
-        },
+        { optionText: "No, leave as is", voteCount: 5, votePercentage: 50.0 },
+        { optionText: "Yes, demote", voteCount: 3, votePercentage: 30.0 },
+        { optionText: "Need further discussion", voteCount: 2, votePercentage: 20.0 },
       ];
 
+      // ACT
       const { poll, results: storedResults } = await UwcPollService.completeUwcPoll(
         "123456789",
         results,
       );
 
+      // ASSERT
       expect(poll.status).toBe("completed");
       expect(poll.endedAt).toBeDefined();
       expect(storedResults).toHaveLength(3);
@@ -123,34 +116,34 @@ describeOrSkip("UwcPollService", () => {
     });
 
     it("throws error for non-existent poll", async () => {
-      expect(async () => {
+      // ACT & ASSERT
+      await expect(async () => {
         await UwcPollService.completeUwcPoll("nonexistent", []);
-      }).toThrow();
+      }).rejects.toThrow();
     });
   });
 
   describe("getActiveUwcPolls", () => {
     it("returns only active polls", async () => {
-      // Create an active poll.
+      // ARRANGE
       await UwcPollService.createUwcPoll({
         messageId: "active1",
         channelId: "987654321",
         creatorId: "111111111",
         pollUrl: "https://discord.com/channels/123/456/789",
       });
-
-      // Create and complete another poll.
       await UwcPollService.createUwcPoll({
         messageId: "completed1",
         channelId: "987654321",
         creatorId: "111111111",
         pollUrl: "https://discord.com/channels/123/456/789",
       });
-
       await UwcPollService.completeUwcPoll("completed1", []);
 
+      // ACT
       const activePolls = await UwcPollService.getActiveUwcPolls();
 
+      // ASSERT
       expect(activePolls).toHaveLength(1);
       expect(activePolls[0]?.messageId).toBe("active1");
     });
@@ -158,7 +151,7 @@ describeOrSkip("UwcPollService", () => {
 
   describe("getUwcPollsByAchievement", () => {
     it("returns polls for a specific achievement", async () => {
-      // Create polls for different achievements.
+      // ARRANGE
       await UwcPollService.createUwcPoll({
         messageId: "poll1",
         channelId: "987654321",
@@ -167,7 +160,6 @@ describeOrSkip("UwcPollService", () => {
         achievementName: "Test Achievement",
         pollUrl: "https://discord.com/channels/123/456/789",
       });
-
       await UwcPollService.createUwcPoll({
         messageId: "poll2",
         channelId: "987654321",
@@ -176,7 +168,6 @@ describeOrSkip("UwcPollService", () => {
         achievementName: "Test Achievement",
         pollUrl: "https://discord.com/channels/123/456/789",
       });
-
       await UwcPollService.createUwcPoll({
         messageId: "poll3",
         channelId: "987654321",
@@ -186,8 +177,10 @@ describeOrSkip("UwcPollService", () => {
         pollUrl: "https://discord.com/channels/123/456/789",
       });
 
+      // ACT
       const polls = await UwcPollService.getUwcPollsByAchievement(14402);
 
+      // ASSERT
       expect(polls).toHaveLength(2);
       expect(polls.every((p) => p.achievementId === 14402)).toBe(true);
     });
@@ -220,19 +213,28 @@ describeOrSkip("UwcPollService", () => {
     });
 
     it("searches by achievement name", async () => {
+      // ACT
       const polls = await UwcPollService.searchUwcPolls("sonic");
+
+      // ASSERT
       expect(polls).toHaveLength(1);
       expect(polls[0]?.achievementName).toBe("Sonic Speed");
     });
 
     it("searches by game name", async () => {
+      // ACT
       const polls = await UwcPollService.searchUwcPolls("mario");
+
+      // ASSERT
       expect(polls).toHaveLength(1);
       expect(polls[0]?.gameName).toBe("Super Mario Bros.");
     });
 
     it("returns empty array for no matches", async () => {
+      // ACT
       const polls = await UwcPollService.searchUwcPolls("zelda");
+
+      // ASSERT
       expect(polls).toHaveLength(0);
     });
   });

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, spyOn } from "bun:test";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createMockInteraction, createMockMessage } from "../test/mocks/discord.mock";
 import { ErrorTracker } from "./error-tracker";
@@ -7,7 +7,7 @@ import * as logger from "./logger";
 describe("Util: ErrorTracker", () => {
   beforeEach(() => {
     // ... spy on logger functions ...
-    spyOn(logger, "logError").mockImplementation(() => {});
+    vi.spyOn(logger, "logError").mockImplementation(() => {});
   });
 
   describe("trackMessageError", () => {

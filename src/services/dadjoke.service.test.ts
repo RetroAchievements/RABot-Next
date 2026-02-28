@@ -1,30 +1,35 @@
-import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import * as logger from "../utils/logger";
 import { DadjokeService } from "./dadjoke.service";
 
 describe("DadjokeService", () => {
+  const originalFetch = global.fetch;
+
   beforeEach(() => {
-    // Reset mocks.
-    spyOn(logger, "logApiCall").mockImplementation(() => {});
-    spyOn(logger, "logError").mockImplementation(() => {});
+    vi.spyOn(logger, "logApiCall").mockImplementation(() => {});
+    vi.spyOn(logger, "logError").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
   });
 
   describe("fetchRandomJoke", () => {
     it("should return a joke when API call is successful", async () => {
-      // Given
+      // ARRANGE
       const mockJoke = "Why don't scientists trust atoms? Because they make up everything!";
       const mockResponse = {
         ok: true,
         status: 200,
-        json: mock(() => Promise.resolve({ joke: mockJoke })),
+        json: vi.fn(() => Promise.resolve({ joke: mockJoke })),
       };
-      global.fetch = mock(() => Promise.resolve(mockResponse)) as any;
+      global.fetch = vi.fn(() => Promise.resolve(mockResponse)) as any;
 
-      // When
+      // ACT
       const result = await DadjokeService.fetchRandomJoke();
 
-      // Then
+      // ASSERT
       expect(result).toBe(mockJoke);
       expect(fetch).toHaveBeenCalledWith("https://icanhazdadjoke.com/", {
         headers: {
@@ -35,45 +40,45 @@ describe("DadjokeService", () => {
     });
 
     it("should return null when API response is not ok", async () => {
-      // Given
+      // ARRANGE
       const mockResponse = {
         ok: false,
         status: 500,
         statusText: "Internal Server Error",
       };
-      global.fetch = mock(() => Promise.resolve(mockResponse)) as any;
+      global.fetch = vi.fn(() => Promise.resolve(mockResponse)) as any;
 
-      // When
+      // ACT
       const result = await DadjokeService.fetchRandomJoke();
 
-      // Then
+      // ASSERT
       expect(result).toBeNull();
     });
 
     it("should return null when fetch throws an error", async () => {
-      // Given
-      global.fetch = mock(() => Promise.reject(new Error("Network error"))) as any;
+      // ARRANGE
+      global.fetch = vi.fn(() => Promise.reject(new Error("Network error"))) as any;
 
-      // When
+      // ACT
       const result = await DadjokeService.fetchRandomJoke();
 
-      // Then
+      // ASSERT
       expect(result).toBeNull();
     });
 
     it("should return null when API response has no joke property", async () => {
-      // Given
+      // ARRANGE
       const mockResponse = {
         ok: true,
         status: 200,
-        json: mock(() => Promise.resolve({})),
+        json: vi.fn(() => Promise.resolve({})),
       };
-      global.fetch = mock(() => Promise.resolve(mockResponse)) as any;
+      global.fetch = vi.fn(() => Promise.resolve(mockResponse)) as any;
 
-      // When
+      // ACT
       const result = await DadjokeService.fetchRandomJoke();
 
-      // Then
+      // ASSERT
       expect(result).toBeNull();
     });
   });

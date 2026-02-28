@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
 import { ChannelType, MessageFlags } from "discord.js";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CHEAT_INVESTIGATION_CATEGORY_ID, WORKSHOP_GUILD_ID } from "../config/constants";
 import { TeamService } from "../services/team.service";
@@ -13,15 +13,15 @@ import pingteamSlashCommand from "./pingteam.command";
 describe("SlashCommand: pingteam", () => {
   beforeEach(() => {
     // Spy on TeamService methods and provide default mock implementations.
-    spyOn(TeamService, "getTeamMembersByName").mockResolvedValue([]);
-    spyOn(TeamService, "addMemberByTeamName").mockResolvedValue();
-    spyOn(TeamService, "removeMemberByTeamName").mockResolvedValue(true);
-    spyOn(TeamService, "createTeam").mockResolvedValue({} as any);
+    vi.spyOn(TeamService, "getTeamMembersByName").mockResolvedValue([]);
+    vi.spyOn(TeamService, "addMemberByTeamName").mockResolvedValue();
+    vi.spyOn(TeamService, "removeMemberByTeamName").mockResolvedValue(true);
+    vi.spyOn(TeamService, "createTeam").mockResolvedValue({} as any);
   });
 
   afterEach(() => {
     // Restore all spies to prevent test pollution.
-    mock.restore();
+    vi.restoreAllMocks();
   });
 
   describe("ping subcommand", () => {
@@ -34,8 +34,8 @@ describe("SlashCommand: pingteam", () => {
           guildId: WORKSHOP_GUILD_ID,
           channel: null, // DM channel
           options: {
-            getSubcommand: mock(() => "ping"),
-            getString: mock(() => "racheats"),
+            getSubcommand: vi.fn(() => "ping"),
+            getString: vi.fn(() => "racheats"),
           },
         });
 
@@ -57,8 +57,8 @@ describe("SlashCommand: pingteam", () => {
           guildId: WORKSHOP_GUILD_ID,
           channel: { type: ChannelType.DM },
           options: {
-            getSubcommand: mock(() => "ping"),
-            getString: mock(() => "racheats"),
+            getSubcommand: vi.fn(() => "ping"),
+            getString: vi.fn(() => "racheats"),
           },
         });
 
@@ -85,8 +85,8 @@ describe("SlashCommand: pingteam", () => {
           guildId: WORKSHOP_GUILD_ID,
           channel,
           options: {
-            getSubcommand: mock(() => "ping"),
-            getString: mock(() => "racheats"),
+            getSubcommand: vi.fn(() => "ping"),
+            getString: vi.fn(() => "racheats"),
           },
         });
 
@@ -112,8 +112,8 @@ describe("SlashCommand: pingteam", () => {
           guildId: WORKSHOP_GUILD_ID,
           channel,
           options: {
-            getSubcommand: mock(() => "ping"),
-            getString: mock(() => "racheats"),
+            getSubcommand: vi.fn(() => "ping"),
+            getString: vi.fn(() => "racheats"),
           },
         });
 
@@ -140,8 +140,8 @@ describe("SlashCommand: pingteam", () => {
           guildId: WORKSHOP_GUILD_ID,
           channel,
           options: {
-            getSubcommand: mock(() => "ping"),
-            getString: mock(() => "RaChEaTs"), // Mixed case
+            getSubcommand: vi.fn(() => "ping"),
+            getString: vi.fn(() => "RaChEaTs"), // Mixed case
           },
         });
 
@@ -168,8 +168,8 @@ describe("SlashCommand: pingteam", () => {
             guildId: WORKSHOP_GUILD_ID,
             channel: threadChannel,
             options: {
-              getSubcommand: mock(() => "ping"),
-              getString: mock(() => "racheats"),
+              getSubcommand: vi.fn(() => "ping"),
+              getString: vi.fn(() => "racheats"),
             },
           });
 
@@ -196,8 +196,8 @@ describe("SlashCommand: pingteam", () => {
             guildId: WORKSHOP_GUILD_ID,
             channel: threadChannel,
             options: {
-              getSubcommand: mock(() => "ping"),
-              getString: mock(() => "racheats"),
+              getSubcommand: vi.fn(() => "ping"),
+              getString: vi.fn(() => "racheats"),
             },
           });
 
@@ -224,8 +224,8 @@ describe("SlashCommand: pingteam", () => {
             guildId: WORKSHOP_GUILD_ID,
             channel: threadChannel,
             options: {
-              getSubcommand: mock(() => "ping"),
-              getString: mock(() => "racheats"),
+              getSubcommand: vi.fn(() => "ping"),
+              getString: vi.fn(() => "racheats"),
             },
           });
 
@@ -252,8 +252,8 @@ describe("SlashCommand: pingteam", () => {
             guildId: WORKSHOP_GUILD_ID,
             channel: threadChannel,
             options: {
-              getSubcommand: mock(() => "ping"),
-              getString: mock(() => "racheats"),
+              getSubcommand: vi.fn(() => "ping"),
+              getString: vi.fn(() => "racheats"),
             },
           });
 
@@ -281,8 +281,8 @@ describe("SlashCommand: pingteam", () => {
             guildId: WORKSHOP_GUILD_ID,
             channel: threadChannel,
             options: {
-              getSubcommand: mock(() => "ping"),
-              getString: mock(() => "racheats"),
+              getSubcommand: vi.fn(() => "ping"),
+              getString: vi.fn(() => "racheats"),
             },
           });
 
@@ -310,8 +310,8 @@ describe("SlashCommand: pingteam", () => {
             guildId: WORKSHOP_GUILD_ID,
             channel: threadChannel,
             options: {
-              getSubcommand: mock(() => "ping"),
-              getString: mock(() => "racheats"),
+              getSubcommand: vi.fn(() => "ping"),
+              getString: vi.fn(() => "racheats"),
             },
           });
 
@@ -341,8 +341,8 @@ describe("SlashCommand: pingteam", () => {
           guildId: WORKSHOP_GUILD_ID,
           channel,
           options: {
-            getSubcommand: mock(() => "ping"),
-            getString: mock(() => "moderators"),
+            getSubcommand: vi.fn(() => "ping"),
+            getString: vi.fn(() => "moderators"),
           },
         });
 
@@ -373,9 +373,9 @@ describe("SlashCommand: pingteam", () => {
         guildId: WORKSHOP_GUILD_ID,
         channel,
         options: {
-          getSubcommand: mock(() => "add"),
-          getString: mock(() => "racheats"),
-          getUser: mock(() => mockUser),
+          getSubcommand: vi.fn(() => "add"),
+          getString: vi.fn(() => "racheats"),
+          getUser: vi.fn(() => mockUser),
         },
       });
 
@@ -403,9 +403,9 @@ describe("SlashCommand: pingteam", () => {
         guildId: WORKSHOP_GUILD_ID,
         channel,
         options: {
-          getSubcommand: mock(() => "remove"),
-          getString: mock(() => "racheats"),
-          getUser: mock(() => mockUser),
+          getSubcommand: vi.fn(() => "remove"),
+          getString: vi.fn(() => "racheats"),
+          getUser: vi.fn(() => mockUser),
         },
       });
 
@@ -428,8 +428,8 @@ describe("SlashCommand: pingteam", () => {
         guildId: WORKSHOP_GUILD_ID,
         channel,
         options: {
-          getSubcommand: mock(() => "create"),
-          getString: mock(() => "newteam"),
+          getSubcommand: vi.fn(() => "create"),
+          getString: vi.fn(() => "newteam"),
         },
       });
 
@@ -452,9 +452,9 @@ describe("SlashCommand: pingteam", () => {
           commandName: "pingteam",
           guildId: "999999999999999999", // Different guild
           options: {
-            getSubcommand: mock(() => subcommand),
-            getString: mock(() => "testteam"),
-            getUser: mock(() => ({ id: "user123" })),
+            getSubcommand: vi.fn(() => subcommand),
+            getString: vi.fn(() => "testteam"),
+            getUser: vi.fn(() => ({ id: "user123" })),
           },
         });
 
@@ -474,11 +474,11 @@ describe("SlashCommand: pingteam", () => {
         expect(TeamService.createTeam).not.toHaveBeenCalled();
 
         // Reset mocks for next iteration
-        mock.restore();
-        spyOn(TeamService, "getTeamMembersByName").mockResolvedValue([]);
-        spyOn(TeamService, "addMemberByTeamName").mockResolvedValue();
-        spyOn(TeamService, "removeMemberByTeamName").mockResolvedValue(true);
-        spyOn(TeamService, "createTeam").mockResolvedValue({} as any);
+        vi.restoreAllMocks();
+        vi.spyOn(TeamService, "getTeamMembersByName").mockResolvedValue([]);
+        vi.spyOn(TeamService, "addMemberByTeamName").mockResolvedValue();
+        vi.spyOn(TeamService, "removeMemberByTeamName").mockResolvedValue(true);
+        vi.spyOn(TeamService, "createTeam").mockResolvedValue({} as any);
       }
     });
 
@@ -488,8 +488,8 @@ describe("SlashCommand: pingteam", () => {
         commandName: "pingteam",
         guildId: null, // DM - no guild ID
         options: {
-          getSubcommand: mock(() => "ping"),
-          getString: mock(() => "testteam"),
+          getSubcommand: vi.fn(() => "ping"),
+          getString: vi.fn(() => "testteam"),
         },
       });
 
@@ -511,8 +511,8 @@ describe("SlashCommand: pingteam", () => {
         guildId: WORKSHOP_GUILD_ID,
         channel: createMockTextChannel({} as any),
         options: {
-          getSubcommand: mock(() => "ping"),
-          getString: mock(() => "testteam"),
+          getSubcommand: vi.fn(() => "ping"),
+          getString: vi.fn(() => "testteam"),
         },
       });
 
@@ -528,16 +528,16 @@ describe("SlashCommand: pingteam", () => {
       );
 
       // Reset for next test
-      mock.restore();
-      spyOn(TeamService, "createTeam").mockResolvedValue({} as any);
+      vi.restoreAllMocks();
+      vi.spyOn(TeamService, "createTeam").mockResolvedValue({} as any);
 
       // ARRANGE - Test create subcommand
       const createInteraction = createMockInteraction({
         commandName: "pingteam",
         guildId: WORKSHOP_GUILD_ID,
         options: {
-          getSubcommand: mock(() => "create"),
-          getString: mock(() => "newteam"),
+          getSubcommand: vi.fn(() => "create"),
+          getString: vi.fn(() => "newteam"),
         },
       });
 

@@ -1,31 +1,33 @@
-import { beforeEach, describe, expect, it, mock, test } from "bun:test";
+import { beforeEach, describe, expect, it, test, vi } from "vitest";
 
 import { createMockAchievementUnlocks } from "../test/mocks/achievement-unlocks.mock";
 import { AchievementUnlocksService, PAGE_SIZE } from "./achievement-unlocks.service";
 
-// ... mock the @retroachievements/api module ...
-const mockBuildAuthorization = mock(() => ({ username: "RABot", webApiKey: "test-key" }));
-const mockGetAchievementUnlocks = mock(async (_auth, { achievementId, offset, count }) => {
-  if (achievementId === 99999) {
-    throw new Error("API Error: 404");
-  } else {
-    const data = createMockAchievementUnlocks(achievementId);
-    data.unlocks = data.unlocks.slice(offset, offset + count);
+const { mockBuildAuthorization, mockGetAchievementUnlocks } = vi.hoisted(() => ({
+  mockBuildAuthorization: vi.fn(() => ({ username: "RABot", webApiKey: "test-key" })),
+  mockGetAchievementUnlocks: vi.fn(),
+}));
 
-    return data;
-  }
-});
-
-mock.module("@retroachievements/api", () => ({
+vi.mock("@retroachievements/api", () => ({
   buildAuthorization: mockBuildAuthorization,
   getAchievementUnlocks: mockGetAchievementUnlocks,
 }));
 
 describe("Service: AchievementUnlocksService", () => {
   beforeEach(() => {
-    // ... reset mocks ...
     mockBuildAuthorization.mockClear();
-    mockGetAchievementUnlocks.mockClear();
+    mockGetAchievementUnlocks
+      .mockClear()
+      .mockImplementation(async (_auth: any, { achievementId, offset, count }: any) => {
+        if (achievementId === 99999) {
+          throw new Error("API Error: 404");
+        }
+
+        const data = createMockAchievementUnlocks(achievementId);
+        data.unlocks = data.unlocks.slice(offset, offset + count);
+
+        return data;
+      });
   });
 
   describe("getAllAchievementUnlocks", () => {
@@ -41,7 +43,7 @@ describe("Service: AchievementUnlocksService", () => {
         const result = await AchievementUnlocksService.getAllAchievementUnlocks(n);
 
         // ASSERT
-        expect(result).toBeArrayOfSize(n);
+        expect(result).toHaveLength(n);
         expect(result!.at(0)).toBe("User0");
         expect(result!.at(-1)).toBe(`User${n - 1}`);
         expect(mockGetAchievementUnlocks).toHaveBeenCalledTimes(Math.ceil(n / PAGE_SIZE));
@@ -59,7 +61,7 @@ describe("Service: AchievementUnlocksService", () => {
       const result = await AchievementUnlocksService.getAllAchievementUnlocks(0);
 
       // ASSERT
-      expect(result).toBeArrayOfSize(0);
+      expect(result).toHaveLength(0);
     });
 
     it("returns null if the achievement is not found", async () => {
@@ -78,7 +80,7 @@ describe("Service: AchievementUnlocksService", () => {
       const result = await AchievementUnlocksService.getAllAchievementUnlocks(1);
 
       // ASSERT
-      expect(result).toBeArrayOfSize(1);
+      expect(result).toHaveLength(1);
       expect(mockGetAchievementUnlocks).toHaveBeenCalledTimes(2);
     });
 

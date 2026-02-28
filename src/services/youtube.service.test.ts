@@ -1,42 +1,43 @@
-import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import * as logger from "../utils/logger";
 import { YouTubeService } from "./youtube.service";
 
-// ... mock the youtube-search module ...
-const mockYtSearch = mock(async (searchTerms, _opts) => {
-  if (searchTerms.includes("error game")) {
-    throw new Error("YouTube API Error");
-  }
-  if (searchTerms.includes("no results")) {
-    return { results: [] };
-  }
+const { mockYtSearch } = vi.hoisted(() => ({
+  mockYtSearch: vi.fn(),
+}));
 
-  return {
-    results: [
-      {
-        link: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-        title: "Test Game Longplay",
-        description: "A longplay of Test Game",
-      },
-    ],
-  };
-});
-
-mock.module("youtube-search", () => ({
+vi.mock("youtube-search", () => ({
   default: mockYtSearch,
 }));
 
 // ... mock constants ...
-mock.module("../config/constants", () => ({
+vi.mock("../config/constants", () => ({
   YOUTUBE_API_KEY: "test-youtube-api-key",
 }));
 
 describe("Service: YouTubeService", () => {
   beforeEach(() => {
-    // ... reset mocks ...
-    mockYtSearch.mockClear();
-    spyOn(logger, "logError").mockImplementation(() => {});
+    mockYtSearch.mockClear().mockImplementation(async (searchTerms: string) => {
+      if (searchTerms.includes("error game")) {
+        throw new Error("YouTube API Error");
+      }
+      if (searchTerms.includes("no results")) {
+        return { results: [] };
+      }
+
+      return {
+        results: [
+          {
+            link: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            title: "Test Game Longplay",
+            description: "A longplay of Test Game",
+          },
+        ],
+      };
+    });
+
+    vi.spyOn(logger, "logError").mockImplementation(() => {});
   });
 
   describe("searchLongplay", () => {
@@ -135,12 +136,10 @@ describe("Service: YouTubeService", () => {
 
     it("returns null when YOUTUBE_API_KEY is not set", async () => {
       // ARRANGE
-      // ... temporarily mock the constants module without API key ...
-      mock.module("../config/constants", () => ({
+      vi.resetModules();
+      vi.doMock("../config/constants", () => ({
         YOUTUBE_API_KEY: undefined,
       }));
-
-      // ... need to re-import to get the new mock ...
       const { YouTubeService: YTServiceNoKey } = await import("./youtube.service");
 
       // ACT
@@ -149,11 +148,6 @@ describe("Service: YouTubeService", () => {
       // ASSERT
       expect(mockYtSearch).not.toHaveBeenCalled();
       expect(result).toBeNull();
-
-      // ... restore the original mock ...
-      mock.module("../config/constants", () => ({
-        YOUTUBE_API_KEY: "test-youtube-api-key",
-      }));
     });
   });
 });

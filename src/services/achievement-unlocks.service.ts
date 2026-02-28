@@ -19,7 +19,9 @@ export class AchievementUnlocksService {
           });
         } catch (error) {
           if (error instanceof Error && error.message.includes("429")) {
-            await new Promise<void>((resolve) => setTimeout(() => resolve(), Math.pow(2, tries) * 200));
+            await new Promise<void>((resolve) =>
+              setTimeout(() => resolve(), Math.pow(2, tries) * 200),
+            );
             continue;
           } else {
             return null;
