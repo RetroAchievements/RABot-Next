@@ -61,7 +61,9 @@ const eventsSlashCommand: SlashCommand = {
 
     switch (interaction.options.getSubcommandGroup(true)) {
       case "gambler":
-        return new GamblerCommand(interaction).run(interaction.options.getSubcommand(true));
+        await new GamblerCommand(interaction).run(interaction.options.getSubcommand(true));
+
+        return;
       default:
         await interaction.editReply("Unknown subcommmand group.");
 
@@ -106,11 +108,17 @@ class GamblerCommand {
 
     switch (subcommand) {
       case "reset":
-        return this.resetGamblers(role);
+        await this.resetGamblers(role);
+
+        return;
       case "award":
-        return this.awardGambler(guild, role);
+        await this.awardGambler(guild, role);
+
+        return;
       case "award-all":
-        return this.awardAllGamblers(guild, role);
+        await this.awardAllGamblers(guild, role);
+
+        return;
       default:
         await this.interaction.editReply(`Unknown subcommmand \`${subcommand}\`.`);
 
@@ -122,11 +130,11 @@ class GamblerCommand {
     const members = role.members.values().toArray();
     const removed = [];
     for (const member of members) {
-      member.roles.remove(role);
+      await member.roles.remove(role);
       removed.push(member.nickname ?? member.displayName);
     }
 
-    replyWithLog(
+    await replyWithLog(
       this.interaction,
       `Removed Gambler role from ${removed.length} user(s).`,
       removed.join("\n"),
@@ -136,8 +144,8 @@ class GamblerCommand {
   async awardGambler(guild: Guild, role: Role) {
     const user = this.interaction.options.getUser("user", true);
     const member = await guild.members.fetch(user);
-    member.roles.add(role);
-    this.interaction.editReply({
+    await member.roles.add(role);
+    await this.interaction.editReply({
       content: `Successfully awarded the Gambler role to <@${member.id}>`,
       allowedMentions: { parse: [] },
     });
@@ -192,7 +200,7 @@ class GamblerCommand {
 
     for (const user of gamblers) {
       if (members.has(user)) {
-        members.get(user)!.roles.add(role);
+        await members.get(user)!.roles.add(role);
         added.push(user);
       } else {
         skipped.push(user);
@@ -202,7 +210,7 @@ class GamblerCommand {
     added.sort();
     skipped.sort();
 
-    replyWithLog(
+    await replyWithLog(
       this.interaction,
       `${statusMessage}\nAdded the Gambler role to ${added.length} members, skipped ${skipped.length} users not found on the server.`,
       `Added:\n${added.map((s) => `  ${s}`).join("\n")}\nSkipped:\n${skipped.map((s) => `  ${s}`).join("\n")}`,
