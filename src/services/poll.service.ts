@@ -77,8 +77,6 @@ export class PollService {
   }
 
   static async getActivePolls(): Promise<Poll[]> {
-    // const now = new Date();
-
-    return db.select().from(polls).where(isNull(polls.endTime)); // For now, just get polls without end times.
+    return db.select().from(polls).where(isNull(polls.endTime));
   }
 }

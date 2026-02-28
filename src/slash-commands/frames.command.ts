@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
 
 import type { SlashCommand } from "../models";
 import { FramesService } from "../services/frames.service";
@@ -25,7 +25,7 @@ const framesSlashCommand: SlashCommand = {
     if (!result) {
       await interaction.reply({
         content: `Invalid format: \`${input}\`\n\nExamples:\n• \`1h 5min 15s\` - time at 60 FPS (default)\n• \`500ms 30fps\` - time at 30 FPS\n• \`40\` - 40 frames at 60 FPS\n• \`0xFF 25fps\` - 255 frames (hex) at 25 FPS`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
 
       return;

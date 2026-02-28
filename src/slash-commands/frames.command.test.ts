@@ -1,3 +1,4 @@
+import { MessageFlags } from "discord.js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FramesService } from "../services/frames.service";
@@ -38,7 +39,7 @@ describe("SlashCommand: frames", () => {
       // ASSERT
       expect(mockInteraction.reply).toHaveBeenCalledWith({
         content: expect.stringContaining("Invalid format: `invalid input`"),
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     });
 

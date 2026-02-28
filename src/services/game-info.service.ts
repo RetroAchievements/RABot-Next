@@ -49,8 +49,7 @@ export class GameInfoService {
    * Get the most recent achievement modification date from game info.
    *
    * This date is used in Discord embeds to show when a game's achievement set
-   * was last updated. We use a Set to deduplicate dates since multiple achievements
-   * might be modified on the same day, and only extract the date portion to avoid
+   * was last updated. We only extract the date portion to avoid
    * timezone complexity in Discord displays.
    */
   static getMostRecentAchievementDate(gameInfo: GameExtended): string {
@@ -58,27 +57,15 @@ export class GameInfoService {
       return "";
     }
 
-    const dates = new Set<string>();
+    let mostRecentDate = "";
 
     for (const achievement of Object.values(gameInfo.achievements)) {
       if (achievement.dateModified) {
         // Extract just the date part (YYYY-MM-DD) to avoid timezone display issues.
         const dateOnly = achievement.dateModified.split(" ")[0];
-        if (dateOnly) {
-          dates.add(dateOnly);
+        if (dateOnly && (!mostRecentDate || new Date(dateOnly) > new Date(mostRecentDate))) {
+          mostRecentDate = dateOnly;
         }
-      }
-    }
-
-    if (dates.size === 0) {
-      return "";
-    }
-
-    // Find the most recent date using lexicographic comparison (works for YYYY-MM-DD format).
-    let mostRecentDate = "";
-    for (const date of dates) {
-      if (!mostRecentDate || new Date(date) > new Date(mostRecentDate)) {
-        mostRecentDate = date;
       }
     }
 

@@ -1,11 +1,7 @@
-import { drizzle } from "drizzle-orm/libsql";
 import { migrate } from "drizzle-orm/libsql/migrator";
 
 import { logger } from "../utils/logger";
-
-const db = drizzle({
-  connection: { url: "file:rabot.db" },
-});
+import { db } from "./db";
 
 await migrate(db, { migrationsFolder: "./drizzle" });
 

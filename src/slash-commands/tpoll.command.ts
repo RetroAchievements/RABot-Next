@@ -1,10 +1,13 @@
-import type { MessageReaction, User } from "discord.js";
-import { Collection, SlashCommandBuilder } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
 
 import type { SlashCommand } from "../models";
 import { PollService } from "../services/poll.service";
-import { logError } from "../utils/logger";
-import { EMOJI_ALPHABET } from "../utils/poll-constants";
+import {
+  addPollReactions,
+  buildPollMessageLines,
+  getReactionsForOptions,
+  startTimedPollCollector,
+} from "../utils/build-poll-message";
 
 const tpollSlashCommand: SlashCommand = {
   data: new SlashCommandBuilder()
@@ -82,46 +85,34 @@ const tpollSlashCommand: SlashCommand = {
       return;
     }
 
-    // Build poll message
-    const reactions = Object.values(EMOJI_ALPHABET).slice(0, options.length);
-    let optionsText = "";
-
-    for (let i = 0; i < options.length; i++) {
-      optionsText += `\n${reactions[i]} ${options[i]}`;
-    }
-
-    const pollMsg = [
-      `__*${interaction.user} started a poll*__:`,
-      `\n:bar_chart: **${question}**\n${optionsText}`,
-    ];
+    const pollMsgLines = buildPollMessageLines({
+      authorMention: String(interaction.user),
+      question,
+      options,
+    });
 
     const milliseconds = seconds * 1000;
 
     if (milliseconds > 0) {
-      pollMsg.push(
+      pollMsgLines.push(
         "\n`Notes:\n- only the first reaction is considered a vote\n- unlisted reactions void the vote`",
       );
     }
 
     // Send the poll message
-    const sentMsg = await interaction.editReply(pollMsg.join("\n"));
+    const sentMsg = await interaction.editReply(pollMsgLines.join("\n"));
 
     if (milliseconds > 0) {
       const endTime = new Date(Date.now() + milliseconds);
 
       // Use Discord timestamp formatting for local time display
       const endTimestamp = Math.floor(endTime.getTime() / 1000);
-      pollMsg.push(`:stopwatch: *This poll ends <t:${endTimestamp}:F>*`);
-      await interaction.editReply(pollMsg.join("\n"));
+      pollMsgLines.push(`:stopwatch: *This poll ends <t:${endTimestamp}:F>*`);
+      await interaction.editReply(pollMsgLines.join("\n"));
     }
 
-    // Add reactions
-    for (let i = 0; i < options.length; i++) {
-      const emoji = reactions[i];
-      if (emoji) {
-        await sentMsg.react(emoji);
-      }
-    }
+    const reactions = getReactionsForOptions(options);
+    await addPollReactions(sentMsg, reactions);
 
     // If no timer, just return
     if (milliseconds === 0) {
@@ -138,75 +129,20 @@ const tpollSlashCommand: SlashCommand = {
       new Date(Date.now() + milliseconds),
     );
 
-    // Track voters and results in memory for this poll session
-    const voters = new Set<string>();
-    const pollResults = new Collection<string, number>();
+    startTimedPollCollector({
+      sentMsg,
+      pollMsgLines,
+      client,
+      reactions,
+      milliseconds,
+      pollId: poll.id,
+      onEnd: async (finalText) => {
+        await interaction.editReply(finalText);
 
-    // Set up reaction collector
-    const filter = (reaction: MessageReaction, user: User) => {
-      // Ignore bot's reactions
-      if (client.user?.id === user.id) {
-        return false;
-      }
-
-      // Do not allow repeated votes
-      if (voters.has(user.id)) {
-        return false;
-      }
-
-      // Do not count invalid reactions
-      if (!reaction.emoji.name || !reactions.includes(reaction.emoji.name)) {
-        return false;
-      }
-
-      // Add voter and count vote
-      voters.add(user.id);
-
-      const emojiName = reaction.emoji.name!; // Safe after check above
-      const optionIndex = reactions.indexOf(emojiName);
-      if (optionIndex !== -1) {
-        // Add vote to database
-        PollService.addVote(poll.id, user.id, optionIndex);
-
-        // Track in memory for immediate results
-        const currentVotes = pollResults.get(emojiName) || 0;
-        pollResults.set(emojiName, currentVotes + 1);
-      }
-
-      return true;
-    };
-
-    const collector = sentMsg.createReactionCollector({ filter, time: milliseconds });
-
-    collector.on("end", async () => {
-      try {
-        // Prepare the final message
-        const finalPollMsg = [
-          `~~${pollMsg[0]}~~\n:no_entry: **THIS POLL IS ALREADY CLOSED** :no_entry:`,
-          pollMsg[1], // Question and options
-          "\n`This poll is closed.`",
-          "__**RESULTS:**__\n",
-        ];
-
-        if (pollResults.size === 0) {
-          finalPollMsg.push("No one voted");
-        } else {
-          // Sort results by vote count
-          const sortedResults = [...pollResults.entries()].sort((a, b) => b[1] - a[1]);
-          for (const [emoji, count] of sortedResults) {
-            finalPollMsg.push(`${emoji}: ${count}`);
-          }
-        }
-
-        await interaction.editReply(finalPollMsg.join("\n"));
-
-        // Notify the poll creator
         await interaction.followUp({
           content: `**Your poll has ended.**\n**Click this link to see the results:**\n<${sentMsg.url}>`,
         });
-      } catch (error) {
-        logError("Error ending timed poll:", { error });
-      }
+      },
     });
   },
 };

@@ -1,7 +1,7 @@
-import { ChannelType, type Message, type PartialMessage, type ThreadChannel } from "discord.js";
+import type { Message, PartialMessage } from "discord.js";
 
-import { UWC_VOTE_CONCLUDED_TAG_ID, UWC_VOTING_TAG_ID } from "../config/constants";
-import { type PollResultData, UwcPollService } from "../services/uwc-poll.service";
+import { UwcPollService } from "../services/uwc-poll.service";
+import { extractPollResults, updateUwcThreadTags } from "../utils/extract-poll-results";
 import { logError, logger } from "../utils/logger";
 
 /**
@@ -36,30 +36,15 @@ export async function handlePollUpdate(
   });
 
   try {
-    // Extract poll results.
-    const results: PollResultData[] = [];
-    let totalVotes = 0;
-
-    // Calculate total votes from all answers.
-    for (const answer of newMessage.poll.answers.values()) {
-      totalVotes += answer.voteCount;
-    }
-
-    // Build results array.
-    for (const answer of newMessage.poll.answers.values()) {
-      const votePercentage = totalVotes > 0 ? (answer.voteCount / totalVotes) * 100 : 0;
-
-      if (answer.text) {
-        results.push({
-          optionText: answer.text,
-          voteCount: answer.voteCount,
-          votePercentage,
-        });
-      }
-    }
+    const results = extractPollResults(newMessage.poll);
 
     // Store the results in the database.
     await UwcPollService.completeUwcPoll(newMessage.id, results);
+
+    let totalVotes = 0;
+    for (const r of results) {
+      totalVotes += r.voteCount;
+    }
 
     logger.info("Stored UWC poll results", {
       messageId: newMessage.id,
@@ -68,36 +53,13 @@ export async function handlePollUpdate(
     });
 
     // Update thread tags if this was in a forum thread.
-    if (
-      uwcPoll.threadId &&
-      newMessage.channel?.type === ChannelType.PublicThread &&
-      UWC_VOTING_TAG_ID &&
-      UWC_VOTE_CONCLUDED_TAG_ID
-    ) {
-      try {
-        const thread = newMessage.channel as ThreadChannel;
-        const currentTags = thread.appliedTags || [];
-
-        // Remove voting tag and add concluded tag.
-        const newTags = currentTags.filter((tag) => tag !== UWC_VOTING_TAG_ID);
-        if (!newTags.includes(UWC_VOTE_CONCLUDED_TAG_ID)) {
-          newTags.push(UWC_VOTE_CONCLUDED_TAG_ID);
-        }
-
-        await thread.setAppliedTags(newTags);
-
-        logger.info("Updated thread tags after poll completion", {
-          threadId: thread.id,
-          removedTag: UWC_VOTING_TAG_ID,
-          addedTag: UWC_VOTE_CONCLUDED_TAG_ID,
-        });
-      } catch (error) {
-        logError(error, {
-          event: "uwc_tag_update_error",
-          threadId: uwcPoll.threadId,
-          messageId: newMessage.id,
-        });
-      }
+    if (uwcPoll.threadId && newMessage.channel) {
+      await updateUwcThreadTags({
+        threadId: uwcPoll.threadId,
+        channel: newMessage.channel,
+        messageId: newMessage.id,
+        logContext: "after poll completion",
+      });
     }
   } catch (error) {
     logError(error, {

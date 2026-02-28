@@ -1,7 +1,11 @@
 import { SlashCommandBuilder } from "discord.js";
 
 import type { SlashCommand } from "../models";
-import { EMOJI_ALPHABET } from "../utils/poll-constants";
+import {
+  addPollReactions,
+  buildPollMessageLines,
+  getReactionsForOptions,
+} from "../utils/build-poll-message";
 
 const pollSlashCommand: SlashCommand = {
   data: new SlashCommandBuilder()
@@ -63,29 +67,17 @@ const pollSlashCommand: SlashCommand = {
       return;
     }
 
-    // Build poll message
-    const reactions = Object.values(EMOJI_ALPHABET).slice(0, options.length);
-    let optionsText = "";
-
-    for (let i = 0; i < options.length; i++) {
-      optionsText += `\n${reactions[i]} ${options[i]}`;
-    }
-
-    const pollMsg = [
-      `__*${interaction.user} started a poll*__:`,
-      `\n:bar_chart: **${question}**\n${optionsText}`,
-    ];
+    const pollMsgLines = buildPollMessageLines({
+      authorMention: String(interaction.user),
+      question,
+      options,
+    });
 
     // Send the poll message
-    const sentMsg = await interaction.editReply(pollMsg.join("\n"));
+    const sentMsg = await interaction.editReply(pollMsgLines.join("\n"));
 
-    // Add reactions
-    for (let i = 0; i < options.length; i++) {
-      const emoji = reactions[i];
-      if (emoji) {
-        await sentMsg.react(emoji);
-      }
-    }
+    const reactions = getReactionsForOptions(options);
+    await addPollReactions(sentMsg, reactions);
   },
 };
 

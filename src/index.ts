@@ -18,13 +18,7 @@ import { logError, logger } from "./utils/logger";
 function validateEnvironment(): void {
   const requiredEnvVars = ["DISCORD_TOKEN", "DISCORD_APPLICATION_ID", "RA_WEB_API_KEY"];
 
-  const missingVars: string[] = [];
-
-  for (const envVar of requiredEnvVars) {
-    if (!process.env[envVar]) {
-      missingVars.push(envVar);
-    }
-  }
+  const missingVars = requiredEnvVars.filter((envVar) => !process.env[envVar]);
 
   if (missingVars.length > 0) {
     logger.fatal(`Missing required environment variables: ${missingVars.join(", ")}`);
@@ -33,14 +27,14 @@ function validateEnvironment(): void {
   }
 
   // Warn about optional but recommended variables.
-  const optionalVars = ["MAIN_GUILD_ID", "WORKSHOP_GUILD_ID", "YOUTUBE_API_KEY"];
+  const missingOptionalVars = ["MAIN_GUILD_ID", "WORKSHOP_GUILD_ID", "YOUTUBE_API_KEY"].filter(
+    (envVar) => !process.env[envVar],
+  );
 
-  for (const envVar of optionalVars) {
-    if (!process.env[envVar]) {
-      logger.warn(
-        `Optional environment variable ${envVar} is not set. Some features may be limited.`,
-      );
-    }
+  for (const envVar of missingOptionalVars) {
+    logger.warn(
+      `Optional environment variable ${envVar} is not set. Some features may be limited.`,
+    );
   }
 }
 
@@ -176,7 +170,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
             event: "autocomplete_error",
             commandName: "pingteam",
             userId: interaction.user.id,
-            guildId: interaction.guildId || undefined,
+            guildId: interaction.guildId,
           });
           await interaction.respond([]);
         }
@@ -215,8 +209,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     return;
   }
 
-  // Start tracking command execution
-  const startTime = CommandAnalytics.startTracking();
+  const startTime = Date.now();
 
   try {
     await command.execute(interaction, client);
@@ -230,7 +223,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     logError(error, {
       commandName: interaction.commandName,
       userId: interaction.user.id,
-      guildId: interaction.guildId || undefined,
+      guildId: interaction.guildId,
       channelId: interaction.channelId,
       interactionId: interaction.id,
     });

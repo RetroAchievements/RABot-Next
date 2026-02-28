@@ -58,7 +58,7 @@ const commandsPath = join(__dirname, "slash-commands");
     });
 
     logger.info(
-      `✅ Successfully reloaded ${(data as unknown as { length: number }).length} application (/) commands.`,
+      `✅ Successfully reloaded ${Array.isArray(data) ? data.length : 0} application (/) commands.`,
     );
   } catch (error) {
     logError("❌ Error deploying commands:", { error });

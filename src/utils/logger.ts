@@ -97,7 +97,7 @@ export const logger: Logger = createLogger();
 
 export interface LogContext {
   userId?: string;
-  guildId?: string;
+  guildId?: string | null;
   channelId?: string;
   commandName?: string;
   interactionId?: string;
@@ -111,7 +111,7 @@ export function createChildLogger(context: LogContext): Logger {
 export function logCommandExecution(
   commandName: string,
   userId: string,
-  guildId?: string,
+  guildId?: string | null,
   channelId?: string,
   interactionId?: string,
 ): Logger {
@@ -194,7 +194,7 @@ export function logMigrationNotice(
   legacyCommand: string,
   slashCommand: string,
   userId: string,
-  guildId?: string,
+  guildId?: string | null,
 ): void {
   logger.info(
     {

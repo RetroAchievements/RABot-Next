@@ -77,7 +77,7 @@ export async function sendMigrationNotice(
         logError(error, {
           event: "migration_message_delete_error",
           userId: message.author.id,
-          guildId: message.guildId || undefined,
+          guildId: message.guildId,
           channelId: message.channelId,
           messageId: sentMessage.id,
         });
@@ -102,7 +102,7 @@ export async function sendMigrationNotice(
         logError(error, {
           event: "migration_message_auto_delete_error",
           userId: message.author.id,
-          guildId: message.guildId || undefined,
+          guildId: message.guildId,
           channelId: message.channelId,
           messageId: sentMessage.id,
         });
