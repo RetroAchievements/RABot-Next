@@ -1,12 +1,12 @@
-import { Database } from "bun:sqlite";
-import { drizzle } from "drizzle-orm/bun-sqlite";
-import { migrate } from "drizzle-orm/bun-sqlite/migrator";
+import { drizzle } from "drizzle-orm/libsql";
+import { migrate } from "drizzle-orm/libsql/migrator";
 
 import { logger } from "../utils/logger";
 
-const sqlite = new Database("rabot.db");
-const db = drizzle(sqlite);
+const db = drizzle({
+  connection: { url: "file:rabot.db" },
+});
 
-migrate(db, { migrationsFolder: "./drizzle" });
+await migrate(db, { migrationsFolder: "./drizzle" });
 
-logger.info("✅ Migrations completed");
+logger.info("Migrations completed");
