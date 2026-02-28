@@ -105,7 +105,7 @@ export interface LogContext {
 }
 
 export function createChildLogger(context: LogContext): Logger {
-  return logger.child(context);
+  return createLogger(context);
 }
 
 export function logCommandExecution(
