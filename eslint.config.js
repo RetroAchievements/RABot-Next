@@ -1,7 +1,6 @@
 import eslint from "@eslint/js";
 import prettierConfig from "eslint-config-prettier";
 import importPlugin from "eslint-plugin-import";
-import prettier from "eslint-plugin-prettier";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import sortKeysShorthand from "eslint-plugin-sort-keys-shorthand";
 import unicorn from "eslint-plugin-unicorn";
@@ -31,7 +30,6 @@ export default tseslint.config(
 
     plugins: {
       "@typescript-eslint": tseslint.plugin,
-      prettier,
       "simple-import-sort": simpleImportSort,
       unicorn,
       "sort-keys-shorthand": sortKeysShorthand,
@@ -109,14 +107,6 @@ export default tseslint.config(
       "unicorn/prefer-module": "off",
       "unicorn/prefer-node-protocol": "off",
       "unicorn/prefer-switch": "off",
-
-      "prettier/prettier": [
-        "error",
-        {
-          tabWidth: 2,
-          printWidth: 100,
-        },
-      ],
     },
   },
 
@@ -126,5 +116,5 @@ export default tseslint.config(
     rules: {
       "@typescript-eslint/no-explicit-any": "off", // Allow any in test files
     },
-  }
+  },
 );

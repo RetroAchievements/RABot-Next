@@ -15,11 +15,13 @@ bun run db:seed         # Seed default teams (RACheats)
 # Development
 bun run dev             # Run with hot reload (--watch)
 bun run tsc             # TypeScript type checking (via tsgo)
+bun run format          # Format code with oxfmt
+bun run format:check    # Check formatting without writing
 bun run lint            # Run ESLint
 bun run lint:fix        # Auto-fix linting issues
 bun run test            # Run all tests (vitest)
 bun run test:watch      # Run tests in watch mode (vitest)
-bun run verify          # Run lint, type checking, and tests (comprehensive check)
+bun run verify          # Run format check, lint, type checking, and tests
 
 # Deployment
 bun run deploy-commands # Deploy slash commands to Discord (required after adding/modifying slash commands)
