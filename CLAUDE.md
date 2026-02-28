@@ -14,7 +14,7 @@ bun run db:seed         # Seed default teams (RACheats)
 
 # Development
 bun run dev             # Run with hot reload (--watch)
-bun run tsc             # TypeScript type checking
+bun run tsc             # TypeScript type checking (via tsgo)
 bun run lint            # Run ESLint
 bun run lint:fix        # Auto-fix linting issues
 bun run test            # Run all tests (vitest)

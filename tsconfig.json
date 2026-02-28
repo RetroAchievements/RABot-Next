@@ -14,6 +14,9 @@
     "verbatimModuleSyntax": true,
     "noEmit": true,
 
+    // Explicitly list @types packages since tsgo doesn't auto-discover them.
+    "types": ["bun", "figlet"],
+
     // Best practices
     "strict": true,
     "skipLibCheck": true,

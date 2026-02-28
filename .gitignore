@@ -30,7 +30,8 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 # IDEs
 .claude/settings.local.json
 .idea
-.vscode
+.vscode/*
+!.vscode/settings.json
 CLAUDE.local.md
 
 # Finder (MacOS) folder config
