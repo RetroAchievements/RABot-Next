@@ -5,27 +5,42 @@ const isDevelopment = process.env.NODE_ENV !== "production";
 const isCI = !!process.env.CI;
 const logLevel = process.env.LOG_LEVEL || (isDevelopment ? "debug" : "info");
 
-// pino-pretty uses worker threads which don't work reliably in Bun on Linux (CI).
-export const logger: Logger = pino({
-  level: logLevel,
-  timestamp: pino.stdTimeFunctions.isoTime,
-  formatters: {
-    level: (label) => ({ level: label }),
-  },
-  ...(isDevelopment && !isCI
-    ? {
-        transport: {
-          target: "pino-pretty",
-          options: {
-            colorize: true,
-            ignore: "pid,hostname",
-            translateTime: "HH:MM:ss.l",
-            singleLine: false,
-          },
-        },
-      }
-    : {}),
-});
+function createLogger(): Logger {
+  try {
+    const instance = pino({
+      level: logLevel,
+      timestamp: pino.stdTimeFunctions.isoTime,
+      formatters: {
+        level: (label) => ({ level: label }),
+      },
+      ...(isDevelopment && !isCI
+        ? {
+            transport: {
+              target: "pino-pretty",
+              options: {
+                colorize: true,
+                ignore: "pid,hostname",
+                translateTime: "HH:MM:ss.l",
+                singleLine: false,
+              },
+            },
+          }
+        : {}),
+    });
+
+    // Verify pino initialized correctly. Some Bun versions on Linux
+    // return a partial object missing core methods like .child().
+    if (typeof instance.child === "function") {
+      return instance;
+    }
+  } catch {
+    // Fall through to fallback.
+  }
+
+  return pino({ level: logLevel });
+}
+
+export const logger: Logger = createLogger();
 
 export interface LogContext {
   userId?: string;
