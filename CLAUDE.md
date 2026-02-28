@@ -17,8 +17,8 @@ bun run dev             # Run with hot reload (--watch)
 bun run tsc             # TypeScript type checking
 bun run lint            # Run ESLint
 bun run lint:fix        # Auto-fix linting issues
-bun test                # Run all tests
-bun test:watch          # Run tests in watch mode
+bun run test            # Run all tests (vitest)
+bun run test:watch      # Run tests in watch mode (vitest)
 bun run verify          # Run lint, type checking, and tests (comprehensive check)
 
 # Deployment
@@ -234,25 +234,7 @@ The bot uses Pino for structured logging with the following features:
 
 ## Testing
 
-### CI Environment Compatibility
-
-Some tests may need to be conditionally skipped in CI environments due to infrastructure differences (e.g., Drizzle ORM compatibility issues with GitHub Actions). Use this pattern for database-dependent tests:
-
-```typescript
-// Skip database-dependent tests in CI environment where Drizzle methods may be undefined.
-const isCI = process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
-const describeOrSkip = isCI ? describe.skip : describe;
-
-describeOrSkip("DatabaseDependentService", () => {
-  // Tests that require database functionality
-});
-```
-
-This ensures:
-
-- Tests run normally in local development
-- CI builds pass by skipping problematic tests
-- Easy to remove when underlying issues are resolved
+Tests use [Vitest](https://vitest.dev/) as the test runner (configured in `vitest.config.ts`). All tests run in both local development and CI environments.
 
 ## Common Gotchas
 

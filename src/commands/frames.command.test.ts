@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FramesService } from "../services/frames.service";
 import { createMockMessage } from "../test/mocks/discord.mock";
@@ -12,7 +12,7 @@ describe("Command: frames", () => {
   });
 
   afterEach(() => {
-    mock.restore();
+    vi.restoreAllMocks();
   });
 
   it("is defined", () => {
@@ -34,7 +34,7 @@ describe("Command: frames", () => {
 
     it("shows error message for invalid input", async () => {
       // ARRANGE
-      spyOn(FramesService, "processInput").mockReturnValue(null);
+      vi.spyOn(FramesService, "processInput").mockReturnValue(null);
 
       // ACT
       await framesCommand.execute(mockMessage, ["invalid", "input"], {} as any);
@@ -49,7 +49,7 @@ describe("Command: frames", () => {
       // ARRANGE
       const expectedOutput =
         "**Time:** `1h 0min 0s 0ms`\n**FPS:** `60`\n**Frames:** `216000 (0x34bc0)`";
-      spyOn(FramesService, "processInput").mockReturnValue(expectedOutput);
+      vi.spyOn(FramesService, "processInput").mockReturnValue(expectedOutput);
 
       // ACT
       await framesCommand.execute(mockMessage, ["1h"], {} as any);
@@ -63,7 +63,7 @@ describe("Command: frames", () => {
       // ARRANGE
       const expectedOutput =
         "**Time:** `0h 1min 0s 0ms`\n**FPS:** `60`\n**Frames:** `3600 (0xe10)`";
-      spyOn(FramesService, "processInput").mockReturnValue(expectedOutput);
+      vi.spyOn(FramesService, "processInput").mockReturnValue(expectedOutput);
 
       // ACT
       await framesCommand.execute(mockMessage, ["3600"], {} as any);
@@ -77,7 +77,7 @@ describe("Command: frames", () => {
       // ARRANGE
       const expectedOutput =
         "**Time:** `1h 30min 0s 0ms`\n**FPS:** `30`\n**Frames:** `162000 (0x27990)`";
-      spyOn(FramesService, "processInput").mockReturnValue(expectedOutput);
+      vi.spyOn(FramesService, "processInput").mockReturnValue(expectedOutput);
 
       // ACT
       await framesCommand.execute(mockMessage, ["1h", "30min", "30fps"], {} as any);

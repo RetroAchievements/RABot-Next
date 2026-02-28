@@ -1,25 +1,24 @@
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createMockTeam, createMockTeamMember } from "../test/mocks/database.mock";
 import { TeamService } from "./team.service";
 
-// ... mock the database module ...
-let mockDb: any;
-
-mock.module("../database/db", () => {
-  mockDb = {
-    select: mock(() => mockDb),
-    from: mock(() => mockDb),
-    where: mock(() => Promise.resolve([])),
-    insert: mock(() => mockDb),
-    values: mock(() => mockDb),
-    returning: mock(() => Promise.resolve([])),
-    onConflictDoNothing: mock(() => Promise.resolve()),
-    delete: mock(() => mockDb),
+const { mockDb } = vi.hoisted(() => {
+  const mockDb: any = {
+    select: vi.fn(() => mockDb),
+    from: vi.fn(() => mockDb),
+    where: vi.fn(() => Promise.resolve([])),
+    insert: vi.fn(() => mockDb),
+    values: vi.fn(() => mockDb),
+    returning: vi.fn(() => Promise.resolve([])),
+    onConflictDoNothing: vi.fn(() => Promise.resolve()),
+    delete: vi.fn(() => mockDb),
   };
 
-  return { db: mockDb };
+  return { mockDb };
 });
+
+vi.mock("../database/db", () => ({ db: mockDb }));
 
 describe("Service: TeamService", () => {
   beforeEach(() => {

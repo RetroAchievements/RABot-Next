@@ -1,30 +1,30 @@
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createMockGameExtended } from "../test/mocks/game-data.mock";
 import { GameInfoService } from "./game-info.service";
 
-// ... mock the @retroachievements/api module ...
-const mockBuildAuthorization = mock(() => ({ username: "RABot", webApiKey: "test-key" }));
-const mockGetGameExtended = mock(async (auth, { gameId }) => {
-  if (gameId === 14402) {
-    return createMockGameExtended();
-  }
-  if (gameId === 99999) {
-    return null;
-  }
-  throw new Error("API Error");
-});
+const { mockBuildAuthorization, mockGetGameExtended } = vi.hoisted(() => ({
+  mockBuildAuthorization: vi.fn(() => ({ username: "RABot", webApiKey: "test-key" })),
+  mockGetGameExtended: vi.fn(),
+}));
 
-mock.module("@retroachievements/api", () => ({
+vi.mock("@retroachievements/api", () => ({
   buildAuthorization: mockBuildAuthorization,
   getGameExtended: mockGetGameExtended,
 }));
 
 describe("Service: GameInfoService", () => {
   beforeEach(() => {
-    // ... reset mocks ...
     mockBuildAuthorization.mockClear();
-    mockGetGameExtended.mockClear();
+    mockGetGameExtended.mockClear().mockImplementation(async (_auth: any, { gameId }: any) => {
+      if (gameId === 14402) {
+        return createMockGameExtended();
+      }
+      if (gameId === 99999) {
+        return null;
+      }
+      throw new Error("API Error");
+    });
   });
 
   describe("extractGameId", () => {

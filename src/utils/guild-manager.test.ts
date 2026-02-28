@@ -1,5 +1,5 @@
-import { describe, expect, it, mock } from "bun:test";
 import type { Guild } from "discord.js";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   checkAndLeaveUnauthorizedGuilds,
@@ -57,7 +57,7 @@ describe("Util: guild-manager", () => {
       const mockGuild = {
         id: "999999999999999999",
         name: "Unauthorized Guild",
-        leave: mock().mockResolvedValue(undefined),
+        leave: vi.fn().mockResolvedValue(undefined),
       } as unknown as Guild;
 
       // ACT
@@ -73,7 +73,7 @@ describe("Util: guild-manager", () => {
       const mockGuild = {
         id: "999999999999999999",
         name: "Problematic Guild",
-        leave: mock().mockRejectedValue(error),
+        leave: vi.fn().mockRejectedValue(error),
       } as unknown as Guild;
 
       // ACT & ASSERT - Should not throw
@@ -105,7 +105,7 @@ describe("Util: guild-manager", () => {
         {
           id: "999999999999999999",
           name: "Test Guild",
-          leave: mock(),
+          leave: vi.fn(),
         },
       ] as unknown as Guild[];
 
@@ -128,12 +128,12 @@ describe("Util: guild-manager", () => {
         {
           id: "999999999999999999", // Likely unauthorized in most configs
           name: "Test Guild 1",
-          leave: mock().mockResolvedValue(undefined),
+          leave: vi.fn().mockResolvedValue(undefined),
         },
         {
           id: "888888888888888888", // Likely unauthorized in most configs
           name: "Test Guild 2",
-          leave: mock().mockResolvedValue(undefined),
+          leave: vi.fn().mockResolvedValue(undefined),
         },
       ] as unknown as Guild[];
 
@@ -157,7 +157,7 @@ describe("Util: guild-manager", () => {
         {
           id: "999999999999999999",
           name: "Test Guild",
-          leave: mock().mockResolvedValue(undefined),
+          leave: vi.fn().mockResolvedValue(undefined),
         },
       ] as unknown as Guild[];
 
@@ -171,12 +171,12 @@ describe("Util: guild-manager", () => {
         {
           id: "310192285306454017", // Main RA guild
           name: "RetroAchievements",
-          leave: mock(),
+          leave: vi.fn(),
         },
         {
           id: "476211979464343552", // Workshop guild
           name: "RA Workshop",
-          leave: mock(),
+          leave: vi.fn(),
         },
       ] as unknown as Guild[];
 
