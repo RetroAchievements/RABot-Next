@@ -66,7 +66,7 @@ git checkout -b fix/issue-description
 
 ### 2. Make Your Changes
 
-- **Follow the existing code style** - The project uses ESLint and Prettier for consistency.
+- **Follow the existing code style** - The project uses oxlint and oxfmt for consistency.
 - **Write TypeScript** - All code must be properly typed.
 - **Add tests** - New functionality should include tests.
 - **Update documentation** - Keep README and JSDoc comments up to date.

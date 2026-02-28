@@ -114,8 +114,8 @@ For production deployments, the bot is automatically deployed via Forge when cha
 - `bun db:migrate` - Apply database migrations
 - `bun run format` - Format code with oxfmt
 - `bun run format:check` - Check formatting without writing
-- `bun lint` - Run ESLint
-- `bun lint:fix` - Run ESLint with auto-fix
+- `bun lint` - Run oxlint
+- `bun lint:fix` - Run oxlint with auto-fix
 - `bun tsc` - Run TypeScript type checking (via tsgo)
 - `bun run test` - Run all tests
 - `bun run test:watch` - Run tests in watch mode

@@ -75,7 +75,6 @@ const uwcSlashCommand: SlashCommand = {
     // Extract achievement/game info from thread if available.
     let achievementId: number | undefined;
     let achievementName: string | undefined;
-    let gameId: number | undefined;
     let gameName: string | undefined;
 
     // Try to extract context from thread name or first message.
@@ -125,7 +124,6 @@ const uwcSlashCommand: SlashCommand = {
         creatorId: interaction.user.id,
         achievementId,
         achievementName,
-        gameId,
         gameName,
         pollUrl: `https://discord.com/channels/${interaction.guildId}/${interaction.channelId}/${pollReply.id}`,
       });
