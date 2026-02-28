@@ -36,7 +36,7 @@
     "lint:fix": "oxlint src --fix",
     "test": "vitest run",
     "test:watch": "vitest",
-    "verify": "bun run format:check && bun run lint && bun run tsc && vitest run",
+    "verify": "run-p format:check lint tsc test",
     "postinstall": "git config core.hooksPath .hooks && chmod +x .hooks/*"
   },
   "dependencies": {
@@ -54,6 +54,7 @@
     "@typescript/native-preview": "^7.0.0-dev.20260228.1",
     "@vitest/coverage-v8": "4.0.18",
     "drizzle-kit": "0.31.4",
+    "npm-run-all2": "^8.0.4",
     "oxfmt": "^0.35.0",
     "oxlint": "^1.50.0",
     "vitest": "^4.0.18"
