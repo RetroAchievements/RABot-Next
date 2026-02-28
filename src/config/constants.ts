@@ -13,6 +13,9 @@ export const CHEAT_INVESTIGATION_CATEGORY_ID = process.env.CHEAT_INVESTIGATION_C
 export const MAIN_GUILD_ID = process.env.MAIN_GUILD_ID || "";
 export const WORKSHOP_GUILD_ID = process.env.WORKSHOP_GUILD_ID || "";
 
+// Role configuration.
+export const GAMBLER_ROLE_ID = process.env.GAMBLER_ROLE_ID || "";
+
 // UWC Poll configuration.
 export const UWC_VOTING_TAG_ID = process.env.UWC_VOTING_TAG_ID || "";
 export const UWC_VOTE_CONCLUDED_TAG_ID = process.env.UWC_VOTE_CONCLUDED_TAG_ID || "";
