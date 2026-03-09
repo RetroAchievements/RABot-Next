@@ -108,7 +108,7 @@ class GamblerCommand {
 
     switch (subcommand) {
       case "reset":
-        await this.resetGamblers(role);
+        await this.resetGamblers(guild, role);
 
         return;
       case "award":
@@ -126,7 +126,10 @@ class GamblerCommand {
     }
   }
 
-  async resetGamblers(role: Role) {
+  async resetGamblers(guild: Guild, role: Role) {
+    // role.members filters from the guild members cache, so we fetch here
+    // to ensure the cache is up to date
+    await guild.members.fetch();
     const members = role.members.values().toArray();
     const removed = [];
     for (const member of members) {
