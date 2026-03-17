@@ -1,13 +1,20 @@
 import { COLORS } from "../config/constants";
 import {
-  TextDisplayBuilder,
-  SeparatorBuilder,
-  SeparatorSpacingSize,
   ButtonBuilder,
   ButtonStyle,
-  SectionBuilder,
   ContainerBuilder,
+  SectionBuilder,
+  SeparatorBuilder,
+  SeparatorSpacingSize,
+  TextDisplayBuilder,
 } from "discord.js";
+
+type Team = {
+  name: string;
+  // username to message on RA
+  username: string;
+  reasons: string[];
+};
 
 const buildContactButton = (account: string): ButtonBuilder => {
   return new ButtonBuilder()
@@ -15,6 +22,18 @@ const buildContactButton = (account: string): ButtonBuilder => {
     .setLabel("Message " + account)
     .setURL("https://retroachievements.org/messages/create?to=" + account);
 };
+
+const buildTeamSection = (team: Team): SectionBuilder => {
+  const reasons = team.reasons.map((reason: string) => "- " + reason).join("\n");
+
+  return new SectionBuilder()
+    .setButtonAccessory(buildContactButton(team.username))
+    .addTextDisplayComponents(
+      new TextDisplayBuilder().setContent("## :e_mail: " + team.name + "\n" + reasons),
+    );
+};
+
+const separator = new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true);
 
 export const buildContactEmbed = (): ContainerBuilder => {
   return new ContainerBuilder()
@@ -25,139 +44,108 @@ export const buildContactEmbed = (): ContainerBuilder => {
           "If you would like to contact us, please send a site message to the appropriate team below.",
       ),
     )
-    .addSeparatorComponents(
-      new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true),
-    )
+    .addSeparatorComponents(separator)
     .addSectionComponents(
-      new SectionBuilder()
-        .setButtonAccessory(buildContactButton("RAdmin"))
-        .addTextDisplayComponents(
-          new TextDisplayBuilder().setContent(
-            "## :e_mail: Admins and Moderators\n" +
-              "- Reporting offensive behavior.\n" +
-              "- Reporting copyrighted material.\n" +
-              "- Requesting to be untracked.",
-          ),
-        ),
+      buildTeamSection({
+        name: "Admins and Moderators",
+        username: "RAdmin",
+        reasons: [
+          "Reporting offensive behavior.",
+          "Reporting copyrighted material.",
+          "Requesting to be untracked.",
+        ],
+      }),
     )
-    .addSeparatorComponents(
-      new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true),
-    )
+    .addSeparatorComponents(separator)
     .addSectionComponents(
-      new SectionBuilder()
-        .setButtonAccessory(buildContactButton("DevCompliance"))
-        .addTextDisplayComponents(
-          new TextDisplayBuilder().setContent(
-            "## :e_mail: Developer Compliance\n" +
-              "- Requesting set approval or early set release.\n" +
-              "- Reporting achievements or sets with unwelcome concepts.\n" +
-              "- Reporting sets failing to cover basic progression.",
-          ),
-        ),
+      buildTeamSection({
+        name: "Developer Compliance",
+        username: "DevCompliance",
+        reasons: [
+          "Requesting set approval or early set release.",
+          "Reporting achievements or sets with unwelcome concepts.",
+          "Reporting sets failing to cover basic progression.",
+        ],
+      }),
     )
-    .addSeparatorComponents(
-      new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true),
-    )
+    .addSeparatorComponents(separator)
     .addSectionComponents(
-      new SectionBuilder()
-        .setButtonAccessory(buildContactButton("QATeam"))
-        .addTextDisplayComponents(
-          new TextDisplayBuilder().setContent(
-            "## :e_mail: Quality Assurance\n" +
-              "- Reporting a broken set, leaderboard, or rich presence.\n" +
-              "- Reporting achievements with grammatical mistakes.\n" +
-              "- Requesting a set be playtested.\n" +
-              "- Hash compatibility questions.\n" +
-              "- Hub organizational questions.\n" +
-              "- Getting involved in a QA sub-team.",
-          ),
-        ),
+      buildTeamSection({
+        name: "Quality Assurance",
+        username: "QATeam",
+        reasons: [
+          "Reporting a broken set, leaderboard, or rich presence.",
+          "Reporting achievements with grammatical mistakes.",
+          "Requesting a set be playtested.",
+          "Hash compatibility questions.",
+          "Hub organizational questions.",
+          "Getting involved in a QA sub-team.",
+        ],
+      }),
     )
-    .addSeparatorComponents(
-      new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true),
-    )
+    .addSeparatorComponents(separator)
     .addSectionComponents(
-      new SectionBuilder()
-        .setButtonAccessory(buildContactButton("RAArtTeam"))
-        .addTextDisplayComponents(
-          new TextDisplayBuilder().setContent(
-            "## :e_mail: RAArtTeam\n" +
-              "- Icon Gauntlets and how to start one.\n" +
-              "- Proposing art updates.\n" +
-              "- Questions about art-related rule changes.\n" +
-              "- Requests for help with creating a new badge or badge set.",
-          ),
-        ),
+      buildTeamSection({
+        name: "Art Team",
+        username: "RAArtTeam",
+        reasons: [
+          "Icon Gauntlets and how to start one.",
+          "Proposing art updates.",
+          "Questions about art-related rule changes.",
+          "Requests for help with creating a new badge or badge set.",
+        ],
+      }),
     )
-    .addSeparatorComponents(
-      new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true),
-    )
+    .addSeparatorComponents(separator)
     .addSectionComponents(
-      new SectionBuilder()
-        .setButtonAccessory(buildContactButton("WritingTeam"))
-        .addTextDisplayComponents(
-          new TextDisplayBuilder().setContent(
-            "## :e_mail: WritingTeam\n" +
-              "- Reporting achievements with grammatical mistakes.\n" +
-              "- Reporting achievements with unclear or confusing descriptions.\n" +
-              "- Requesting help from the team with proofreading achievement sets.\n" +
-              "- Requesting help for coming up with original titles for achievements."
-          ),
-        ),
+      buildTeamSection({
+        name: "Writing Team",
+        username: "WritingTeam",
+        reasons: [
+          "Reporting achievements with grammatical mistakes.",
+          "Reporting achievements with unclear or confusing descriptions.",
+          "Requesting help from the team with proofreading achievement sets.",
+          "Requesting help for coming up with original titles for achievements.",
+        ],
+      }),
     )
-    .addSeparatorComponents(
-      new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true),
-    )
+    .addSeparatorComponents(separator)
     .addSectionComponents(
-      new SectionBuilder()
-        .setButtonAccessory(buildContactButton("RANews"))
-        .addTextDisplayComponents(
-          new TextDisplayBuilder().setContent(
-            "## :e_mail: RANews\n" +
-              "- Submitting a Play This Set, Wish This Set, or RAdvantage entry.\n" +
-              "- Submitting a retrogaming article.\n" +
-              "- Proposing a new article idea.\n" +
-              "- Getting involved with RANews.",
-          ),
-        ),
+      buildTeamSection({
+        name: "RANews",
+        username: "RANews",
+        reasons: [
+          "Submitting a Play This Set, Wish This Set, or RAdvantage entry.",
+          "Submitting a retrogaming article.",
+          "Proposing a new article idea.",
+          "Getting involved with RANews.",
+        ],
+      }),
     )
-    .addSeparatorComponents(
-      new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true),
-    )
+    .addSeparatorComponents(separator)
     .addSectionComponents(
-      new SectionBuilder()
-        .setButtonAccessory(buildContactButton("RAEvents"))
-        .addTextDisplayComponents(
-          new TextDisplayBuilder().setContent(
-            "## :e_mail: RAEvents\n" +
-              "- Submissions, questions, ideas, or reporting issues related to events.",
-          ),
-        ),
+      buildTeamSection({
+        name: "RAEvents",
+        username: "RAEvents",
+        reasons: ["Submissions, questions, ideas, or reporting issues related to events."],
+      }),
     )
-    .addSeparatorComponents(
-      new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true),
-    )
+    .addSeparatorComponents(separator)
     .addSectionComponents(
-      new SectionBuilder()
-        .setButtonAccessory(buildContactButton("DevQuest"))
-        .addTextDisplayComponents(
-          new TextDisplayBuilder().setContent(
-            "## :e_mail: DevQuest\n" +
-              "- Submissions, questions, ideas, or reporting issues related to DevQuest.",
-          ),
-        ),
+      buildTeamSection({
+        name: "DevQuest",
+        username: "DevQuest",
+        reasons: ["Submissions, questions, ideas, or reporting issues related to DevQuest."],
+      }),
     )
-    .addSeparatorComponents(
-      new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true),
-    )
+    .addSeparatorComponents(separator)
     .addSectionComponents(
-      new SectionBuilder()
-        .setButtonAccessory(buildContactButton("RACheats"))
-        .addTextDisplayComponents(
-          new TextDisplayBuilder().setContent(
-            "## :e_mail: RACheats\n" +
-              "- If you believe someone is in violation of our [Global Leaderboard and Achievement Hunting Rules](https://docs.retroachievements.org/guidelines/users/global-leaderboard-and-achievement-hunting-rules.html#not-allowed).",
-          ),
-        ),
+      buildTeamSection({
+        name: "RACheats",
+        username: "RACheats",
+        reasons: [
+          "If you believe someone is in violation of our [Global Leaderboard and Achievement Hunting Rules](https://docs.retroachievements.org/guidelines/users/global-leaderboard-and-achievement-hunting-rules.html#not-allowed).",
+        ],
+      }),
     );
 };
