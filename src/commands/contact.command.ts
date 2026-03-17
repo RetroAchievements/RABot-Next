@@ -1,6 +1,7 @@
 import type { Command } from "../models";
 import { buildContactEmbed } from "../utils/build-contact-embed";
 import { logError } from "../utils/logger";
+import {MessageFlags} from "discord.js";
 
 const contactCommand: Command = {
   name: "contact",
@@ -14,7 +15,7 @@ const contactCommand: Command = {
 
     try {
       await message.react("\u{1F4E7}");
-      await message.reply({ embeds: [embed] });
+      await message.reply({ components: [embed], flags: MessageFlags.IsComponentsV2 });
     } catch (error) {
       logError(error, {
         event: "contact_command_react_error",
@@ -22,7 +23,7 @@ const contactCommand: Command = {
         guildId: message.guildId,
         channelId: message.channelId,
       });
-      await message.reply({ embeds: [embed] });
+      await message.reply({ components: [embed], flags: MessageFlags.IsComponentsV2 });
     }
   },
 };

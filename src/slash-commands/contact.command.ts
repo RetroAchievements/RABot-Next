@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import {MessageFlags, SlashCommandBuilder} from "discord.js";
 
 import type { SlashCommand } from "../models";
 import { buildContactEmbed } from "../utils/build-contact-embed";
@@ -13,7 +13,7 @@ const contactSlashCommand: SlashCommand = {
   async execute(interaction, _client) {
     const embed = buildContactEmbed();
 
-    await interaction.reply({ embeds: [embed] });
+    await interaction.reply({ components: [embed], flags: [MessageFlags.IsComponentsV2, MessageFlags.Ephemeral] });
   },
 };
 
