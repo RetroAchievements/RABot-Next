@@ -37,6 +37,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "verify": "run-p format lint:fix tsc test",
+    "ci": "bun run format:check && bun run lint && bun run tsc && bun run test",
     "postinstall": "git config core.hooksPath .hooks && chmod +x .hooks/*"
   },
   "dependencies": {

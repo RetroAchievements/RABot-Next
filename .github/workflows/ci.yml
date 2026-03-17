@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  verify:
+  ci:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,4 +26,4 @@ jobs:
           bun run db:generate
           bun run db:migrate
 
-      - run: bun run verify
+      - run: bun run ci
