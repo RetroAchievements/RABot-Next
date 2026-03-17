@@ -1,7 +1,7 @@
 import type { Command } from "../models";
 import { buildContactEmbed } from "../utils/build-contact-embed";
 import { logError } from "../utils/logger";
-import {MessageFlags} from "discord.js";
+import { MessageFlags } from "discord.js";
 
 const contactCommand: Command = {
   name: "contact",
