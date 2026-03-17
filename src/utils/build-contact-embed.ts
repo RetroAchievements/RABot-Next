@@ -98,10 +98,10 @@ export const buildContactEmbed = (): ContainerBuilder => {
         .addTextDisplayComponents(
           new TextDisplayBuilder().setContent(
             "## :e_mail: WritingTeam\n" +
-              "- Submitting a Play This Set, Wish This Set, or RAdvantage entry.\n" +
-              "- Submitting a retrogaming article.\n" +
-              "- Proposing a new article idea.\n" +
-              "- Getting involved with RANews.",
+              "- Reporting achievements with grammatical mistakes.\n" +
+              "- Reporting achievements with unclear or confusing descriptions.\n" +
+              "- Requesting help from the team with proofreading achievement sets.\n" +
+              "- Requesting help for coming up with original titles for achievements."
           ),
         ),
     )
